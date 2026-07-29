@@ -69,6 +69,22 @@ class AppRepository(private val context: Context) {
     fun loadBitmap(image: LibraryImage, processed: Boolean = true): Bitmap? =
         BitmapFactory.decodeFile(imageFile(image, processed).absolutePath)
 
+    fun loadThumbnail(image: LibraryImage, maxSize: Int = 360): Bitmap? {
+        val path = imageFile(image).absolutePath
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(path, bounds)
+        var sampleSize = 1
+        while (bounds.outWidth / sampleSize > maxSize * 2 ||
+            bounds.outHeight / sampleSize > maxSize * 2
+        ) {
+            sampleSize *= 2
+        }
+        return BitmapFactory.decodeFile(
+            path,
+            BitmapFactory.Options().apply { inSampleSize = sampleSize },
+        )
+    }
+
     fun saveProcessed(image: LibraryImage, bitmap: Bitmap): LibraryImage {
         val fileName = "${image.id}_processed.png"
         FileOutputStream(File(imagesDir, fileName)).use {

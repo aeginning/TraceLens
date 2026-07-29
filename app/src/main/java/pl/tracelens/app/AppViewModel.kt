@@ -2,6 +2,7 @@ package pl.tracelens.app
 
 import android.graphics.Bitmap
 import android.net.Uri
+import android.util.LruCache
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -19,6 +20,9 @@ import pl.tracelens.app.image.ImageProcessor
 import java.util.UUID
 
 class AppViewModel(private val repository: AppRepository) : ViewModel() {
+    private val thumbnailCache = object : LruCache<String, Bitmap>(16 * 1024) {
+        override fun sizeOf(key: String, value: Bitmap): Int = value.byteCount / 1024
+    }
     var images by mutableStateOf(repository.loadImages().sortedImages())
         private set
     var projects by mutableStateOf(repository.loadProjects().sortedByDescending { it.modifiedAt })
@@ -96,6 +100,13 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
 
     fun bitmap(image: LibraryImage, processed: Boolean = true): Bitmap? =
         repository.loadBitmap(image, processed)
+
+    fun thumbnail(image: LibraryImage): Bitmap? {
+        val key = "${image.id}:${image.processedFileName}:${image.filters.hashCode()}"
+        return thumbnailCache[key] ?: repository.loadThumbnail(image)?.also {
+            thumbnailCache.put(key, it)
+        }
+    }
 
     fun createProject(name: String, image: LibraryImage): TraceProject {
         val project = TraceProject(

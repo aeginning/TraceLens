@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Delete
@@ -47,11 +48,13 @@ import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -65,6 +68,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -87,6 +91,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.data.ImageFilters
 import pl.tracelens.app.data.LibraryImage
@@ -711,8 +717,8 @@ private fun ProjectsScreen(
         }
     }
     if (createDialog) {
-        CreateProjectDialog(
-            images = viewModel.images,
+        ProjectImageSelectorDialog(
+            viewModel = viewModel,
             onDismiss = { createDialog = false },
             onCreate = { name, image ->
                 createDialog = false
@@ -770,6 +776,179 @@ private fun ProjectsScreen(
                 }) { Text("Anuluj") }
             },
         )
+    }
+}
+
+private enum class ProjectImageFilter {
+    All,
+    Favorites,
+    Recent,
+}
+
+@Composable
+private fun ProjectImageSelectorDialog(
+    viewModel: AppViewModel,
+    onDismiss: () -> Unit,
+    onCreate: (String, LibraryImage) -> Unit,
+) {
+    var projectName by remember { mutableStateOf("") }
+    var query by remember { mutableStateOf("") }
+    var filter by remember { mutableStateOf(ProjectImageFilter.All) }
+    var selected by remember { mutableStateOf<LibraryImage?>(null) }
+    val visibleImages = remember(viewModel.images, query, filter) {
+        val matching = viewModel.images.filter { it.name.contains(query.trim(), ignoreCase = true) }
+        when (filter) {
+            ProjectImageFilter.All -> matching
+            ProjectImageFilter.Favorites -> matching.filter { it.favorite }
+            ProjectImageFilter.Recent -> matching.sortedByDescending { it.createdAt }.take(30)
+        }
+    }
+
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false,
+        ),
+    ) {
+        Surface(Modifier.fillMaxSize()) {
+            Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+                TopAppBar(
+                    title = { Text("Nowy projekt") },
+                    navigationIcon = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(Icons.Default.ArrowBack, "Anuluj")
+                        }
+                    },
+                )
+                Column(
+                    Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                ) {
+                    TextField(
+                        value = projectName,
+                        onValueChange = { projectName = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Nazwa projektu") },
+                        singleLine = true,
+                    )
+                    TextField(
+                        value = query,
+                        onValueChange = { query = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        label = { Text("Szukaj obrazu po nazwie") },
+                        leadingIcon = { Icon(Icons.Default.Search, null) },
+                        singleLine = true,
+                    )
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        FilterChip(
+                            selected = filter == ProjectImageFilter.All,
+                            onClick = { filter = ProjectImageFilter.All },
+                            label = { Text("Wszystkie") },
+                        )
+                        FilterChip(
+                            selected = filter == ProjectImageFilter.Favorites,
+                            onClick = { filter = ProjectImageFilter.Favorites },
+                            label = { Text("Ulubione") },
+                        )
+                        FilterChip(
+                            selected = filter == ProjectImageFilter.Recent,
+                            onClick = { filter = ProjectImageFilter.Recent },
+                            label = { Text("Ostatnie") },
+                        )
+                    }
+                }
+                if (visibleImages.isEmpty()) {
+                    Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("Brak obrazów pasujących do wyszukiwania.")
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(120.dp),
+                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        items(visibleImages, key = { it.id }) { image ->
+                            val isSelected = selected?.id == image.id
+                            Card(
+                                onClick = { selected = image },
+                                modifier = Modifier.border(
+                                    width = if (isSelected) 3.dp else 1.dp,
+                                    color = if (isSelected) {
+                                        MaterialTheme.colorScheme.primary
+                                    } else {
+                                        MaterialTheme.colorScheme.outlineVariant
+                                    },
+                                    shape = RoundedCornerShape(12.dp),
+                                ),
+                            ) {
+                                Box(
+                                    Modifier.fillMaxWidth().height(110.dp)
+                                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                                    contentAlignment = Alignment.Center,
+                                ) {
+                                    viewModel.thumbnail(image)?.let { bitmap ->
+                                        Image(
+                                            bitmap.asImageBitmap(),
+                                            image.name,
+                                            Modifier.fillMaxSize(),
+                                            contentScale = ContentScale.Fit,
+                                        )
+                                    }
+                                    if (image.favorite) {
+                                        Icon(
+                                            Icons.Default.Favorite,
+                                            "Ulubiony",
+                                            Modifier.align(Alignment.TopStart).padding(6.dp),
+                                            tint = Color(0xFFFFB300),
+                                        )
+                                    }
+                                    if (isSelected) {
+                                        Icon(
+                                            Icons.Default.CheckCircle,
+                                            "Wybrany obraz",
+                                            Modifier.align(Alignment.TopEnd).padding(6.dp),
+                                            tint = MaterialTheme.colorScheme.primary,
+                                        )
+                                    }
+                                }
+                                Text(
+                                    image.name,
+                                    Modifier.fillMaxWidth().height(48.dp).padding(6.dp),
+                                    maxLines = 2,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
+                    }
+                }
+                Surface(shadowElevation = 8.dp) {
+                    Row(
+                        Modifier.fillMaxWidth().padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            selected?.let { "Wybrano: ${it.name}" } ?: "Wybierz obraz",
+                            Modifier.weight(1f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        TextButton(onClick = onDismiss) { Text("Anuluj") }
+                        Button(
+                            onClick = { selected?.let { onCreate(projectName, it) } },
+                            enabled = selected != null,
+                        ) { Text("Utwórz") }
+                    }
+                }
+            }
+        }
     }
 }
 

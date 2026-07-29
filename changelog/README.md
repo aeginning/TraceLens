@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [0.9](0.9.md) — pełnoekranowy selektor obrazu projektu
 - [0.8](0.8.md) — jeden rząd akcji w bibliotece
 - [0.7](0.7.md) — galeria projektu i zdjęcia w galerii telefonu
 - [0.6](0.6.md) — szybkie tworzenie projektu z obrazu
