@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [0.11](0.11.md) — przesuwanie zdjęć w pełnym podglądzie
 - [0.10](0.10.md) — pełnoekranowa galeria projektu i poprawna orientacja zdjęć
 - [0.9](0.9.md) — pełnoekranowy selektor obrazu projektu
 - [0.8](0.8.md) — jeden rząd akcji w bibliotece

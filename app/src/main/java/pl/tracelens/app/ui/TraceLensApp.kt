@@ -51,6 +51,7 @@ import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.ZoomIn
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -79,6 +80,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -89,7 +91,6 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.layout.ContentScale
@@ -1031,6 +1032,7 @@ private fun ProjectGalleryScreen(
         if (photos.isNotEmpty()) {
             val safeIndex = initialIndex.coerceIn(0, photos.lastIndex)
             val pagerState = rememberPagerState(initialPage = safeIndex) { photos.size }
+            val zoomByPhoto = remember { mutableStateMapOf<String, Float>() }
             Dialog(
                 onDismissRequest = { selectedIndex = null },
                 properties = DialogProperties(
@@ -1043,14 +1045,14 @@ private fun ProjectGalleryScreen(
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier.fillMaxSize(),
+                            userScrollEnabled =
+                                (zoomByPhoto[photos[pagerState.currentPage]] ?: 1f) <= 1f,
                         ) { page ->
                             val fileName = photos[page]
                             val bitmap = remember(project.id, fileName) {
                                 viewModel.progressBitmap(project.id, fileName)
                             }
-                            var zoom by remember(fileName) { mutableStateOf(1f) }
-                            var offsetX by remember(fileName) { mutableStateOf(0f) }
-                            var offsetY by remember(fileName) { mutableStateOf(0f) }
+                            val zoom = zoomByPhoto[fileName] ?: 1f
                             if (bitmap != null) {
                                 Image(
                                     bitmap.asImageBitmap(),
@@ -1059,20 +1061,14 @@ private fun ProjectGalleryScreen(
                                         .graphicsLayer(
                                             scaleX = zoom,
                                             scaleY = zoom,
-                                            translationX = offsetX,
-                                            translationY = offsetY,
                                         )
                                         .pointerInput(fileName) {
-                                            detectTransformGestures { _, pan, gestureZoom, _ ->
-                                                zoom = (zoom * gestureZoom).coerceIn(1f, 6f)
-                                                if (zoom > 1f) {
-                                                    offsetX += pan.x
-                                                    offsetY += pan.y
-                                                } else {
-                                                    offsetX = 0f
-                                                    offsetY = 0f
-                                                }
-                                            }
+                                            detectTapGestures(
+                                                onDoubleTap = {
+                                                    zoomByPhoto[fileName] =
+                                                        if ((zoomByPhoto[fileName] ?: 1f) > 1f) 1f else 2.5f
+                                                },
+                                            )
                                         },
                                     contentScale = ContentScale.Fit,
                                 )
@@ -1095,6 +1091,13 @@ private fun ProjectGalleryScreen(
                                 "${pagerState.currentPage + 1} / ${photos.size}",
                                 color = Color.White,
                             )
+                            IconButton(onClick = {
+                                val fileName = photos[pagerState.currentPage]
+                                zoomByPhoto[fileName] =
+                                    if ((zoomByPhoto[fileName] ?: 1f) > 1f) 1f else 2.5f
+                            }) {
+                                Icon(Icons.Default.ZoomIn, "Powiększ lub pomniejsz", tint = Color.White)
+                            }
                             IconButton(onClick = {
                                 val fileName = photos[pagerState.currentPage]
                                 val uri = viewModel.progressPhotoUri(project.id, fileName)
