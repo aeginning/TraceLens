@@ -37,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Folder
@@ -198,6 +199,7 @@ private fun LibraryScreen(
     modifier: Modifier,
     onEdit: (LibraryImage) -> Unit,
 ) {
+    var imageToRename by remember { mutableStateOf<LibraryImage?>(null) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) viewModel.importImage(uri, onEdit)
     }
@@ -221,6 +223,7 @@ private fun LibraryScreen(
                         image = image,
                         bitmap = viewModel.bitmap(image),
                         onFavorite = { viewModel.toggleFavorite(image) },
+                        onRename = { imageToRename = image },
                         onEdit = { onEdit(image) },
                     )
                 }
@@ -231,6 +234,16 @@ private fun LibraryScreen(
             ) { Icon(Icons.Default.Add, "Dodaj obraz") }
         }
     }
+    imageToRename?.let { image ->
+        RenameImageDialog(
+            image = image,
+            onDismiss = { imageToRename = null },
+            onRename = { newName ->
+                viewModel.renameImage(image, newName)
+                imageToRename = null
+            },
+        )
+    }
 }
 
 @Composable
@@ -238,6 +251,7 @@ private fun ImageCard(
     image: LibraryImage,
     bitmap: Bitmap?,
     onFavorite: () -> Unit,
+    onRename: () -> Unit,
     onEdit: () -> Unit,
 ) {
     Card(onClick = onEdit) {
@@ -267,11 +281,61 @@ private fun ImageCard(
                 Modifier.fillMaxWidth().padding(10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(image.name, Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Icon(Icons.Default.Edit, "Edytuj", Modifier.size(18.dp))
+                Text(
+                    image.name,
+                    Modifier.weight(1f).clickable(onClick = onRename),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                IconButton(onClick = onRename, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(20.dp))
+                }
+                IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
+                    Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(20.dp))
+                }
             }
         }
     }
+}
+
+@Composable
+private fun RenameImageDialog(
+    image: LibraryImage,
+    onDismiss: () -> Unit,
+    onRename: (String) -> Unit,
+) {
+    val initialName = remember(image.id) {
+        image.name.substringBeforeLast('.', image.name)
+    }
+    var name by remember(image.id) { mutableStateOf(initialName) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Zmień nazwę obrazu") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text("Nazwa w bibliotece") },
+                    placeholder = { Text("np. Słodki misio") },
+                    singleLine = true,
+                )
+                Text(
+                    "Nie musisz wpisywać rozszerzenia pliku.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onRename(name) },
+                enabled = name.trim().isNotEmpty(),
+            ) { Text("Zapisz nazwę") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Anuluj") }
+        },
+    )
 }
 
 @Composable

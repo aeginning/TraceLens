@@ -48,6 +48,19 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         updateImage(image.copy(favorite = !image.favorite))
     }
 
+    fun renameImage(image: LibraryImage, newName: String) {
+        val normalized = newName.trim()
+            .replace(Regex("[\\\\/:*?\"<>|]"), " ")
+            .replace(Regex("\\s+"), " ")
+            .trim()
+        if (normalized.isBlank()) {
+            message = "Nazwa obrazu nie może być pusta."
+            return
+        }
+        updateImage(image.copy(name = normalized))
+        message = "Zmieniono nazwę obrazu."
+    }
+
     fun updateFilters(image: LibraryImage, filters: ImageFilters, onComplete: (LibraryImage) -> Unit = {}) {
         viewModelScope.launch {
             busy = true
