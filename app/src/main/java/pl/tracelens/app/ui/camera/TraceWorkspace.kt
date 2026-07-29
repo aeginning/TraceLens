@@ -45,6 +45,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cameraswitch
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Flip
@@ -54,9 +55,11 @@ import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.ScreenLockLandscape
 import androidx.compose.material.icons.filled.ScreenLockPortrait
+import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -123,6 +126,8 @@ fun TraceWorkspace(
     var cameras by remember { mutableStateOf<List<CameraOption>>(emptyList()) }
     var thermalStatus by remember { mutableIntStateOf(PowerManager.THERMAL_STATUS_NONE) }
     var showProgress by remember { mutableStateOf(false) }
+    var showControls by remember { mutableStateOf(true) }
+    var photoToDelete by remember { mutableStateOf<String?>(null) }
 
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
     DisposableEffect(Unit) {
@@ -156,6 +161,18 @@ fun TraceWorkspace(
     fun saveProject(updated: TraceProject) {
         project = updated
         viewModel.updateProject(updated)
+    }
+
+    fun takeProgressPhoto() {
+        captureProgress(
+            context = context,
+            capture = imageCapture,
+            output = viewModel.newProgressFile(project.id),
+            onSaved = { file ->
+                project = viewModel.addProgressPhoto(project, file.name)
+                Toast.makeText(context, "Zapisano etap pracy.", Toast.LENGTH_SHORT).show()
+            },
+        )
     }
 
     Scaffold(
@@ -215,11 +232,47 @@ fun TraceWorkspace(
                             .padding(8.dp).background(Color(0xCCB45309)).padding(8.dp),
                     )
                 }
+                if (!showControls) {
+                    Row(
+                        Modifier.align(Alignment.BottomCenter).padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Button(onClick = ::takeProgressPhoto) {
+                            Icon(Icons.Default.PhotoCamera, null)
+                            Spacer(Modifier.size(6.dp))
+                            Text("Zdjęcie")
+                        }
+                        Button(onClick = { showControls = true }) {
+                            Icon(Icons.Default.Tune, null)
+                            Spacer(Modifier.size(6.dp))
+                            Text("Sterowanie")
+                        }
+                    }
+                }
             }
 
-            Card(Modifier.fillMaxWidth().navigationBarsPadding()) {
+            if (showControls) Card(Modifier.fillMaxWidth().navigationBarsPadding()) {
                 Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text("Przezroczystość: ${(project.opacity * 100).roundToInt()}%")
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            "Przezroczystość: ${(project.opacity * 100).roundToInt()}%",
+                            modifier = Modifier.weight(1f),
+                        )
+                        FilledTonalButton(onClick = {
+                            if (!locked) {
+                                locked = true
+                                saveProject(project)
+                            }
+                            showControls = false
+                        }) {
+                            Icon(Icons.Default.VisibilityOff, null)
+                            Spacer(Modifier.size(6.dp))
+                            Text("Tryb rysowania")
+                        }
+                    }
                     Slider(
                         value = project.opacity,
                         onValueChange = { project = project.copy(opacity = it) },
@@ -254,15 +307,7 @@ fun TraceWorkspace(
                             }
                         }
                         WorkspaceButton("Zdjęcie", Icons.Default.PhotoCamera) {
-                            captureProgress(
-                                context = context,
-                                capture = imageCapture,
-                                output = viewModel.newProgressFile(project.id),
-                                onSaved = { file ->
-                                    project = viewModel.addProgressPhoto(project, file.name)
-                                    Toast.makeText(context, "Zapisano etap pracy.", Toast.LENGTH_SHORT).show()
-                                },
-                            )
+                            takeProgressPhoto()
                         }
                         WorkspaceButton("Pion", Icons.Default.ScreenLockPortrait) {
                             saveProject(project.copy(orientation = 1))
@@ -313,18 +358,48 @@ fun TraceWorkspace(
                             BitmapFactory.decodeFile(viewModel.progressFile(project.id, fileName).absolutePath)
                         }
                         if (bitmap != null) {
-                            Image(
-                                bitmap.asImageBitmap(),
-                                "Etap pracy",
-                                Modifier.size(220.dp).background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentScale = ContentScale.Fit,
-                            )
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Image(
+                                    bitmap.asImageBitmap(),
+                                    "Etap pracy",
+                                    Modifier.size(220.dp).background(MaterialTheme.colorScheme.surfaceVariant),
+                                    contentScale = ContentScale.Fit,
+                                )
+                                TextButton(onClick = {
+                                    showProgress = false
+                                    photoToDelete = fileName
+                                }) {
+                                    Icon(Icons.Default.Delete, null)
+                                    Spacer(Modifier.size(6.dp))
+                                    Text("Usuń zdjęcie")
+                                }
+                            }
                         }
                     }
                 }
             },
             confirmButton = {
                 TextButton(onClick = { showProgress = false }) { Text("Zamknij") }
+            },
+        )
+    }
+    photoToDelete?.let { fileName ->
+        AlertDialog(
+            onDismissRequest = { photoToDelete = null },
+            title = { Text("Usunąć zdjęcie?") },
+            text = { Text("To zdjęcie postępu zostanie trwale usunięte z projektu.") },
+            confirmButton = {
+                Button(onClick = {
+                    project = viewModel.deleteProgressPhoto(project, fileName)
+                    photoToDelete = null
+                    if (project.progressPhotos.isNotEmpty()) showProgress = true
+                }) { Text("Usuń zdjęcie") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    photoToDelete = null
+                    showProgress = true
+                }) { Text("Anuluj") }
             },
         )
     }
@@ -429,8 +504,10 @@ private fun WorkspaceButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     onClick: () -> Unit,
 ) {
-    FilledIconButton(onClick = onClick, modifier = Modifier.size(52.dp)) {
-        Icon(icon, label)
+    FilledTonalButton(onClick = onClick) {
+        Icon(icon, null, Modifier.size(20.dp))
+        Spacer(Modifier.size(6.dp))
+        Text(label)
     }
 }
 

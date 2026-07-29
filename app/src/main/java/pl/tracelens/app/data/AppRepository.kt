@@ -83,6 +83,14 @@ class AppRepository(private val context: Context) {
     fun fileForProgress(projectId: String, fileName: String): File =
         File(progressDirectory(projectId), fileName)
 
+    fun deleteProgressPhoto(projectId: String, fileName: String): Boolean =
+        fileForProgress(projectId, fileName).delete()
+
+    fun deleteProjectFiles(projectId: String): Boolean {
+        val directory = File(projectsDir, projectId)
+        return !directory.exists() || directory.deleteRecursively()
+    }
+
     private fun queryDisplayName(uri: Uri): String? {
         val projection = arrayOf(android.provider.OpenableColumns.DISPLAY_NAME)
         return context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
@@ -105,6 +113,10 @@ private fun LibraryImage.toJson() = JSONObject().apply {
         put("invert", filters.invert)
         put("removeColor", filters.removeColor)
         put("colorTolerance", filters.colorTolerance.toDouble())
+        put("cropLeft", filters.cropLeft.toDouble())
+        put("cropTop", filters.cropTop.toDouble())
+        put("cropRight", filters.cropRight.toDouble())
+        put("cropBottom", filters.cropBottom.toDouble())
     })
 }
 
@@ -125,6 +137,10 @@ private fun JSONObject.toLibraryImage(): LibraryImage {
                 filterJson.getInt("removeColor")
             } else null,
             colorTolerance = filterJson.optDouble("colorTolerance", 0.08).toFloat(),
+            cropLeft = filterJson.optDouble("cropLeft", 0.0).toFloat(),
+            cropTop = filterJson.optDouble("cropTop", 0.0).toFloat(),
+            cropRight = filterJson.optDouble("cropRight", 1.0).toFloat(),
+            cropBottom = filterJson.optDouble("cropBottom", 1.0).toFloat(),
         ),
         createdAt = optLong("createdAt", System.currentTimeMillis()),
     )

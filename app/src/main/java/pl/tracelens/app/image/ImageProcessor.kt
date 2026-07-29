@@ -10,7 +10,7 @@ import kotlin.math.sqrt
 
 object ImageProcessor {
     fun process(source: Bitmap, filters: ImageFilters): Bitmap {
-        val bitmap = downscale(source, 2048)
+        val bitmap = downscale(crop(source, filters), 2048)
         val width = bitmap.width
         val height = bitmap.height
         val input = IntArray(width * height)
@@ -60,6 +60,22 @@ object ImageProcessor {
 
     private fun contrast(value: Int, amount: Float): Int =
         (((value - 128) * amount) + 128).toInt().coerceIn(0, 255)
+
+    fun crop(source: Bitmap, filters: ImageFilters): Bitmap {
+        val left = (filters.cropLeft.coerceIn(0f, 0.99f) * source.width).toInt()
+        val top = (filters.cropTop.coerceIn(0f, 0.99f) * source.height).toInt()
+        val right = (filters.cropRight.coerceIn(filters.cropLeft + 0.01f, 1f) * source.width)
+            .toInt().coerceAtLeast(left + 1)
+        val bottom = (filters.cropBottom.coerceIn(filters.cropTop + 0.01f, 1f) * source.height)
+            .toInt().coerceAtLeast(top + 1)
+        return Bitmap.createBitmap(
+            source,
+            left,
+            top,
+            (right - left).coerceAtMost(source.width - left),
+            (bottom - top).coerceAtMost(source.height - top),
+        )
+    }
 
     private fun downscale(source: Bitmap, maxDimension: Int): Bitmap {
         val largest = max(source.width, source.height)

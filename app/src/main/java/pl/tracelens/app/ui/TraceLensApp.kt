@@ -38,10 +38,12 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Image
+import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
@@ -55,6 +57,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
@@ -350,6 +353,7 @@ private fun EditorScreen(
 ) {
     val original = remember(image.id) { viewModel.bitmap(image, processed = false) }
     var filters by remember(image.id) { mutableStateOf(image.filters) }
+    var showCropDialog by remember { mutableStateOf(false) }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -375,6 +379,20 @@ private fun EditorScreen(
                         bitmap = original,
                         filters = filters,
                         onColor = { filters = filters.copy(removeColor = it) },
+                    )
+                }
+            }
+            item {
+                FilledTonalButton(
+                    onClick = { showCropDialog = true },
+                    enabled = original != null,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Icon(Icons.Default.Crop, null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (filters.isCropped()) "Zmień kadr obrazu"
+                        else "Wykadruj fragment obrazu"
                     )
                 }
             }
@@ -433,6 +451,17 @@ private fun EditorScreen(
             }
         }
     }
+    if (showCropDialog && original != null) {
+        CropImageDialog(
+            bitmap = original,
+            filters = filters,
+            onDismiss = { showCropDialog = false },
+            onApply = {
+                filters = it
+                showCropDialog = false
+            },
+        )
+    }
 }
 
 @Composable
@@ -445,7 +474,7 @@ private fun ColorPickImage(bitmap: Bitmap, filters: ImageFilters, onColor: (Int)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .pointerInput(bitmap) {
                 detectTapGestures { position ->
-                    val bitmapRatio = bitmap.width.toFloat() / bitmap.height
+                    val bitmapRatio = preview.width.toFloat() / preview.height
                     val viewRatio = size.width.toFloat() / size.height
                     val drawnWidth: Float
                     val drawnHeight: Float
@@ -463,9 +492,15 @@ private fun ColorPickImage(bitmap: Bitmap, filters: ImageFilters, onColor: (Int)
                         top = 0f
                     }
                     if (position.x in left..(left + drawnWidth) && position.y in top..(top + drawnHeight)) {
-                        val x = (((position.x - left) / drawnWidth) * bitmap.width).toInt()
+                        val normalizedX = ((position.x - left) / drawnWidth).coerceIn(0f, 1f)
+                        val normalizedY = ((position.y - top) / drawnHeight).coerceIn(0f, 1f)
+                        val sourceX = filters.cropLeft +
+                            normalizedX * (filters.cropRight - filters.cropLeft)
+                        val sourceY = filters.cropTop +
+                            normalizedY * (filters.cropBottom - filters.cropTop)
+                        val x = (sourceX * bitmap.width).toInt()
                             .coerceIn(0, bitmap.width - 1)
-                        val y = (((position.y - top) / drawnHeight) * bitmap.height).toInt()
+                        val y = (sourceY * bitmap.height).toInt()
                             .coerceIn(0, bitmap.height - 1)
                         onColor(bitmap.getPixel(x, y))
                     }
@@ -474,6 +509,80 @@ private fun ColorPickImage(bitmap: Bitmap, filters: ImageFilters, onColor: (Int)
         contentScale = ContentScale.Fit,
     )
 }
+
+@Composable
+private fun CropImageDialog(
+    bitmap: Bitmap,
+    filters: ImageFilters,
+    onDismiss: () -> Unit,
+    onApply: (ImageFilters) -> Unit,
+) {
+    var horizontal by remember {
+        mutableStateOf(filters.cropLeft..filters.cropRight)
+    }
+    var vertical by remember {
+        mutableStateOf(filters.cropTop..filters.cropBottom)
+    }
+    val cropFilters = filters.copy(
+        cropLeft = horizontal.start,
+        cropRight = horizontal.endInclusive,
+        cropTop = vertical.start,
+        cropBottom = vertical.endInclusive,
+    )
+    val preview = remember(bitmap, cropFilters) {
+        pl.tracelens.app.image.ImageProcessor.crop(bitmap, cropFilters)
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Kadrowanie obrazu") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Image(
+                    preview.asImageBitmap(),
+                    "Podgląd kadru",
+                    Modifier.fillMaxWidth().height(260.dp)
+                        .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
+                    contentScale = ContentScale.Fit,
+                )
+                Text("Zakres poziomy")
+                RangeSlider(
+                    value = horizontal,
+                    onValueChange = {
+                        if (it.endInclusive - it.start >= 0.05f) horizontal = it
+                    },
+                    valueRange = 0f..1f,
+                )
+                Text("Zakres pionowy")
+                RangeSlider(
+                    value = vertical,
+                    onValueChange = {
+                        if (it.endInclusive - it.start >= 0.05f) vertical = it
+                    },
+                    valueRange = 0f..1f,
+                )
+                Text(
+                    "Przesuwaj oba końce suwaków. Podgląd automatycznie powiększa wybrany fragment.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onApply(cropFilters) }) { Text("Zastosuj kadr") }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = {
+                    horizontal = 0f..1f
+                    vertical = 0f..1f
+                }) { Text("Pełny obraz") }
+                TextButton(onClick = onDismiss) { Text("Anuluj") }
+            }
+        },
+    )
+}
+
+private fun ImageFilters.isCropped(): Boolean =
+    cropLeft > 0.001f || cropTop > 0.001f || cropRight < 0.999f || cropBottom < 0.999f
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
@@ -493,6 +602,7 @@ private fun ProjectsScreen(
     onOpen: (TraceProject) -> Unit,
 ) {
     var createDialog by remember { mutableStateOf(false) }
+    var projectToDelete by remember { mutableStateOf<TraceProject?>(null) }
     Box(modifier.fillMaxSize()) {
         if (viewModel.projects.isEmpty()) {
             EmptyState(
@@ -524,6 +634,9 @@ private fun ProjectsScreen(
                                 Text(project.name, fontWeight = FontWeight.SemiBold)
                                 Text("${project.progressPhotos.size} zdjęć postępu", style = MaterialTheme.typography.bodySmall)
                             }
+                            IconButton(onClick = { projectToDelete = project }) {
+                                Icon(Icons.Default.Delete, "Usuń projekt")
+                            }
                             Icon(Icons.Default.PlayArrow, "Otwórz")
                         }
                     }
@@ -542,6 +655,26 @@ private fun ProjectsScreen(
             onCreate = { name, image ->
                 createDialog = false
                 onOpen(viewModel.createProject(name, image))
+            },
+        )
+    }
+    projectToDelete?.let { project ->
+        AlertDialog(
+            onDismissRequest = { projectToDelete = null },
+            title = { Text("Usunąć projekt?") },
+            text = {
+                Text(
+                    "Projekt „${project.name}” oraz wszystkie jego zdjęcia postępu zostaną trwale usunięte. Obraz w bibliotece pozostanie bez zmian."
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.deleteProject(project)
+                    projectToDelete = null
+                }) { Text("Usuń projekt") }
+            },
+            dismissButton = {
+                TextButton(onClick = { projectToDelete = null }) { Text("Anuluj") }
             },
         )
     }

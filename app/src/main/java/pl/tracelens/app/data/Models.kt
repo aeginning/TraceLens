@@ -7,6 +7,10 @@ data class ImageFilters(
     val invert: Boolean = false,
     val removeColor: Int? = null,
     val colorTolerance: Float = 0.08f,
+    val cropLeft: Float = 0f,
+    val cropTop: Float = 0f,
+    val cropRight: Float = 1f,
+    val cropBottom: Float = 1f,
 )
 
 data class LibraryImage(

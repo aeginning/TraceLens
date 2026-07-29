@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [0.5](0.5.md) — kadrowanie, usuwanie i tryb rysowania
 - [0.4](0.4.md) — jednakowa wysokość kafelków biblioteki
 - [0.3](0.3.md) — czytelniejszy układ nazw i akcji na kafelkach
 - [0.2](0.2.md) — własne nazwy obrazów w bibliotece

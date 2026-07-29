@@ -100,9 +100,24 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         repository.saveProjects(projects)
     }
 
+    fun deleteProject(project: TraceProject) {
+        repository.deleteProjectFiles(project.id)
+        projects = projects.filterNot { it.id == project.id }
+        repository.saveProjects(projects)
+        message = "Projekt „${project.name}” został usunięty."
+    }
+
     fun addProgressPhoto(project: TraceProject, fileName: String): TraceProject {
         val updated = project.copy(progressPhotos = project.progressPhotos + fileName)
         updateProject(updated)
+        return updated
+    }
+
+    fun deleteProgressPhoto(project: TraceProject, fileName: String): TraceProject {
+        repository.deleteProgressPhoto(project.id, fileName)
+        val updated = project.copy(progressPhotos = project.progressPhotos.filterNot { it == fileName })
+        updateProject(updated)
+        message = "Zdjęcie postępu zostało usunięte."
         return updated
     }
 
