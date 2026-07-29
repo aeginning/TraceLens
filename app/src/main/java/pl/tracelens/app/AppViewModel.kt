@@ -61,6 +61,21 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         message = "Zmieniono nazwę obrazu."
     }
 
+    fun deleteImage(image: LibraryImage) {
+        val linkedProjects = projects.filter { it.imageId == image.id }
+        linkedProjects.forEach { repository.deleteProjectFiles(it.id) }
+        projects = projects.filterNot { it.imageId == image.id }
+        repository.saveProjects(projects)
+        repository.deleteImageFiles(image)
+        images = images.filterNot { it.id == image.id }.sortedImages()
+        repository.saveImages(images)
+        message = if (linkedProjects.isEmpty()) {
+            "Obraz „${image.name}” został usunięty."
+        } else {
+            "Usunięto obraz „${image.name}”. Usunięte powiązane projekty: ${linkedProjects.size}."
+        }
+    }
+
     fun updateFilters(image: LibraryImage, filters: ImageFilters, onComplete: (LibraryImage) -> Unit = {}) {
         viewModelScope.launch {
             busy = true
@@ -128,6 +143,9 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         repository.fileForProgress(projectId, fileName)
 
     fun newProgressFile(projectId: String) = repository.progressFile(projectId)
+
+    fun publishProgressPhoto(projectName: String, file: java.io.File): Boolean =
+        repository.publishProgressPhoto(projectName, file)
 
     private fun updateImage(updated: LibraryImage) {
         images = images.map { if (it.id == updated.id) updated else it }.sortedImages()

@@ -1,9 +1,12 @@
 package pl.tracelens.app.data
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Environment
+import android.provider.MediaStore
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -74,6 +77,11 @@ class AppRepository(private val context: Context) {
         return image.copy(processedFileName = fileName)
     }
 
+    fun deleteImageFiles(image: LibraryImage) {
+        imageFile(image, processed = false).delete()
+        image.processedFileName?.let { File(imagesDir, it).delete() }
+    }
+
     fun progressDirectory(projectId: String): File =
         File(projectsDir, "$projectId/progress").apply { mkdirs() }
 
@@ -86,6 +94,32 @@ class AppRepository(private val context: Context) {
     fun deleteProgressPhoto(projectId: String, fileName: String): Boolean =
         fileForProgress(projectId, fileName).delete()
 
+    fun publishProgressPhoto(projectName: String, source: File): Boolean {
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, source.name)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                "${Environment.DIRECTORY_PICTURES}/TraceLens/${projectName.toSafeFolderName()}",
+            )
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values) ?: return false
+        return try {
+            resolver.openOutputStream(uri)?.use { output ->
+                source.inputStream().use { input -> input.copyTo(output) }
+            } ?: error("Nie można otworzyć pliku w galerii")
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            resolver.update(uri, values, null, null)
+            true
+        } catch (_: Exception) {
+            resolver.delete(uri, null, null)
+            false
+        }
+    }
+
     fun deleteProjectFiles(projectId: String): Boolean {
         val directory = File(projectsDir, projectId)
         return !directory.exists() || directory.deleteRecursively()
@@ -97,6 +131,11 @@ class AppRepository(private val context: Context) {
             if (cursor.moveToFirst()) cursor.getString(0) else null
         }
     }
+}
+
+private fun String.toSafeFolderName(): String {
+    val sanitized = trim().replace(Regex("""[\\/:*?"<>|]"""), "_").trim('.', ' ')
+    return sanitized.ifBlank { "Projekt" }
 }
 
 private fun LibraryImage.toJson() = JSONObject().apply {

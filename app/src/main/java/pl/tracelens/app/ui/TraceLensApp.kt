@@ -45,6 +45,7 @@ import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -206,6 +207,7 @@ private fun LibraryScreen(
 ) {
     var imageToRename by remember { mutableStateOf<LibraryImage?>(null) }
     var imageForProject by remember { mutableStateOf<LibraryImage?>(null) }
+    var imageToDelete by remember { mutableStateOf<LibraryImage?>(null) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) viewModel.importImage(uri, onEdit)
     }
@@ -232,6 +234,7 @@ private fun LibraryScreen(
                         onRename = { imageToRename = image },
                         onEdit = { onEdit(image) },
                         onCreateProject = { imageForProject = image },
+                        onDelete = { imageToDelete = image },
                     )
                 }
             }
@@ -262,6 +265,31 @@ private fun LibraryScreen(
             },
         )
     }
+    imageToDelete?.let { image ->
+        val linkedProjects = viewModel.projects.count { it.imageId == image.id }
+        AlertDialog(
+            onDismissRequest = { imageToDelete = null },
+            title = { Text("Usunąć obraz?") },
+            text = {
+                Text(
+                    if (linkedProjects == 0) {
+                        "Obraz „${image.name}” zostanie trwale usunięty z biblioteki."
+                    } else {
+                        "Obraz „${image.name}” jest używany w projektach. Liczba powiązanych projektów: $linkedProjects. Usunięcie obrazu usunie również te projekty i ich zdjęcia robocze. Kopie zapisane w galerii telefonu pozostaną bez zmian."
+                    }
+                )
+            },
+            confirmButton = {
+                Button(onClick = {
+                    viewModel.deleteImage(image)
+                    imageToDelete = null
+                }) { Text("Usuń obraz") }
+            },
+            dismissButton = {
+                TextButton(onClick = { imageToDelete = null }) { Text("Anuluj") }
+            },
+        )
+    }
 }
 
 @Composable
@@ -272,6 +300,7 @@ private fun ImageCard(
     onRename: () -> Unit,
     onEdit: () -> Unit,
     onCreateProject: () -> Unit,
+    onDelete: () -> Unit,
 ) {
     Card(onClick = onEdit) {
         Column {
@@ -303,21 +332,25 @@ private fun ImageCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Row(
+                Column(
                     Modifier.fillMaxWidth().padding(top = 4.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    IconButton(onClick = onRename, modifier = Modifier.size(40.dp)) {
-                        Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(22.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        IconButton(onClick = onRename, modifier = Modifier.size(40.dp)) {
+                            Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(22.dp))
+                        }
+                        IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+                            Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(22.dp))
+                        }
                     }
-                    Spacer(Modifier.width(6.dp))
-                    IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
-                        Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(22.dp))
-                    }
-                    Spacer(Modifier.width(6.dp))
-                    IconButton(onClick = onCreateProject, modifier = Modifier.size(40.dp)) {
-                        Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(22.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        IconButton(onClick = onCreateProject, modifier = Modifier.size(40.dp)) {
+                            Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(22.dp))
+                        }
+                        IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
+                            Icon(Icons.Default.Delete, "Usuń obraz z biblioteki", Modifier.size(22.dp))
+                        }
                     }
                 }
             }
@@ -623,6 +656,8 @@ private fun ProjectsScreen(
 ) {
     var createDialog by remember { mutableStateOf(false) }
     var projectToDelete by remember { mutableStateOf<TraceProject?>(null) }
+    var projectGallery by remember { mutableStateOf<TraceProject?>(null) }
+    var galleryDeleteRequest by remember { mutableStateOf<Pair<TraceProject, String>?>(null) }
     Box(modifier.fillMaxSize()) {
         if (viewModel.projects.isEmpty()) {
             EmptyState(
@@ -653,6 +688,12 @@ private fun ProjectsScreen(
                             Column(Modifier.weight(1f)) {
                                 Text(project.name, fontWeight = FontWeight.SemiBold)
                                 Text("${project.progressPhotos.size} zdjęć postępu", style = MaterialTheme.typography.bodySmall)
+                            }
+                            IconButton(
+                                onClick = { projectGallery = project },
+                                enabled = project.progressPhotos.isNotEmpty(),
+                            ) {
+                                Icon(Icons.Default.PhotoLibrary, "Otwórz zdjęcia postępu")
                             }
                             IconButton(onClick = { projectToDelete = project }) {
                                 Icon(Icons.Default.Delete, "Usuń projekt")
@@ -698,6 +739,80 @@ private fun ProjectsScreen(
             },
         )
     }
+    projectGallery?.let { project ->
+        ProjectGalleryDialog(
+            viewModel = viewModel,
+            project = project,
+            onDismiss = { projectGallery = null },
+            onDelete = { fileName ->
+                projectGallery = null
+                galleryDeleteRequest = project to fileName
+            },
+        )
+    }
+    galleryDeleteRequest?.let { (project, fileName) ->
+        AlertDialog(
+            onDismissRequest = { galleryDeleteRequest = null },
+            title = { Text("Usunąć zdjęcie?") },
+            text = { Text("To zdjęcie postępu zostanie trwale usunięte z projektu.") },
+            confirmButton = {
+                Button(onClick = {
+                    val updated = viewModel.deleteProgressPhoto(project, fileName)
+                    galleryDeleteRequest = null
+                    if (updated.progressPhotos.isNotEmpty()) projectGallery = updated
+                }) { Text("Usuń zdjęcie") }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    galleryDeleteRequest = null
+                    projectGallery = project
+                }) { Text("Anuluj") }
+            },
+        )
+    }
+}
+
+@Composable
+private fun ProjectGalleryDialog(
+    viewModel: AppViewModel,
+    project: TraceProject,
+    onDismiss: () -> Unit,
+    onDelete: (String) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Galeria: ${project.name}") },
+        text = {
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                items(project.progressPhotos) { fileName ->
+                    val bitmap = remember(project.id, fileName) {
+                        android.graphics.BitmapFactory.decodeFile(
+                            viewModel.progressFile(project.id, fileName).absolutePath
+                        )
+                    }
+                    if (bitmap != null) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Image(
+                                bitmap.asImageBitmap(),
+                                "Etap pracy",
+                                Modifier.size(220.dp)
+                                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                                contentScale = ContentScale.Fit,
+                            )
+                            TextButton(onClick = { onDelete(fileName) }) {
+                                Icon(Icons.Default.Delete, null)
+                                Spacer(Modifier.size(6.dp))
+                                Text("Usuń zdjęcie")
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Zamknij") }
+        },
+    )
 }
 
 @Composable

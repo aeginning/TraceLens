@@ -170,7 +170,16 @@ fun TraceWorkspace(
             output = viewModel.newProgressFile(project.id),
             onSaved = { file ->
                 project = viewModel.addProgressPhoto(project, file.name)
-                Toast.makeText(context, "Zapisano etap pracy.", Toast.LENGTH_SHORT).show()
+                val published = viewModel.publishProgressPhoto(project.name, file)
+                Toast.makeText(
+                    context,
+                    if (published) {
+                        "Zapisano etap pracy także w galerii telefonu."
+                    } else {
+                        "Zapisano etap w projekcie, ale nie udało się dodać go do galerii telefonu."
+                    },
+                    Toast.LENGTH_LONG,
+                ).show()
             },
         )
     }

@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [0.7](0.7.md) — galeria projektu i zdjęcia w galerii telefonu
 - [0.6](0.6.md) — szybkie tworzenie projektu z obrazu
 - [0.5](0.5.md) — kadrowanie, usuwanie i tryb rysowania
 - [0.4](0.4.md) — jednakowa wysokość kafelków biblioteki
