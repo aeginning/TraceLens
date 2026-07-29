@@ -108,9 +108,9 @@ h1 em { color: var(--green); font-style: normal; }
 .trust-strip span { margin-top:4px; font-size:13px; color:#d4dfda; }
 
 .section { width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:130px 0 40px; }
-.section-heading { max-width:720px; margin-bottom:46px; }
+.section-heading { margin-bottom:46px; }
 .section-heading h2, .download-section h2 { margin-bottom:18px; font-size:clamp(38px,5vw,62px); line-height:1.02; letter-spacing:-.05em; }
-.section-heading > p:last-child { color:var(--muted); font-size:18px; }
+.section-heading > p:last-child { max-width:720px; color:var(--muted); font-size:18px; }
 .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .feature { position:relative; min-height:300px; padding:29px; overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); }
 .feature-wide { grid-column:span 2; }
