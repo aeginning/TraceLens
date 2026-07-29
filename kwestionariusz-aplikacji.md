@@ -21,8 +21,8 @@ Przy wybranych funkcjach warto dopisać oczekiwany sposób działania w przeznac
 
 - [ ] **Automatyczne wykrywanie kartki** — odnajdywanie krawędzi i rogów kartki w podglądzie kamery.
 - [ ] **Stabilizacja nakładki** — utrzymywanie grafiki w tym samym miejscu po niewielkim poruszeniu telefonu lub statywu.
-- [ ] **Blokada ostrości i ekspozycji** — zapobieganie ciągłemu rozjaśnianiu obrazu i zmianom ostrości podczas przesuwania dłoni nad kartką.
-- [ ] **Siatka i prowadnice** — nakładana na podgląd siatka, linie środka oraz regulowany rozmiar pól.
+- [X] **Blokada ostrości i ekspozycji** — zapobieganie ciągłemu rozjaśnianiu obrazu i zmianom ostrości podczas przesuwania dłoni nad kartką.
+- [X] **Siatka i prowadnice** — nakładana na podgląd siatka, linie środka oraz regulowany rozmiar pól.
 - [ ] **Eksport i import projektu** — zapis projektu razem z obrazem, konfiguracją i zdjęciami postępu do jednego archiwum.
 - [ ] **Wyszukiwarka biblioteki** — wyszukiwanie przygotowanych obrazów po nadanej nazwie.
 - [ ] **Samouczek pierwszego uruchomienia** — krótkie objaśnienie importu, edycji obrazu, tworzenia projektu i trybu rysowania.
@@ -61,9 +61,9 @@ Przy wybranych funkcjach warto dopisać oczekiwany sposób działania w przeznac
 - [ ] **Podział pracy na fragmenty** — zaciemnianie obszarów poza aktualnie odrysowywaną częścią.
 - [ ] **Lupa** — powiększony podgląd fragmentu wskazanego palcem.
 - [ ] **Zamrożenie klatki z kamery** — ułatwienie dokładnego ustawienia nakładki bez ruchu obrazu.
-- [ ] **Przycisk porównania** — przytrzymanie przycisku chwilowo ukrywa nakładkę.
-- [ ] **Tryb A/B** — szybkie przełączanie pomiędzy samą kamerą a kamerą z nakładką.
-- [ ] **Automatyczne miganie nakładki** — regulowane naprzemienne pokazywanie i ukrywanie grafiki.
+- [X] **Przycisk porównania** — przytrzymanie przycisku chwilowo ukrywa nakładkę.
+- [X] **Tryb A/B** — szybkie przełączanie pomiędzy samą kamerą a kamerą z nakładką.
+- [X] **Automatyczne miganie nakładki** — regulowane naprzemienne pokazywanie i ukrywanie grafiki.
 - [ ] **Zmiana koloru konturów** — wybór koloru najlepiej widocznego na danym materiale.
 - [ ] **Szybkie wartości przezroczystości** — np. 10%, 25%, 50% i 75% obok obecnego suwaka.
 - [ ] **Ochrona przed przypadkowym dotknięciem** — czasowe zablokowanie wszystkich kontrolek podczas rysowania.
@@ -76,16 +76,16 @@ Przy wybranych funkcjach warto dopisać oczekiwany sposób działania w przeznac
 
 ## Edytor obrazów
 
-- [ ] **Uproszczenie obrazu** — ograniczenie liczby kolorów lub poziomu szczegółowości.
-- [ ] **Gumka** — ręczne usuwanie niepotrzebnych fragmentów obrazu po automatycznym usunięciu tła.
+- [x] **Uproszczenie obrazu** — ograniczenie liczby kolorów lub poziomu szczegółowości.
+- [X] **Gumka** — ręczne usuwanie niepotrzebnych fragmentów obrazu po automatycznym usunięciu tła.
 - [ ] **Pędzel przywracający** — odzyskiwanie fragmentów usuniętych zbyt dużą tolerancją koloru.
-- [ ] **Automatyczne usuwanie tła** — wykrywanie głównego obiektu bez ręcznego wskazywania koloru.
+- [X] **Automatyczne usuwanie tła** — wykrywanie głównego obiektu bez ręcznego wskazywania koloru.
 - [ ] **Historia zmian Cofnij/Ponów** — cofanie kolejnych operacji edycyjnych.
-- [ ] **Porównanie przed/po** — chwilowy podgląd oryginału obok przetworzonego obrazu.
+- [X] **Porównanie przed/po** — chwilowy podgląd oryginału obok przetworzonego obrazu.
 - [ ] **Zapisywanie ustawień jako preset** — ponowne użycie tych samych filtrów dla podobnych grafik.
 - [ ] **Obsługa SVG** — import rzeczywistych plików wektorowych z zachowaniem jakości przy skalowaniu.
 - [ ] **Obsługa WebP**.
-- [ ] **Eksport przygotowanego obrazu** — zapis przetworzonej grafiki do galerii telefonu.
+- [X] **Eksport przygotowanego obrazu** — zapis przetworzonej grafiki do galerii telefonu.
 
 **Uwagi:**
 
@@ -132,14 +132,14 @@ Przy wybranych funkcjach warto dopisać oczekiwany sposób działania w przeznac
 
 ## Zdjęcia postępu i prezentacja pracy
 
-- [ ] **Automatyczny timelapse** — wykonywanie zdjęcia co określony czas.
-- [ ] **Ręczne ustawienie interwału timelapse**.
+- [X] **Automatyczny timelapse** — wykonywanie zdjęcia co określony czas.
+- [X] **Ręczne ustawienie interwału timelapse**.
 - [ ] **Film z procesu rysowania**.
 - [ ] **Porównanie referencji z ukończoną pracą**.
 - [ ] **Zestawienie „przed i po”** — wygenerowanie jednego obrazu do zapisania lub udostępnienia.
 - [ ] **Opis zdjęcia postępu** — możliwość dodania krótkiej notatki do etapu.
-- [ ] **Wybór zdjęcia okładkowego projektu**.
-- [ ] **Udostępnianie zdjęcia lub całej galerii projektu**.
+- [X] **Wybór zdjęcia okładkowego projektu**.
+- [X] **Udostępnianie zdjęcia lub całej galerii projektu**.
 
 **Uwagi:**
 
@@ -175,10 +175,10 @@ Przy wybranych funkcjach warto dopisać oczekiwany sposób działania w przeznac
 - [ ] **Testy na różnych rozdzielczościach i producentach telefonów**.
 - [ ] **Test długiej pracy** — kamera, ekran i latarka uruchomione przez kilkadziesiąt minut.
 - [ ] **Lokalny raport diagnostyczny** — możliwość wyeksportowania informacji technicznych bez wysyłania prywatnych zdjęć.
-- [ ] **Przygotowanie strony i aplikacji do przyszłej publikacji w Google Play**.
+- [X] **Przygotowanie strony i aplikacji do przyszłej publikacji w Google Play**.
 
 **Uwagi:**
-
+Rozpocząłem proces tworzenia konta developera w google store
 
 
 ---
@@ -187,15 +187,15 @@ Przy wybranych funkcjach warto dopisać oczekiwany sposób działania w przeznac
 
 Poniższe pomysły wynikają z testowania obecnego fundamentu aplikacji i mogą szczególnie poprawić codzienną pracę.
 
-- [ ] **Tryb „Ustaw statyw ponownie”** — zapisanie zdjęcia kontrolnego i półprzezroczyste pokazanie go przy kolejnym uruchomieniu projektu. Ułatwi ustawienie telefonu dokładnie w poprzednim miejscu bez skomplikowanego śledzenia AR.
-- [ ] **Blokada ostrości, ekspozycji i balansu bieli jednym przyciskiem** — obraz nie będzie „pompował” ani zmieniał barwy, gdy ręka znajdzie się pod aparatem.
-- [ ] **Kontrola czytelności nakładki** — szybki wybór koloru konturu oraz trybu mieszania odpowiedniego do jasnej lub ciemnej powierzchni.
+- [X] **Tryb „Ustaw statyw ponownie”** — zapisanie zdjęcia kontrolnego i półprzezroczyste pokazanie go przy kolejnym uruchomieniu projektu. Ułatwi ustawienie telefonu dokładnie w poprzednim miejscu bez skomplikowanego śledzenia AR.
+- [X] **Blokada ostrości, ekspozycji i balansu bieli jednym przyciskiem** — obraz nie będzie „pompował” ani zmieniał barwy, gdy ręka znajdzie się pod aparatem.
+- [X] **Kontrola czytelności nakładki** — szybki wybór koloru konturu oraz trybu mieszania odpowiedniego do jasnej lub ciemnej powierzchni.
 - [ ] **Migawka bez nakładki i z nakładką** — opcja zapisania dwóch wersji zdjęcia postępu za jednym dotknięciem.
-- [ ] **Wskaźnik ustawienia telefonu** — prosta poziomica pokazująca, czy telefon znajduje się równolegle do kartki.
-- [ ] **Ostrzeżenie o poruszeniu statywu** — komunikat, gdy po zablokowaniu projektu telefon znacząco zmieni położenie.
-- [ ] **Szybkie wznowienie ostatniego projektu** — skrót na ekranie startowym aplikacji.
-- [ ] **Automatyczna miniatura postępu na kafelku projektu** — ostatnie zdjęcie pracy zamiast samej grafiki referencyjnej.
-- [ ] **Kontrola wolnego miejsca** — ostrzeżenie przed wykonaniem zdjęcia, jeśli pamięć telefonu jest bliska zapełnienia.
+- [X] **Wskaźnik ustawienia telefonu** — prosta poziomica pokazująca, czy telefon znajduje się równolegle do kartki.
+- [X] **Ostrzeżenie o poruszeniu statywu** — komunikat, gdy po zablokowaniu projektu telefon znacząco zmieni położenie.
+- [X] **Szybkie wznowienie ostatniego projektu** — skrót na ekranie startowym aplikacji.
+- [X] **Automatyczna miniatura postępu na kafelku projektu** — ostatnie zdjęcie pracy zamiast samej grafiki referencyjnej.
+- [X] **Kontrola wolnego miejsca** — ostrzeżenie przed wykonaniem zdjęcia, jeśli pamięć telefonu jest bliska zapełnienia.
 - [ ] **Eksport paczki diagnostycznej** — wersja aplikacji, model telefonu, lista kamer i ustawienia projektu bez dołączania prywatnych obrazów.
 
 **Pomysły użytkownika:**
@@ -206,14 +206,47 @@ Poniższe pomysły wynikają z testowania obecnego fundamentu aplikacji i mogą 
 
 ## Wybrane do następnego wydania
 
-Po zaznaczeniu funkcji powyżej można tutaj przepisać ostateczny zakres następnej wersji.
+Zaznaczone funkcje zostaną wdrożone etapami. Podział ogranicza ryzyko wzajemnych regresji w kamerze, edytorze i zapisie projektów.
 
-- [ ] Pierwsza funkcja
-- [ ] Druga funkcja
-- [ ] Trzecia funkcja
+### Wersja 1.2 — narzędzia podczas rysowania
 
-**Planowany numer wersji:**
+- [X] Blokada ostrości, ekspozycji i balansu bieli.
+- [X] Siatka, prowadnice i regulowany rozmiar pól.
+- [X] Przycisk porównania oraz tryb A/B.
+- [X] Automatyczne miganie nakładki z regulacją częstotliwości.
+- [X] Kontrola czytelności nakładki.
+- [X] Wskaźnik wypoziomowania telefonu.
+- [X] Ostrzeżenie o poruszeniu statywu.
 
+### Wersja 1.3 — rozbudowa edytora
 
+- [X] Uproszczenie obrazu.
+- [X] Gumka do ręcznego usuwania fragmentów.
+- [X] Automatyczne usuwanie tła.
+- [X] Porównanie obrazu przed i po edycji.
+- [X] Eksport przygotowanego obrazu do galerii telefonu.
+
+### Wersja 1.4 — postęp i projekty
+
+- [X] Automatyczny timelapse i ręczne ustawianie interwału.
+- [X] Wybór zdjęcia okładkowego projektu.
+- [X] Udostępnianie zdjęcia lub galerii projektu.
+- [X] Tryb ponownego ustawienia statywu.
+- [X] Szybkie wznowienie ostatniego projektu.
+- [X] Ostatnie zdjęcie postępu jako miniatura projektu.
+- [X] Kontrola wolnego miejsca przed wykonaniem zdjęcia.
+
+### Wersja 1.5 — przygotowanie do Google Play
+
+- [X] Produkcyjny wariant aplikacji i konfiguracja podpisu.
+- [X] Weryfikacja uprawnień, zasad prywatności i danych aplikacji.
+- [X] Materiały oraz metadane potrzebne do przygotowania karty sklepu.
+- [X] Pakiet Android App Bundle przeznaczony do wysłania do Google Play Console.
+
+**Planowany numer wersji:** `1.2`
 
 **Dodatkowe ustalenia:**
+
+- Konto deweloperskie Google Play jest obecnie w trakcie zakładania.
+- Przygotowanie techniczne może odbywać się wcześniej, ale publikacja będzie możliwa dopiero po aktywacji konta.
+- Każdy etap otrzyma osobny changelog, commit, tag, APK testowe i test na telefonie.
