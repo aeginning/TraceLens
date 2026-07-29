@@ -136,6 +136,7 @@ fun TraceWorkspace(
 ) {
     val context = LocalContext.current
     val activity = context as Activity
+    val appSettings = viewModel.appSettings
     var project by remember(initialProject.id) { mutableStateOf(initialProject) }
     var cameraPermission by remember {
         mutableStateOf(context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
@@ -149,7 +150,7 @@ fun TraceWorkspace(
 
     val overlay = remember(image.id, image.processedFileName) { viewModel.bitmap(image) }
     var locked by remember { mutableStateOf(true) }
-    var torch by remember { mutableStateOf(false) }
+    var torch by remember(initialProject.id) { mutableStateOf(appSettings.defaultTorchEnabled) }
     var camera by remember { mutableStateOf<Camera?>(null) }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameras by remember { mutableStateOf<List<CameraOption>>(emptyList()) }
@@ -158,12 +159,14 @@ fun TraceWorkspace(
     var showCameraPicker by remember { mutableStateOf(false) }
     var overlayEnabled by remember { mutableStateOf(true) }
     var compareHeld by remember { mutableStateOf(false) }
-    var blinking by remember { mutableStateOf(false) }
+    var blinking by remember(initialProject.id) { mutableStateOf(appSettings.defaultBlinkEnabled) }
     var blinkVisible by remember { mutableStateOf(true) }
     var cameraParametersLocked by remember { mutableStateOf(false) }
     var movementBaseline by remember { mutableStateOf<DeviceTilt?>(null) }
     var movementWarning by remember { mutableStateOf(false) }
-    var timelapseEnabled by remember { mutableStateOf(false) }
+    var timelapseEnabled by remember(initialProject.id) {
+        mutableStateOf(appSettings.defaultTimelapseEnabled)
+    }
     var captureInProgress by remember { mutableStateOf(false) }
     var tripodAlignMode by remember { mutableStateOf(false) }
     val deviceTilt = rememberDeviceTilt()
@@ -333,6 +336,9 @@ fun TraceWorkspace(
                             camera = boundCamera
                             imageCapture = capture
                             cameras = options
+                            if (torch && thermalStatus < PowerManager.THERMAL_STATUS_SEVERE) {
+                                boundCamera.cameraControl.enableTorch(true)
+                            }
                             if (project.cameraId != actualId) saveProject(project.copy(cameraId = actualId))
                         },
                     )
@@ -392,16 +398,18 @@ fun TraceWorkspace(
                     Modifier.align(Alignment.TopStart).padding(8.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Text(
-                        "Poziom: ${deviceTilt.horizontal.roundToInt()}° / ${deviceTilt.vertical.roundToInt()}°",
-                        color = Color.White,
-                        modifier = Modifier.background(
-                            if (abs(deviceTilt.horizontal) <= 2f && abs(deviceTilt.vertical) <= 2f) {
-                                Color(0xCC2E7D32)
-                            } else Color(0xAA000000)
-                        ).padding(horizontal = 8.dp, vertical = 5.dp),
-                    )
-                    if (movementWarning) {
+                    if (appSettings.showLevelIndicator) {
+                        Text(
+                            "Poziom: ${deviceTilt.horizontal.roundToInt()}° / ${deviceTilt.vertical.roundToInt()}°",
+                            color = Color.White,
+                            modifier = Modifier.background(
+                                if (abs(deviceTilt.horizontal) <= 2f && abs(deviceTilt.vertical) <= 2f) {
+                                    Color(0xCC2E7D32)
+                                } else Color(0xAA000000)
+                            ).padding(horizontal = 8.dp, vertical = 5.dp),
+                        )
+                    }
+                    if (appSettings.showMovementWarning && movementWarning) {
                         Text(
                             "Telefon lub statyw został poruszony",
                             color = Color.White,

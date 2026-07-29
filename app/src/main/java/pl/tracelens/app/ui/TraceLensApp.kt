@@ -7,6 +7,8 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -62,6 +64,7 @@ import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.MonochromePhotos
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.ColorLens
@@ -124,6 +127,7 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.data.ImageFilters
+import pl.tracelens.app.data.AppSettings
 import pl.tracelens.app.data.EraserPoint
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
@@ -132,6 +136,7 @@ import pl.tracelens.app.ui.camera.TraceWorkspace
 private sealed interface Screen {
     data object Library : Screen
     data object Projects : Screen
+    data object Settings : Screen
     data class Editor(val imageId: String) : Screen
     data class Workspace(val projectId: String) : Screen
     data class Gallery(val projectId: String, val fromWorkspace: Boolean) : Screen
@@ -153,10 +158,11 @@ fun TraceLensApp(viewModel: AppViewModel) {
         Box(Modifier.fillMaxSize()) {
             when (val current = screen) {
                 Screen.Library -> MainScaffold(
-                    selectedLibrary = true,
+                    selectedTab = 0,
                     snackbar = snackbar,
                     onLibrary = { screen = Screen.Library },
                     onProjects = { screen = Screen.Projects },
+                    onSettings = { screen = Screen.Settings },
                 ) { padding ->
                     LibraryScreen(
                         viewModel = viewModel,
@@ -166,16 +172,29 @@ fun TraceLensApp(viewModel: AppViewModel) {
                     )
                 }
                 Screen.Projects -> MainScaffold(
-                    selectedLibrary = false,
+                    selectedTab = 1,
                     snackbar = snackbar,
                     onLibrary = { screen = Screen.Library },
                     onProjects = { screen = Screen.Projects },
+                    onSettings = { screen = Screen.Settings },
                 ) { padding ->
                     ProjectsScreen(
                         viewModel = viewModel,
                         modifier = Modifier.padding(padding),
                         onOpen = { screen = Screen.Workspace(it.id) },
                         onGallery = { screen = Screen.Gallery(it.id, false) },
+                    )
+                }
+                Screen.Settings -> MainScaffold(
+                    selectedTab = 2,
+                    snackbar = snackbar,
+                    onLibrary = { screen = Screen.Library },
+                    onProjects = { screen = Screen.Projects },
+                    onSettings = { screen = Screen.Settings },
+                ) { padding ->
+                    SettingsScreen(
+                        viewModel = viewModel,
+                        modifier = Modifier.padding(padding),
                     )
                 }
                 is Screen.Editor -> {
@@ -222,35 +241,159 @@ fun TraceLensApp(viewModel: AppViewModel) {
 
 @Composable
 private fun MainScaffold(
-    selectedLibrary: Boolean,
+    selectedTab: Int,
     snackbar: SnackbarHostState,
     onLibrary: () -> Unit,
     onProjects: () -> Unit,
+    onSettings: () -> Unit,
     content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit,
 ) {
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(if (selectedLibrary) "Biblioteka obrazów" else "Projekty") })
+            TopAppBar(title = {
+                Text(
+                    when (selectedTab) {
+                        0 -> "Biblioteka obrazów"
+                        1 -> "Projekty"
+                        else -> "Ustawienia"
+                    }
+                )
+            })
         },
         snackbarHost = { SnackbarHost(snackbar) },
         bottomBar = {
             NavigationBar {
                 NavigationBarItem(
-                    selected = selectedLibrary,
+                    selected = selectedTab == 0,
                     onClick = onLibrary,
                     icon = { Icon(Icons.Default.Image, null) },
                     label = { Text("Obrazy") },
                 )
                 NavigationBarItem(
-                    selected = !selectedLibrary,
+                    selected = selectedTab == 1,
                     onClick = onProjects,
                     icon = { Icon(Icons.Default.Folder, null) },
                     label = { Text("Projekty") },
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 2,
+                    onClick = onSettings,
+                    icon = { Icon(Icons.Default.Settings, null) },
+                    label = { Text("Ustawienia") },
                 )
             }
         },
         content = content,
     )
+}
+
+@Composable
+private fun SettingsScreen(
+    viewModel: AppViewModel,
+    modifier: Modifier,
+) {
+    val context = LocalContext.current
+    val settings = viewModel.appSettings
+    val cameras = remember {
+        val manager = context.getSystemService(android.content.Context.CAMERA_SERVICE) as CameraManager
+        manager.cameraIdList.mapIndexed { index, id ->
+            val facing = manager.getCameraCharacteristics(id)
+                .get(CameraCharacteristics.LENS_FACING)
+            val label = when (facing) {
+                CameraCharacteristics.LENS_FACING_BACK -> "Tylna ${index + 1}"
+                CameraCharacteristics.LENS_FACING_FRONT -> "Przednia ${index + 1}"
+                else -> "Kamera ${index + 1}"
+            }
+            id to label
+        }
+    }
+    fun save(updated: AppSettings) = viewModel.updateSettings(updated)
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        item {
+            Text("Domyślne ustawienia nowych projektów", fontWeight = FontWeight.SemiBold)
+            Text(
+                "Wartości będą stosowane przy tworzeniu projektu. Ustawienia widoczności działają od razu.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+        item {
+            Text("Przezroczystość: ${(settings.defaultOpacity * 100).toInt()}%")
+            Slider(
+                value = settings.defaultOpacity,
+                onValueChange = { save(settings.copy(defaultOpacity = it)) },
+            )
+        }
+        item {
+            ToggleRow("Siatka domyślnie włączona", settings.defaultGridEnabled) {
+                save(settings.copy(defaultGridEnabled = it))
+            }
+        }
+        if (settings.defaultGridEnabled) {
+            item {
+                Text("Pola siatki: ${settings.defaultGridDivisions} × ${settings.defaultGridDivisions}")
+                Slider(
+                    value = settings.defaultGridDivisions.toFloat(),
+                    onValueChange = {
+                        save(settings.copy(defaultGridDivisions = it.toInt().coerceIn(2, 12)))
+                    },
+                    valueRange = 2f..12f,
+                    steps = 9,
+                )
+            }
+        }
+        item {
+            ToggleRow("Miganie domyślnie włączone", settings.defaultBlinkEnabled) {
+                save(settings.copy(defaultBlinkEnabled = it))
+            }
+        }
+        item {
+            ToggleRow("Timelapse domyślnie włączony", settings.defaultTimelapseEnabled) {
+                save(settings.copy(defaultTimelapseEnabled = it))
+            }
+        }
+        item {
+            ToggleRow("Latarka domyślnie włączona", settings.defaultTorchEnabled) {
+                save(settings.copy(defaultTorchEnabled = it))
+            }
+        }
+        item {
+            Text("Domyślny obiektyw", fontWeight = FontWeight.SemiBold)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item {
+                    FilterChip(
+                        selected = settings.defaultCameraId == null,
+                        onClick = { save(settings.copy(defaultCameraId = null)) },
+                        label = { Text("Automatyczny") },
+                    )
+                }
+                items(cameras, key = { it.first }) { camera ->
+                    FilterChip(
+                        selected = settings.defaultCameraId == camera.first,
+                        onClick = { save(settings.copy(defaultCameraId = camera.first)) },
+                        label = { Text(camera.second) },
+                    )
+                }
+            }
+        }
+        item {
+            Text("Informacje na ekranie rysowania", fontWeight = FontWeight.SemiBold)
+        }
+        item {
+            ToggleRow("Pokazuj poziom telefonu", settings.showLevelIndicator) {
+                save(settings.copy(showLevelIndicator = it))
+            }
+        }
+        item {
+            ToggleRow("Ostrzegaj o poruszeniu telefonu lub statywu", settings.showMovementWarning) {
+                save(settings.copy(showMovementWarning = it))
+            }
+        }
+    }
 }
 
 @Composable

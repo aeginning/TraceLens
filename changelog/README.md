@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [1.4.2](1.4.2.md) — sekcja ustawień i domyślna konfiguracja projektów
 - [1.4.1](1.4.1.md) — jednoznaczne etykiety stanów sterowania
 - [1.4](1.4.md) — timelapse, okładki, udostępnianie i ponowne ustawianie statywu
 - [1.3](1.3.md) — rozbudowa edytora obrazów

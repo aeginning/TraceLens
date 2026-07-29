@@ -13,6 +13,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import pl.tracelens.app.data.AppRepository
+import pl.tracelens.app.data.AppSettings
 import pl.tracelens.app.data.ImageFilters
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
@@ -26,6 +27,8 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     var images by mutableStateOf(repository.loadImages().sortedImages())
         private set
     var projects by mutableStateOf(repository.loadProjects().sortedByDescending { it.modifiedAt })
+        private set
+    var appSettings by mutableStateOf(repository.loadSettings())
         private set
     var busy by mutableStateOf(false)
         private set
@@ -109,14 +112,24 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     }
 
     fun createProject(name: String, image: LibraryImage): TraceProject {
+        val defaults = appSettings
         val project = TraceProject(
             id = UUID.randomUUID().toString(),
             name = name.ifBlank { "Nowy projekt" },
             imageId = image.id,
+            opacity = defaults.defaultOpacity,
+            gridEnabled = defaults.defaultGridEnabled,
+            gridDivisions = defaults.defaultGridDivisions,
+            cameraId = defaults.defaultCameraId,
         )
         projects = listOf(project) + projects
         repository.saveProjects(projects)
         return project
+    }
+
+    fun updateSettings(settings: AppSettings) {
+        appSettings = settings
+        repository.saveSettings(settings)
     }
 
     fun updateProject(project: TraceProject) {

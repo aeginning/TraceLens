@@ -32,6 +32,18 @@ data class LibraryImage(
     val createdAt: Long = System.currentTimeMillis(),
 )
 
+data class AppSettings(
+    val defaultOpacity: Float = 0.25f,
+    val defaultGridEnabled: Boolean = false,
+    val defaultGridDivisions: Int = 4,
+    val defaultBlinkEnabled: Boolean = false,
+    val defaultTimelapseEnabled: Boolean = false,
+    val defaultTorchEnabled: Boolean = false,
+    val defaultCameraId: String? = null,
+    val showLevelIndicator: Boolean = true,
+    val showMovementWarning: Boolean = true,
+)
+
 data class TraceProject(
     val id: String,
     val name: String,

@@ -21,6 +21,33 @@ class AppRepository(private val context: Context) {
     private val projectsDir = File(context.filesDir, "projects").apply { mkdirs() }
     private val metadataFile = File(context.filesDir, "library.json")
     private val projectsFile = File(context.filesDir, "projects.json")
+    private val preferences = context.getSharedPreferences("trace_lens_settings", Context.MODE_PRIVATE)
+
+    fun loadSettings() = AppSettings(
+        defaultOpacity = preferences.getFloat("defaultOpacity", 0.25f).coerceIn(0f, 1f),
+        defaultGridEnabled = preferences.getBoolean("defaultGridEnabled", false),
+        defaultGridDivisions = preferences.getInt("defaultGridDivisions", 4).coerceIn(2, 12),
+        defaultBlinkEnabled = preferences.getBoolean("defaultBlinkEnabled", false),
+        defaultTimelapseEnabled = preferences.getBoolean("defaultTimelapseEnabled", false),
+        defaultTorchEnabled = preferences.getBoolean("defaultTorchEnabled", false),
+        defaultCameraId = preferences.getString("defaultCameraId", null),
+        showLevelIndicator = preferences.getBoolean("showLevelIndicator", true),
+        showMovementWarning = preferences.getBoolean("showMovementWarning", true),
+    )
+
+    fun saveSettings(settings: AppSettings) {
+        preferences.edit()
+            .putFloat("defaultOpacity", settings.defaultOpacity)
+            .putBoolean("defaultGridEnabled", settings.defaultGridEnabled)
+            .putInt("defaultGridDivisions", settings.defaultGridDivisions)
+            .putBoolean("defaultBlinkEnabled", settings.defaultBlinkEnabled)
+            .putBoolean("defaultTimelapseEnabled", settings.defaultTimelapseEnabled)
+            .putBoolean("defaultTorchEnabled", settings.defaultTorchEnabled)
+            .putString("defaultCameraId", settings.defaultCameraId)
+            .putBoolean("showLevelIndicator", settings.showLevelIndicator)
+            .putBoolean("showMovementWarning", settings.showMovementWarning)
+            .apply()
+    }
 
     fun loadImages(): List<LibraryImage> = runCatching {
         if (!metadataFile.exists()) return emptyList()
