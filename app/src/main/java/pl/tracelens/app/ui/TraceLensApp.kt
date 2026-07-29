@@ -122,6 +122,7 @@ fun TraceLensApp(viewModel: AppViewModel) {
                         viewModel = viewModel,
                         modifier = Modifier.padding(padding),
                         onEdit = { screen = Screen.Editor(it.id) },
+                        onOpenProject = { screen = Screen.Workspace(it.id) },
                     )
                 }
                 Screen.Projects -> MainScaffold(
@@ -201,8 +202,10 @@ private fun LibraryScreen(
     viewModel: AppViewModel,
     modifier: Modifier,
     onEdit: (LibraryImage) -> Unit,
+    onOpenProject: (TraceProject) -> Unit,
 ) {
     var imageToRename by remember { mutableStateOf<LibraryImage?>(null) }
+    var imageForProject by remember { mutableStateOf<LibraryImage?>(null) }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) viewModel.importImage(uri, onEdit)
     }
@@ -228,6 +231,7 @@ private fun LibraryScreen(
                         onFavorite = { viewModel.toggleFavorite(image) },
                         onRename = { imageToRename = image },
                         onEdit = { onEdit(image) },
+                        onCreateProject = { imageForProject = image },
                     )
                 }
             }
@@ -247,6 +251,17 @@ private fun LibraryScreen(
             },
         )
     }
+    imageForProject?.let { image ->
+        CreateProjectDialog(
+            images = listOf(image),
+            fixedImage = image,
+            onDismiss = { imageForProject = null },
+            onCreate = { name, selectedImage ->
+                imageForProject = null
+                onOpenProject(viewModel.createProject(name, selectedImage))
+            },
+        )
+    }
 }
 
 @Composable
@@ -256,6 +271,7 @@ private fun ImageCard(
     onFavorite: () -> Unit,
     onRename: () -> Unit,
     onEdit: () -> Unit,
+    onCreateProject: () -> Unit,
 ) {
     Card(onClick = onEdit) {
         Column {
@@ -295,9 +311,13 @@ private fun ImageCard(
                     IconButton(onClick = onRename, modifier = Modifier.size(40.dp)) {
                         Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(22.dp))
                     }
-                    Spacer(Modifier.width(12.dp))
+                    Spacer(Modifier.width(6.dp))
                     IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
                         Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(22.dp))
+                    }
+                    Spacer(Modifier.width(6.dp))
+                    IconButton(onClick = onCreateProject, modifier = Modifier.size(40.dp)) {
+                        Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(22.dp))
                     }
                 }
             }
@@ -683,24 +703,29 @@ private fun ProjectsScreen(
 @Composable
 private fun CreateProjectDialog(
     images: List<LibraryImage>,
+    fixedImage: LibraryImage? = null,
     onDismiss: () -> Unit,
     onCreate: (String, LibraryImage) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
-    var selected by remember { mutableStateOf(images.firstOrNull()) }
+    var selected by remember { mutableStateOf(fixedImage ?: images.firstOrNull()) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Nowy projekt") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 TextField(name, { name = it }, label = { Text("Nazwa projektu") }, singleLine = true)
-                Text("Wybierz przygotowany obraz")
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(images, key = { it.id }) { image ->
-                        FilledTonalButton(
-                            onClick = { selected = image },
-                            enabled = selected?.id != image.id,
-                        ) { Text(image.name, maxLines = 1) }
+                if (fixedImage != null) {
+                    Text("Obraz: ${fixedImage.name}")
+                } else {
+                    Text("Wybierz przygotowany obraz")
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(images, key = { it.id }) { image ->
+                            FilledTonalButton(
+                                onClick = { selected = image },
+                                enabled = selected?.id != image.id,
+                            ) { Text(image.name, maxLines = 1) }
+                        }
                     }
                 }
             }

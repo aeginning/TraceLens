@@ -12,8 +12,8 @@ android {
         applicationId = "pl.tracelens.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 5
-        versionName = "0.5"
+        versionCode = 6
+        versionName = "0.6"
     }
 
     buildFeatures {
