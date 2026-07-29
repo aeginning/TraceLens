@@ -6,3 +6,4 @@ build/
 app/build/
 captures/
 *.apk
+.env.deploy

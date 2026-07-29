@@ -1,0 +1,51 @@
+[
+  {
+    "version": "1.0",
+    "title": "Pierwsze kompletne wydanie",
+    "description": "Biblioteka, edytor, projekty, aparat z nakładką i pełna galeria postępu.",
+    "apk": "TraceLens-1.0.apk",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.11",
+    "title": "Wygodne przeglądanie zdjęć",
+    "description": "Przesuwanie palcem pomiędzy etapami i oddzielne powiększanie.",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.10",
+    "title": "Pełnoekranowa galeria",
+    "description": "Siatka zdjęć, poprawna orientacja EXIF, daty i otwieranie w galerii telefonu.",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.9",
+    "title": "Nowy selektor obrazów",
+    "description": "Miniatury, wyszukiwarka oraz filtry dla dużych bibliotek.",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.8",
+    "title": "Porządek w bibliotece",
+    "description": "Czytelny rząd najważniejszych akcji na każdym obrazie.",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.7",
+    "title": "Zdjęcia w galerii telefonu",
+    "description": "Eksport etapów do folderów nazwanych według projektów.",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.5",
+    "title": "Kadrowanie i tryb rysowania",
+    "description": "Przygotowanie fragmentu obrazu i niemal pełnoekranowy widok aparatu.",
+    "date": "2026-07-29"
+  },
+  {
+    "version": "0.1",
+    "title": "Pierwszy działający fundament",
+    "description": "Biblioteka, kamera, nakładka, projekty i zdjęcia postępu.",
+    "date": "2026-07-29"
+  }
+]
