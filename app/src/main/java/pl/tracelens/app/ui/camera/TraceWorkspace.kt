@@ -539,7 +539,7 @@ fun TraceWorkspace(
                             saveProject(project.copy(mirrorY = !project.mirrorY))
                         }
                         WorkspaceButton(
-                            if (project.gridEnabled) "Siatka wył." else "Siatka wł.",
+                            if (project.gridEnabled) "Siatka: włączona" else "Siatka: wyłączona",
                             Icons.Default.GridOn,
                         ) {
                             saveProject(project.copy(gridEnabled = !project.gridEnabled))
@@ -557,14 +557,14 @@ fun TraceWorkspace(
                             blinking = false
                         }
                         WorkspaceButton(
-                            if (blinking) "Miganie wył." else "Miganie wł.",
+                            if (blinking) "Miganie: włączone" else "Miganie: wyłączone",
                             Icons.Default.Timer,
                         ) {
                             blinking = !blinking
                             overlayEnabled = true
                         }
                         WorkspaceButton(
-                            if (timelapseEnabled) "Timelapse wył." else "Timelapse wł.",
+                            if (timelapseEnabled) "Timelapse: włączony" else "Timelapse: wyłączony",
                             Icons.Default.Timer,
                         ) {
                             timelapseEnabled = !timelapseEnabled
@@ -599,7 +599,7 @@ fun TraceWorkspace(
                             saveProject(project.copy(overlayBlendMode = (project.overlayBlendMode + 1) % 3))
                         }
                         WorkspaceButton(
-                            if (torch) "Latarka wył." else "Latarka wł.",
+                            if (torch) "Latarka: włączona" else "Latarka: wyłączona",
                             if (torch) Icons.Default.FlashOff else Icons.Default.FlashOn,
                         ) {
                             if (thermalStatus < PowerManager.THERMAL_STATUS_SEVERE) {
