@@ -10,7 +10,6 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.PowerManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,13 +38,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cameraswitch
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Flip
@@ -104,6 +100,7 @@ fun TraceWorkspace(
     initialProject: TraceProject,
     image: LibraryImage,
     onBack: () -> Unit,
+    onOpenGallery: () -> Unit,
 ) {
     val context = LocalContext.current
     val activity = context as Activity
@@ -125,9 +122,7 @@ fun TraceWorkspace(
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameras by remember { mutableStateOf<List<CameraOption>>(emptyList()) }
     var thermalStatus by remember { mutableIntStateOf(PowerManager.THERMAL_STATUS_NONE) }
-    var showProgress by remember { mutableStateOf(false) }
     var showControls by remember { mutableStateOf(true) }
-    var photoToDelete by remember { mutableStateOf<String?>(null) }
 
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
     DisposableEffect(Unit) {
@@ -347,7 +342,7 @@ fun TraceWorkspace(
                         }
                     }
                     TextButton(
-                        onClick = { showProgress = true },
+                        onClick = onOpenGallery,
                         enabled = project.progressPhotos.isNotEmpty(),
                     ) {
                         Text("Zdjęcia postępu: ${project.progressPhotos.size}")
@@ -355,62 +350,6 @@ fun TraceWorkspace(
                 }
             }
         }
-    }
-    if (showProgress) {
-        AlertDialog(
-            onDismissRequest = { showProgress = false },
-            title = { Text("Galeria postępu") },
-            text = {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    items(project.progressPhotos) { fileName ->
-                        val bitmap = remember(fileName) {
-                            BitmapFactory.decodeFile(viewModel.progressFile(project.id, fileName).absolutePath)
-                        }
-                        if (bitmap != null) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Image(
-                                    bitmap.asImageBitmap(),
-                                    "Etap pracy",
-                                    Modifier.size(220.dp).background(MaterialTheme.colorScheme.surfaceVariant),
-                                    contentScale = ContentScale.Fit,
-                                )
-                                TextButton(onClick = {
-                                    showProgress = false
-                                    photoToDelete = fileName
-                                }) {
-                                    Icon(Icons.Default.Delete, null)
-                                    Spacer(Modifier.size(6.dp))
-                                    Text("Usuń zdjęcie")
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showProgress = false }) { Text("Zamknij") }
-            },
-        )
-    }
-    photoToDelete?.let { fileName ->
-        AlertDialog(
-            onDismissRequest = { photoToDelete = null },
-            title = { Text("Usunąć zdjęcie?") },
-            text = { Text("To zdjęcie postępu zostanie trwale usunięte z projektu.") },
-            confirmButton = {
-                Button(onClick = {
-                    project = viewModel.deleteProgressPhoto(project, fileName)
-                    photoToDelete = null
-                    if (project.progressPhotos.isNotEmpty()) showProgress = true
-                }) { Text("Usuń zdjęcie") }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    photoToDelete = null
-                    showProgress = true
-                }) { Text("Anuluj") }
-            },
-        )
     }
 }
 

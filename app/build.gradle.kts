@@ -12,8 +12,8 @@ android {
         applicationId = "pl.tracelens.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 9
-        versionName = "0.9"
+        versionCode = 10
+        versionName = "0.10"
     }
 
     buildFeatures {
@@ -49,6 +49,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.10.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
+    implementation("androidx.exifinterface:exifinterface:1.4.2")
 
     val cameraX = "1.6.1"
     implementation("androidx.camera:camera-core:$cameraX")

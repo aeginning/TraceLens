@@ -153,6 +153,12 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     fun progressFile(projectId: String, fileName: String) =
         repository.fileForProgress(projectId, fileName)
 
+    fun progressBitmap(projectId: String, fileName: String, maxSize: Int = 1800): Bitmap? =
+        repository.loadProgressBitmap(projectId, fileName, maxSize)
+
+    fun progressPhotoUri(projectId: String, fileName: String) =
+        repository.progressPhotoUri(projectId, fileName)
+
     fun newProgressFile(projectId: String) = repository.progressFile(projectId)
 
     fun publishProgressPhoto(projectName: String, file: java.io.File): Boolean =

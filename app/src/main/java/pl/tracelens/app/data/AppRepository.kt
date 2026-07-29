@@ -4,9 +4,12 @@ import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.exifinterface.media.ExifInterface
+import androidx.core.content.FileProvider
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -106,6 +109,37 @@ class AppRepository(private val context: Context) {
 
     fun fileForProgress(projectId: String, fileName: String): File =
         File(progressDirectory(projectId), fileName)
+
+    fun loadProgressBitmap(projectId: String, fileName: String, maxSize: Int = 1800): Bitmap? {
+        val file = fileForProgress(projectId, fileName)
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeFile(file.absolutePath, bounds)
+        var sampleSize = 1
+        while (bounds.outWidth / sampleSize > maxSize * 2 ||
+            bounds.outHeight / sampleSize > maxSize * 2
+        ) {
+            sampleSize *= 2
+        }
+        val bitmap = BitmapFactory.decodeFile(
+            file.absolutePath,
+            BitmapFactory.Options().apply { inSampleSize = sampleSize },
+        ) ?: return null
+        val exif = runCatching { ExifInterface(file) }.getOrNull() ?: return bitmap
+        val matrix = Matrix().apply {
+            if (exif.isFlipped) postScale(-1f, 1f)
+            if (exif.rotationDegrees != 0) postRotate(exif.rotationDegrees.toFloat())
+        }
+        if (!exif.isFlipped && exif.rotationDegrees == 0) return bitmap
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            .also { if (it !== bitmap) bitmap.recycle() }
+    }
+
+    fun progressPhotoUri(projectId: String, fileName: String): Uri =
+        FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.files",
+            fileForProgress(projectId, fileName),
+        )
 
     fun deleteProgressPhoto(projectId: String, fileName: String): Boolean =
         fileForProgress(projectId, fileName).delete()

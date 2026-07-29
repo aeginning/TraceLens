@@ -3,6 +3,7 @@
 package pl.tracelens.app.ui
 
 import android.app.Activity
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
@@ -49,6 +50,7 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -84,8 +86,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -93,6 +99,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.data.ImageFilters
 import pl.tracelens.app.data.LibraryImage
@@ -104,6 +113,7 @@ private sealed interface Screen {
     data object Projects : Screen
     data class Editor(val imageId: String) : Screen
     data class Workspace(val projectId: String) : Screen
+    data class Gallery(val projectId: String, val fromWorkspace: Boolean) : Screen
 }
 
 @Composable
@@ -144,6 +154,7 @@ fun TraceLensApp(viewModel: AppViewModel) {
                         viewModel = viewModel,
                         modifier = Modifier.padding(padding),
                         onOpen = { screen = Screen.Workspace(it.id) },
+                        onGallery = { screen = Screen.Gallery(it.id, false) },
                     )
                 }
                 is Screen.Editor -> {
@@ -160,6 +171,22 @@ fun TraceLensApp(viewModel: AppViewModel) {
                         initialProject = project,
                         image = image,
                         onBack = { screen = Screen.Projects },
+                        onOpenGallery = { screen = Screen.Gallery(project.id, true) },
+                    )
+                }
+                is Screen.Gallery -> {
+                    val project = viewModel.projects.firstOrNull { it.id == current.projectId }
+                    if (project == null) screen = Screen.Projects
+                    else ProjectGalleryScreen(
+                        viewModel = viewModel,
+                        initialProject = project,
+                        onBack = {
+                            screen = if (current.fromWorkspace) {
+                                Screen.Workspace(current.projectId)
+                            } else {
+                                Screen.Projects
+                            }
+                        },
                     )
                 }
             }
@@ -660,11 +687,10 @@ private fun ProjectsScreen(
     viewModel: AppViewModel,
     modifier: Modifier,
     onOpen: (TraceProject) -> Unit,
+    onGallery: (TraceProject) -> Unit,
 ) {
     var createDialog by remember { mutableStateOf(false) }
     var projectToDelete by remember { mutableStateOf<TraceProject?>(null) }
-    var projectGallery by remember { mutableStateOf<TraceProject?>(null) }
-    var galleryDeleteRequest by remember { mutableStateOf<Pair<TraceProject, String>?>(null) }
     Box(modifier.fillMaxSize()) {
         if (viewModel.projects.isEmpty()) {
             EmptyState(
@@ -697,7 +723,7 @@ private fun ProjectsScreen(
                                 Text("${project.progressPhotos.size} zdjęć postępu", style = MaterialTheme.typography.bodySmall)
                             }
                             IconButton(
-                                onClick = { projectGallery = project },
+                                onClick = { onGallery(project) },
                                 enabled = project.progressPhotos.isNotEmpty(),
                             ) {
                                 Icon(Icons.Default.PhotoLibrary, "Otwórz zdjęcia postępu")
@@ -743,37 +769,6 @@ private fun ProjectsScreen(
             },
             dismissButton = {
                 TextButton(onClick = { projectToDelete = null }) { Text("Anuluj") }
-            },
-        )
-    }
-    projectGallery?.let { project ->
-        ProjectGalleryDialog(
-            viewModel = viewModel,
-            project = project,
-            onDismiss = { projectGallery = null },
-            onDelete = { fileName ->
-                projectGallery = null
-                galleryDeleteRequest = project to fileName
-            },
-        )
-    }
-    galleryDeleteRequest?.let { (project, fileName) ->
-        AlertDialog(
-            onDismissRequest = { galleryDeleteRequest = null },
-            title = { Text("Usunąć zdjęcie?") },
-            text = { Text("To zdjęcie postępu zostanie trwale usunięte z projektu.") },
-            confirmButton = {
-                Button(onClick = {
-                    val updated = viewModel.deleteProgressPhoto(project, fileName)
-                    galleryDeleteRequest = null
-                    if (updated.progressPhotos.isNotEmpty()) projectGallery = updated
-                }) { Text("Usuń zdjęcie") }
-            },
-            dismissButton = {
-                TextButton(onClick = {
-                    galleryDeleteRequest = null
-                    projectGallery = project
-                }) { Text("Anuluj") }
             },
         )
     }
@@ -953,46 +948,205 @@ private fun ProjectImageSelectorDialog(
 }
 
 @Composable
-private fun ProjectGalleryDialog(
+private fun ProjectGalleryScreen(
     viewModel: AppViewModel,
-    project: TraceProject,
-    onDismiss: () -> Unit,
-    onDelete: (String) -> Unit,
+    initialProject: TraceProject,
+    onBack: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Galeria: ${project.name}") },
-        text = {
-            LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                items(project.progressPhotos) { fileName ->
-                    val bitmap = remember(project.id, fileName) {
-                        android.graphics.BitmapFactory.decodeFile(
-                            viewModel.progressFile(project.id, fileName).absolutePath
+    val context = LocalContext.current
+    var project by remember(initialProject.id) { mutableStateOf(initialProject) }
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    var photoToDelete by remember { mutableStateOf<String?>(null) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(project.name)
+                        Text(
+                            "${project.progressPhotos.size} zdjęć postępu",
+                            style = MaterialTheme.typography.bodySmall,
                         )
                     }
-                    if (bitmap != null) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Image(
-                                bitmap.asImageBitmap(),
-                                "Etap pracy",
-                                Modifier.size(220.dp)
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, "Wróć")
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        if (project.progressPhotos.isEmpty()) {
+            EmptyState(
+                title = "Brak zdjęć postępu",
+                detail = "Wróć do projektu i wykonaj pierwsze zdjęcie.",
+                button = "Wróć",
+                onClick = onBack,
+            )
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(140.dp),
+                modifier = Modifier.fillMaxSize().padding(padding),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                items(project.progressPhotos, key = { it }) { fileName ->
+                    val index = project.progressPhotos.indexOf(fileName)
+                    val bitmap = remember(project.id, fileName) {
+                        viewModel.progressBitmap(project.id, fileName, 520)
+                    }
+                    Card(onClick = { selectedIndex = index }) {
+                        Column {
+                            Box(
+                                Modifier.fillMaxWidth().height(180.dp)
                                     .background(MaterialTheme.colorScheme.surfaceVariant),
-                                contentScale = ContentScale.Fit,
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                if (bitmap != null) {
+                                    Image(
+                                        bitmap.asImageBitmap(),
+                                        "Zdjęcie postępu ${index + 1}",
+                                        Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop,
+                                    )
+                                }
+                            }
+                            Text(
+                                progressPhotoDate(fileName),
+                                Modifier.padding(8.dp),
+                                style = MaterialTheme.typography.bodySmall,
                             )
-                            TextButton(onClick = { onDelete(fileName) }) {
-                                Icon(Icons.Default.Delete, null)
-                                Spacer(Modifier.size(6.dp))
-                                Text("Usuń zdjęcie")
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    selectedIndex?.let { initialIndex ->
+        val photos = project.progressPhotos
+        if (photos.isNotEmpty()) {
+            val safeIndex = initialIndex.coerceIn(0, photos.lastIndex)
+            val pagerState = rememberPagerState(initialPage = safeIndex) { photos.size }
+            Dialog(
+                onDismissRequest = { selectedIndex = null },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
+                ),
+            ) {
+                Surface(color = Color.Black, modifier = Modifier.fillMaxSize()) {
+                    Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize(),
+                        ) { page ->
+                            val fileName = photos[page]
+                            val bitmap = remember(project.id, fileName) {
+                                viewModel.progressBitmap(project.id, fileName)
+                            }
+                            var zoom by remember(fileName) { mutableStateOf(1f) }
+                            var offsetX by remember(fileName) { mutableStateOf(0f) }
+                            var offsetY by remember(fileName) { mutableStateOf(0f) }
+                            if (bitmap != null) {
+                                Image(
+                                    bitmap.asImageBitmap(),
+                                    "Zdjęcie ${page + 1} z ${photos.size}",
+                                    Modifier.fillMaxSize()
+                                        .graphicsLayer(
+                                            scaleX = zoom,
+                                            scaleY = zoom,
+                                            translationX = offsetX,
+                                            translationY = offsetY,
+                                        )
+                                        .pointerInput(fileName) {
+                                            detectTransformGestures { _, pan, gestureZoom, _ ->
+                                                zoom = (zoom * gestureZoom).coerceIn(1f, 6f)
+                                                if (zoom > 1f) {
+                                                    offsetX += pan.x
+                                                    offsetY += pan.y
+                                                } else {
+                                                    offsetX = 0f
+                                                    offsetY = 0f
+                                                }
+                                            }
+                                        },
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = { selectedIndex = null },
+                            modifier = Modifier.align(Alignment.TopStart)
+                                .background(Color.Black.copy(alpha = 0.55f)),
+                        ) {
+                            Icon(Icons.Default.ArrowBack, "Zamknij", tint = Color.White)
+                        }
+                        Row(
+                            Modifier.align(Alignment.BottomCenter)
+                                .background(Color.Black.copy(alpha = 0.65f)).padding(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                "${pagerState.currentPage + 1} / ${photos.size}",
+                                color = Color.White,
+                            )
+                            IconButton(onClick = {
+                                val fileName = photos[pagerState.currentPage]
+                                val uri = viewModel.progressPhotoUri(project.id, fileName)
+                                val intent = Intent(Intent.ACTION_VIEW).apply {
+                                    setDataAndType(uri, "image/jpeg")
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                }
+                                runCatching { context.startActivity(intent) }.onFailure {
+                                    android.widget.Toast.makeText(
+                                        context,
+                                        "Nie znaleziono aplikacji do otwarcia zdjęcia.",
+                                        android.widget.Toast.LENGTH_SHORT,
+                                    ).show()
+                                }
+                            }) {
+                                Icon(Icons.Default.OpenInNew, "Otwórz w galerii telefonu", tint = Color.White)
+                            }
+                            IconButton(onClick = {
+                                photoToDelete = photos[pagerState.currentPage]
+                                selectedIndex = null
+                            }) {
+                                Icon(Icons.Default.Delete, "Usuń zdjęcie", tint = Color.White)
                             }
                         }
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Zamknij") }
-        },
-    )
+        }
+    }
+
+    photoToDelete?.let { fileName ->
+        AlertDialog(
+            onDismissRequest = { photoToDelete = null },
+            title = { Text("Usunąć zdjęcie?") },
+            text = { Text("To zdjęcie zostanie trwale usunięte z projektu.") },
+            confirmButton = {
+                Button(onClick = {
+                    project = viewModel.deleteProgressPhoto(project, fileName)
+                    photoToDelete = null
+                }) { Text("Usuń zdjęcie") }
+            },
+            dismissButton = {
+                TextButton(onClick = { photoToDelete = null }) { Text("Anuluj") }
+            },
+        )
+    }
+}
+
+private fun progressPhotoDate(fileName: String): String {
+    val timestamp = fileName.substringAfter("progress_", "").substringBefore('.').toLongOrNull()
+        ?: return "Zdjęcie postępu"
+    return SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.getDefault()).format(Date(timestamp))
 }
 
 @Composable
