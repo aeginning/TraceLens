@@ -58,6 +58,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -70,6 +71,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -332,24 +334,23 @@ private fun ImageCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                Column(
+                Row(
                     Modifier.fillMaxWidth().padding(top = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        IconButton(onClick = onRename, modifier = Modifier.size(40.dp)) {
-                            Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(22.dp))
+                    CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 32.dp) {
+                        IconButton(onClick = onRename, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(20.dp))
                         }
-                        IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
-                            Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(22.dp))
+                        IconButton(onClick = onEdit, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(20.dp))
                         }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        IconButton(onClick = onCreateProject, modifier = Modifier.size(40.dp)) {
-                            Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(22.dp))
+                        IconButton(onClick = onCreateProject, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(20.dp))
                         }
-                        IconButton(onClick = onDelete, modifier = Modifier.size(40.dp)) {
-                            Icon(Icons.Default.Delete, "Usuń obraz z biblioteki", Modifier.size(22.dp))
+                        IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Delete, "Usuń obraz z biblioteki", Modifier.size(20.dp))
                         }
                     }
                 }
