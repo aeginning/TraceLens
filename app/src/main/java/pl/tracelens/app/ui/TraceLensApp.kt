@@ -172,7 +172,6 @@ fun TraceLensApp(viewModel: AppViewModel) {
                         initialProject = project,
                         image = image,
                         onBack = { screen = Screen.Projects },
-                        onOpenGallery = { screen = Screen.Gallery(project.id, true) },
                     )
                 }
                 is Screen.Gallery -> {

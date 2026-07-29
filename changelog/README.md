@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [1.2](1.2.md) — narzędzia precyzyjnego odrysowywania
 - [1.1](1.1.md) — firmowy ekran startowy aplikacji
 - [1.0](1.0.md) — pierwsze kompletne wydanie do testów prywatnych
 - [0.11](0.11.md) — przesuwanie zdjęć w pełnym podglądzie

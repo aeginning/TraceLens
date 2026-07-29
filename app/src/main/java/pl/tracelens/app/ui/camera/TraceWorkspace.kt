@@ -10,23 +10,35 @@ import android.content.Context
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.hardware.camera2.CaptureRequest
 import android.os.PowerManager
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.camera2.interop.Camera2CameraInfo
+import androidx.camera.camera2.interop.Camera2CameraControl
+import androidx.camera.camera2.interop.CaptureRequestOptions
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraInfo
 import androidx.camera.core.CameraSelector
+import androidx.camera.core.FocusMeteringAction
 import androidx.camera.core.ImageCapture
 import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +47,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,15 +55,23 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cameraswitch
+import androidx.compose.material.icons.filled.CenterFocusStrong
+import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.Compare
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.FlashOn
 import androidx.compose.material.icons.filled.Flip
 import androidx.compose.material.icons.filled.FlipCameraAndroid
+import androidx.compose.material.icons.filled.GridOn
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.ScreenLockLandscape
 import androidx.compose.material.icons.filled.ScreenLockPortrait
+import androidx.compose.material.icons.filled.ScreenRotation
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
@@ -77,6 +98,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -86,13 +109,18 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import kotlinx.coroutines.delay
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
 import java.io.File
 import kotlin.math.roundToInt
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 private data class CameraOption(val id: String, val label: String)
+private data class DeviceTilt(val horizontal: Float = 0f, val vertical: Float = 0f)
 
 @Composable
 fun TraceWorkspace(
@@ -100,7 +128,6 @@ fun TraceWorkspace(
     initialProject: TraceProject,
     image: LibraryImage,
     onBack: () -> Unit,
-    onOpenGallery: () -> Unit,
 ) {
     val context = LocalContext.current
     val activity = context as Activity
@@ -123,6 +150,38 @@ fun TraceWorkspace(
     var cameras by remember { mutableStateOf<List<CameraOption>>(emptyList()) }
     var thermalStatus by remember { mutableIntStateOf(PowerManager.THERMAL_STATUS_NONE) }
     var showControls by remember { mutableStateOf(true) }
+    var showCameraPicker by remember { mutableStateOf(false) }
+    var overlayEnabled by remember { mutableStateOf(true) }
+    var compareHeld by remember { mutableStateOf(false) }
+    var blinking by remember { mutableStateOf(false) }
+    var blinkVisible by remember { mutableStateOf(true) }
+    var cameraParametersLocked by remember { mutableStateOf(false) }
+    var movementBaseline by remember { mutableStateOf<DeviceTilt?>(null) }
+    var movementWarning by remember { mutableStateOf(false) }
+    val deviceTilt = rememberDeviceTilt()
+
+    LaunchedEffect(blinking, project.blinkIntervalMs) {
+        blinkVisible = true
+        while (blinking) {
+            delay(project.blinkIntervalMs)
+            blinkVisible = !blinkVisible
+        }
+    }
+    LaunchedEffect(deviceTilt, locked) {
+        if (deviceTilt == DeviceTilt()) return@LaunchedEffect
+        if (!locked) {
+            movementBaseline = null
+            movementWarning = false
+        } else {
+            val baseline = movementBaseline
+            if (baseline == null) {
+                movementBaseline = deviceTilt
+            } else {
+                movementWarning = abs(deviceTilt.horizontal - baseline.horizontal) > 3.5f ||
+                    abs(deviceTilt.vertical - baseline.vertical) > 3.5f
+            }
+        }
+    }
 
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
     DisposableEffect(Unit) {
@@ -179,6 +238,26 @@ fun TraceWorkspace(
         )
     }
 
+    fun toggleCameraLock() {
+        val activeCamera = camera ?: return
+        if (cameraParametersLocked) {
+            activeCamera.cameraControl.cancelFocusAndMetering()
+            applyCameraLocks(activeCamera, false)
+            cameraParametersLocked = false
+            Toast.makeText(context, "Automatyka kamery odblokowana.", Toast.LENGTH_SHORT).show()
+        } else {
+            val point = SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(.5f, .5f)
+            val action = FocusMeteringAction.Builder(
+                point,
+                FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE or FocusMeteringAction.FLAG_AWB,
+            ).disableAutoCancel().build()
+            activeCamera.cameraControl.startFocusAndMetering(action)
+            applyCameraLocks(activeCamera, true)
+            cameraParametersLocked = true
+            Toast.makeText(context, "Zablokowano ostrość, ekspozycję i balans bieli.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -211,7 +290,7 @@ fun TraceWorkspace(
                     ) { Text("Zezwól na dostęp do kamery") }
                 }
 
-                if (overlay != null) {
+                if (overlay != null && overlayEnabled && !compareHeld && (!blinking || blinkVisible)) {
                     OverlayImage(
                         bitmap = overlay,
                         project = project,
@@ -227,6 +306,12 @@ fun TraceWorkspace(
                         onTransformEnd = { saveProject(project) },
                     )
                 }
+                if (project.gridEnabled) {
+                    DrawingGrid(
+                        divisions = project.gridDivisions,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
 
                 if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE) {
                     Text(
@@ -234,7 +319,29 @@ fun TraceWorkspace(
                         color = Color.White,
                         modifier = Modifier.align(Alignment.TopCenter)
                             .padding(8.dp).background(Color(0xCCB45309)).padding(8.dp),
+                        )
+                }
+                Column(
+                    Modifier.align(Alignment.TopStart).padding(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    Text(
+                        "Poziom: ${deviceTilt.horizontal.roundToInt()}° / ${deviceTilt.vertical.roundToInt()}°",
+                        color = Color.White,
+                        modifier = Modifier.background(
+                            if (abs(deviceTilt.horizontal) <= 2f && abs(deviceTilt.vertical) <= 2f) {
+                                Color(0xCC2E7D32)
+                            } else Color(0xAA000000)
+                        ).padding(horizontal = 8.dp, vertical = 5.dp),
                     )
+                    if (movementWarning) {
+                        Text(
+                            "Telefon lub statyw został poruszony",
+                            color = Color.White,
+                            modifier = Modifier.background(Color(0xCCD84315))
+                                .padding(horizontal = 8.dp, vertical = 5.dp),
+                        )
+                    }
                 }
                 if (!showControls) {
                     Row(
@@ -256,7 +363,12 @@ fun TraceWorkspace(
             }
 
             if (showControls) Card(Modifier.fillMaxWidth().navigationBarsPadding()) {
-                Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Column(
+                    Modifier.heightIn(max = 380.dp)
+                        .verticalScroll(rememberScrollState())
+                        .padding(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     Row(
                         Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -282,6 +394,27 @@ fun TraceWorkspace(
                         onValueChange = { project = project.copy(opacity = it) },
                         onValueChangeFinished = { saveProject(project) },
                     )
+                    if (project.gridEnabled) {
+                        Text("Pola siatki: ${project.gridDivisions} × ${project.gridDivisions}")
+                        Slider(
+                            value = project.gridDivisions.toFloat(),
+                            onValueChange = {
+                                project = project.copy(gridDivisions = it.roundToInt().coerceIn(2, 12))
+                            },
+                            onValueChangeFinished = { saveProject(project) },
+                            valueRange = 2f..12f,
+                            steps = 9,
+                        )
+                    }
+                    if (blinking) {
+                        Text("Miganie nakładki: ${(project.blinkIntervalMs / 100f).roundToInt() / 10f} s")
+                        Slider(
+                            value = project.blinkIntervalMs.toFloat(),
+                            onValueChange = { project = project.copy(blinkIntervalMs = it.toLong()) },
+                            onValueChangeFinished = { saveProject(project) },
+                            valueRange = 250f..2_000f,
+                        )
+                    }
                     Row(
                         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -299,6 +432,56 @@ fun TraceWorkspace(
                         }
                         WorkspaceButton("Odbij Y", Icons.Default.FlipCameraAndroid) {
                             saveProject(project.copy(mirrorY = !project.mirrorY))
+                        }
+                        WorkspaceButton(
+                            if (project.gridEnabled) "Siatka wył." else "Siatka wł.",
+                            Icons.Default.GridOn,
+                        ) {
+                            saveProject(project.copy(gridEnabled = !project.gridEnabled))
+                        }
+                        WorkspaceButton(
+                            if (cameraParametersLocked) "Odblokuj kamerę" else "Zablokuj kamerę",
+                            Icons.Default.CenterFocusStrong,
+                            onClick = ::toggleCameraLock,
+                        )
+                        WorkspaceButton(
+                            if (overlayEnabled) "Widok: A+B" else "Widok: kamera",
+                            Icons.Default.Compare,
+                        ) {
+                            overlayEnabled = !overlayEnabled
+                            blinking = false
+                        }
+                        WorkspaceButton(
+                            if (blinking) "Miganie wył." else "Miganie wł.",
+                            Icons.Default.Timer,
+                        ) {
+                            blinking = !blinking
+                            overlayEnabled = true
+                        }
+                        FilledTonalButton(
+                            onClick = { },
+                            modifier = Modifier.pointerInput(Unit) {
+                                detectTapGestures(onPress = {
+                                    compareHeld = true
+                                    tryAwaitRelease()
+                                    compareHeld = false
+                                })
+                            },
+                        ) {
+                            Icon(Icons.Default.VisibilityOff, null, Modifier.size(20.dp))
+                            Spacer(Modifier.size(6.dp))
+                            Text("Przytrzymaj: bez nakładki")
+                        }
+                        WorkspaceButton("Czytelność", Icons.Default.ColorLens) {
+                            val choices = listOf<Int?>(null, 0xFF6F45C8.toInt(), 0xFFE53935.toInt(), 0xFF000000.toInt())
+                            val next = (choices.indexOf(project.overlayTint) + 1).mod(choices.size)
+                            saveProject(project.copy(overlayTint = choices[next]))
+                        }
+                        WorkspaceButton(
+                            "Mieszanie ${blendModeLabel(project.overlayBlendMode)}",
+                            Icons.Default.ScreenRotation,
+                        ) {
+                            saveProject(project.copy(overlayBlendMode = (project.overlayBlendMode + 1) % 3))
                         }
                         WorkspaceButton(
                             if (torch) "Latarka wył." else "Latarka wł.",
@@ -320,8 +503,25 @@ fun TraceWorkspace(
                             saveProject(project.copy(orientation = 2))
                         }
                     }
-                    if (cameras.size > 1) {
-                        Text("Obiektyw")
+                    if (cameras.isNotEmpty()) {
+                        val selectedCamera = cameras.firstOrNull { it.id == project.cameraId }
+                        FilledTonalButton(
+                            onClick = { showCameraPicker = !showCameraPicker },
+                            modifier = Modifier.fillMaxWidth(),
+                        ) {
+                            Icon(Icons.Default.Cameraswitch, null)
+                            Spacer(Modifier.size(6.dp))
+                            Text(
+                                "Obiektyw: ${selectedCamera?.label ?: "domyślny"}",
+                                modifier = Modifier.weight(1f),
+                            )
+                            Icon(
+                                if (showCameraPicker) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                                if (showCameraPicker) "Zwiń" else "Rozwiń",
+                            )
+                        }
+                    }
+                    if (showCameraPicker && cameras.size > 1) {
                         Row(
                             Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -340,12 +540,6 @@ fun TraceWorkspace(
                                 }
                             }
                         }
-                    }
-                    TextButton(
-                        onClick = onOpenGallery,
-                        enabled = project.progressPhotos.isNotEmpty(),
-                    ) {
-                        Text("Zdjęcia postępu: ${project.progressPhotos.size}")
                     }
                 }
             }
@@ -422,6 +616,7 @@ private fun OverlayImage(
         bitmap.asImageBitmap(),
         "Nakładka",
         contentScale = ContentScale.Fit,
+        colorFilter = project.overlayTint?.let { ColorFilter.tint(Color(it)) },
         modifier = Modifier.fillMaxSize()
             .graphicsLayer {
                 translationX = project.offsetX
@@ -430,6 +625,11 @@ private fun OverlayImage(
                 scaleY = project.scale * if (project.mirrorY) -1f else 1f
                 rotationZ = project.rotation
                 alpha = project.opacity
+                blendMode = when (project.overlayBlendMode) {
+                    1 -> BlendMode.Multiply
+                    2 -> BlendMode.Screen
+                    else -> BlendMode.SrcOver
+                }
             }
             .pointerInput(locked) {
                 if (!locked) {
@@ -457,6 +657,60 @@ private fun WorkspaceButton(
         Spacer(Modifier.size(6.dp))
         Text(label)
     }
+}
+
+@Composable
+private fun DrawingGrid(divisions: Int, modifier: Modifier = Modifier) {
+    Canvas(modifier) {
+        val count = divisions.coerceIn(2, 12)
+        for (index in 1 until count) {
+            val x = size.width * index / count
+            val y = size.height * index / count
+            drawLine(Color(0xAAFFFFFF), start = androidx.compose.ui.geometry.Offset(x, 0f), end = androidx.compose.ui.geometry.Offset(x, size.height), strokeWidth = 1.5f)
+            drawLine(Color(0xAAFFFFFF), start = androidx.compose.ui.geometry.Offset(0f, y), end = androidx.compose.ui.geometry.Offset(size.width, y), strokeWidth = 1.5f)
+        }
+        drawLine(Color(0xFFE0C8FF), start = androidx.compose.ui.geometry.Offset(size.width / 2f, 0f), end = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height), strokeWidth = 3f)
+        drawLine(Color(0xFFE0C8FF), start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f), end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f), strokeWidth = 3f)
+    }
+}
+
+@Composable
+private fun rememberDeviceTilt(): DeviceTilt {
+    val context = LocalContext.current
+    var tilt by remember { mutableStateOf(DeviceTilt()) }
+    DisposableEffect(context) {
+        val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        val sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val listener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                val x = event.values[0]
+                val y = event.values[1]
+                val z = event.values[2]
+                val horizontal = Math.toDegrees(atan2(x.toDouble(), sqrt((y * y + z * z).toDouble()))).toFloat()
+                val vertical = Math.toDegrees(atan2(y.toDouble(), sqrt((x * x + z * z).toDouble()))).toFloat()
+                tilt = DeviceTilt(horizontal, vertical)
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
+        }
+        if (sensor != null) manager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+        onDispose { manager.unregisterListener(listener) }
+    }
+    return tilt
+}
+
+@androidx.annotation.OptIn(androidx.camera.camera2.interop.ExperimentalCamera2Interop::class)
+private fun applyCameraLocks(camera: Camera, enabled: Boolean) {
+    val options = CaptureRequestOptions.Builder()
+        .setCaptureRequestOption(CaptureRequest.CONTROL_AE_LOCK, enabled)
+        .setCaptureRequestOption(CaptureRequest.CONTROL_AWB_LOCK, enabled)
+        .build()
+    Camera2CameraControl.from(camera.cameraControl).setCaptureRequestOptions(options)
+}
+
+private fun blendModeLabel(mode: Int) = when (mode) {
+    1 -> "mnożenie"
+    2 -> "rozjaśnianie"
+    else -> "zwykłe"
 }
 
 private fun captureProgress(
