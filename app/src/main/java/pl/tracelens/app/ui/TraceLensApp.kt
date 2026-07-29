@@ -60,6 +60,8 @@ import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.MonochromePhotos
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.ColorLens
@@ -942,11 +944,31 @@ private fun ProjectsScreen(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp, 12.dp, 12.dp, 96.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
+                item {
+                    val lastProject = viewModel.projects.first()
+                    FilledTonalButton(
+                        onClick = { onOpen(lastProject) },
+                        modifier = Modifier.fillMaxWidth().height(56.dp),
+                    ) {
+                        Icon(Icons.Default.PlayArrow, null)
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Wznów ostatni projekt: ${lastProject.name}",
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
                 items(viewModel.projects, key = { it.id }) { project ->
                     val image = viewModel.imageForProject(project)
                     Card(onClick = { onOpen(project) }, modifier = Modifier.fillMaxWidth()) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-                            val bitmap = image?.let(viewModel::bitmap)
+                            val previewPhoto = project.coverPhoto ?: project.progressPhotos.lastOrNull()
+                            val bitmap = if (previewPhoto != null) {
+                                remember(project.id, previewPhoto) {
+                                    viewModel.progressBitmap(project.id, previewPhoto, 320)
+                                }
+                            } else image?.let(viewModel::bitmap)
                             if (bitmap != null) {
                                 Image(
                                     bitmap.asImageBitmap(), null,
@@ -1212,6 +1234,21 @@ private fun ProjectGalleryScreen(
                         Icon(Icons.Default.ArrowBack, "Wróć")
                     }
                 },
+                actions = {
+                    IconButton(
+                        onClick = {
+                            shareProjectPhotos(
+                                context,
+                                project.progressPhotos.map {
+                                    viewModel.progressPhotoUri(project.id, it)
+                                },
+                            )
+                        },
+                        enabled = project.progressPhotos.isNotEmpty(),
+                    ) {
+                        Icon(Icons.Default.Share, "Udostępnij całą galerię")
+                    }
+                },
             )
         },
     ) { padding ->
@@ -1352,6 +1389,29 @@ private fun ProjectGalleryScreen(
                                 Icon(Icons.Default.OpenInNew, "Otwórz w galerii telefonu", tint = Color.White)
                             }
                             IconButton(onClick = {
+                                val fileName = photos[pagerState.currentPage]
+                                project = viewModel.setProjectCover(project, fileName)
+                            }) {
+                                Icon(
+                                    Icons.Default.Star,
+                                    if (project.coverPhoto == photos[pagerState.currentPage]) {
+                                        "To jest okładka projektu"
+                                    } else "Ustaw jako okładkę projektu",
+                                    tint = if (project.coverPhoto == photos[pagerState.currentPage]) {
+                                        Color(0xFFFFD54F)
+                                    } else Color.White,
+                                )
+                            }
+                            IconButton(onClick = {
+                                val fileName = photos[pagerState.currentPage]
+                                shareProjectPhotos(
+                                    context,
+                                    listOf(viewModel.progressPhotoUri(project.id, fileName)),
+                                )
+                            }) {
+                                Icon(Icons.Default.Share, "Udostępnij zdjęcie", tint = Color.White)
+                            }
+                            IconButton(onClick = {
                                 photoToDelete = photos[pagerState.currentPage]
                                 selectedIndex = null
                             }) {
@@ -1380,6 +1440,24 @@ private fun ProjectGalleryScreen(
             },
         )
     }
+}
+
+private fun shareProjectPhotos(context: android.content.Context, uris: List<android.net.Uri>) {
+    if (uris.isEmpty()) return
+    val intent = if (uris.size == 1) {
+        Intent(Intent.ACTION_SEND).apply {
+            type = "image/jpeg"
+            putExtra(Intent.EXTRA_STREAM, uris.first())
+        }
+    } else {
+        Intent(Intent.ACTION_SEND_MULTIPLE).apply {
+            type = "image/jpeg"
+            putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
+        }
+    }.apply {
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+    context.startActivity(Intent.createChooser(intent, "Udostępnij zdjęcia projektu"))
 }
 
 private fun progressPhotoDate(fileName: String): String {

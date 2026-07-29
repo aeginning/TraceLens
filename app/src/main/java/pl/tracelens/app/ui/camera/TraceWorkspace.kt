@@ -16,6 +16,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.hardware.camera2.CaptureRequest
 import android.os.PowerManager
+import android.os.StatFs
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -75,6 +76,7 @@ import androidx.compose.material.icons.filled.ScreenRotation
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.filled.ControlCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
@@ -161,7 +163,15 @@ fun TraceWorkspace(
     var cameraParametersLocked by remember { mutableStateOf(false) }
     var movementBaseline by remember { mutableStateOf<DeviceTilt?>(null) }
     var movementWarning by remember { mutableStateOf(false) }
+    var timelapseEnabled by remember { mutableStateOf(false) }
+    var captureInProgress by remember { mutableStateOf(false) }
+    var tripodAlignMode by remember { mutableStateOf(false) }
     val deviceTilt = rememberDeviceTilt()
+    val tripodReference = remember(project.tripodReferencePhoto) {
+        project.tripodReferencePhoto?.let {
+            viewModel.progressBitmap(project.id, it, 1800)
+        }
+    }
 
     LaunchedEffect(blinking, project.blinkIntervalMs) {
         blinkVisible = true
@@ -221,6 +231,18 @@ fun TraceWorkspace(
     }
 
     fun takeProgressPhoto() {
+        if (captureInProgress) return
+        val availableBytes = StatFs(context.filesDir.absolutePath).availableBytes
+        if (availableBytes < 200L * 1024L * 1024L) {
+            timelapseEnabled = false
+            Toast.makeText(
+                context,
+                "Za mało wolnego miejsca. Zwolnij pamięć przed wykonaniem zdjęcia.",
+                Toast.LENGTH_LONG,
+            ).show()
+            return
+        }
+        captureInProgress = true
         captureProgress(
             context = context,
             capture = imageCapture,
@@ -238,7 +260,35 @@ fun TraceWorkspace(
                     Toast.LENGTH_LONG,
                 ).show()
             },
+            onFinished = { captureInProgress = false },
         )
+    }
+
+    fun saveTripodReference() {
+        if (captureInProgress) return
+        captureInProgress = true
+        captureProgress(
+            context = context,
+            capture = imageCapture,
+            output = viewModel.newProgressFile(project.id),
+            onSaved = { file ->
+                project = viewModel.setTripodReference(project, file.name)
+                tripodAlignMode = false
+                Toast.makeText(
+                    context,
+                    "Zapisano położenie statywu dla tego projektu.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            },
+            onFinished = { captureInProgress = false },
+        )
+    }
+
+    LaunchedEffect(timelapseEnabled, project.timelapseIntervalSeconds) {
+        while (timelapseEnabled) {
+            delay(project.timelapseIntervalSeconds * 1_000L)
+            if (timelapseEnabled) takeProgressPhoto()
+        }
     }
 
     fun toggleCameraLock() {
@@ -313,6 +363,20 @@ fun TraceWorkspace(
                     DrawingGrid(
                         divisions = project.gridDivisions,
                         modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                if (tripodAlignMode && tripodReference != null) {
+                    Image(
+                        tripodReference.asImageBitmap(),
+                        "Zdjęcie kontrolne ustawienia statywu",
+                        modifier = Modifier.fillMaxSize().alpha(0.45f),
+                        contentScale = ContentScale.Crop,
+                    )
+                    Text(
+                        "Dopasuj bieżący widok do półprzezroczystego zdjęcia",
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.TopCenter)
+                            .padding(8.dp).background(Color(0xBB000000)).padding(8.dp),
                     )
                 }
 
@@ -443,6 +507,19 @@ fun TraceWorkspace(
                             valueRange = 250f..2_000f,
                         )
                     }
+                    if (timelapseEnabled) {
+                        Text("Timelapse: zdjęcie co ${project.timelapseIntervalSeconds} s")
+                        Slider(
+                            value = project.timelapseIntervalSeconds.toFloat(),
+                            onValueChange = {
+                                project = project.copy(
+                                    timelapseIntervalSeconds = it.roundToInt().coerceIn(5, 300)
+                                )
+                            },
+                            onValueChangeFinished = { saveProject(project) },
+                            valueRange = 5f..300f,
+                        )
+                    }
                     Row(
                         Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -485,6 +562,35 @@ fun TraceWorkspace(
                         ) {
                             blinking = !blinking
                             overlayEnabled = true
+                        }
+                        WorkspaceButton(
+                            if (timelapseEnabled) "Timelapse wył." else "Timelapse wł.",
+                            Icons.Default.Timer,
+                        ) {
+                            timelapseEnabled = !timelapseEnabled
+                            Toast.makeText(
+                                context,
+                                if (timelapseEnabled) {
+                                    "Timelapse uruchomiony: co ${project.timelapseIntervalSeconds} s."
+                                } else "Timelapse zatrzymany.",
+                                Toast.LENGTH_SHORT,
+                            ).show()
+                        }
+                        WorkspaceButton(
+                            if (project.tripodReferencePhoto == null) {
+                                "Zapisz statyw"
+                            } else if (tripodAlignMode) {
+                                "Ukryj wzorzec"
+                            } else {
+                                "Ustaw statyw"
+                            },
+                            Icons.Default.ControlCamera,
+                        ) {
+                            if (project.tripodReferencePhoto == null) {
+                                saveTripodReference()
+                            } else {
+                                tripodAlignMode = !tripodAlignMode
+                            }
                         }
                         WorkspaceButton(
                             "Mieszanie ${blendModeLabel(project.overlayBlendMode)}",
@@ -723,9 +829,11 @@ private fun captureProgress(
     capture: ImageCapture?,
     output: File,
     onSaved: (File) -> Unit,
+    onFinished: () -> Unit = {},
 ) {
     if (capture == null) {
         Toast.makeText(context, "Kamera nie jest jeszcze gotowa.", Toast.LENGTH_SHORT).show()
+        onFinished()
         return
     }
     val options = ImageCapture.OutputFileOptions.Builder(output).build()
@@ -733,9 +841,13 @@ private fun captureProgress(
         options,
         ContextCompat.getMainExecutor(context),
         object : ImageCapture.OnImageSavedCallback {
-            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) = onSaved(output)
+            override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                onSaved(output)
+                onFinished()
+            }
             override fun onError(exception: ImageCaptureException) {
                 Toast.makeText(context, "Nie udało się zapisać zdjęcia.", Toast.LENGTH_LONG).show()
+                onFinished()
             }
         },
     )

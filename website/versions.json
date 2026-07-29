@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.4",
+    "title": "Postęp i wygodniejsze projekty",
+    "description": "Timelapse, okładki i miniatury postępu, udostępnianie galerii, wzorzec statywu, szybkie wznowienie oraz kontrola wolnego miejsca.",
+    "apk": "TraceLens-1.4.apk",
+    "date": "2026-07-30"
+  },
+  {
     "version": "1.3",
     "title": "Rozbudowany edytor obrazów",
     "description": "Uproszczenie kolorów, automatyczne usuwanie tła, ręczna gumka, porównanie przed i po oraz eksport PNG do galerii.",

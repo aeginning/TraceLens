@@ -226,16 +226,6 @@ Zaznaczone funkcje zostaną wdrożone etapami. Podział ogranicza ryzyko wzajemn
 - [X] Porównanie obrazu przed i po edycji.
 - [X] Eksport przygotowanego obrazu do galerii telefonu.
 
-### Wersja 1.4 — postęp i projekty
-
-- [X] Automatyczny timelapse i ręczne ustawianie interwału.
-- [X] Wybór zdjęcia okładkowego projektu.
-- [X] Udostępnianie zdjęcia lub galerii projektu.
-- [X] Tryb ponownego ustawienia statywu.
-- [X] Szybkie wznowienie ostatniego projektu.
-- [X] Ostatnie zdjęcie postępu jako miniatura projektu.
-- [X] Kontrola wolnego miejsca przed wykonaniem zdjęcia.
-
 ### Wersja 1.5 — przygotowanie do Google Play
 
 - [X] Produkcyjny wariant aplikacji i konfiguracja podpisu.
@@ -243,7 +233,7 @@ Zaznaczone funkcje zostaną wdrożone etapami. Podział ogranicza ryzyko wzajemn
 - [X] Materiały oraz metadane potrzebne do przygotowania karty sklepu.
 - [X] Pakiet Android App Bundle przeznaczony do wysłania do Google Play Console.
 
-**Planowany numer wersji:** `1.2`
+**Planowany numer wersji:** `1.5`
 
 **Dodatkowe ustalenia:**
 

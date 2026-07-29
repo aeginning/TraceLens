@@ -141,9 +141,27 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
 
     fun deleteProgressPhoto(project: TraceProject, fileName: String): TraceProject {
         repository.deleteProgressPhoto(project.id, fileName)
-        val updated = project.copy(progressPhotos = project.progressPhotos.filterNot { it == fileName })
+        val remaining = project.progressPhotos.filterNot { it == fileName }
+        val updated = project.copy(
+            progressPhotos = remaining,
+            coverPhoto = if (project.coverPhoto == fileName) remaining.lastOrNull() else project.coverPhoto,
+        )
         updateProject(updated)
         message = "Zdjęcie postępu zostało usunięte."
+        return updated
+    }
+
+    fun setProjectCover(project: TraceProject, fileName: String): TraceProject {
+        val updated = project.copy(coverPhoto = fileName)
+        updateProject(updated)
+        message = "Ustawiono zdjęcie okładkowe projektu."
+        return updated
+    }
+
+    fun setTripodReference(project: TraceProject, fileName: String): TraceProject {
+        val updated = project.copy(tripodReferencePhoto = fileName)
+        updateProject(updated)
+        message = "Zapisano zdjęcie kontrolne ustawienia statywu."
         return updated
     }
 

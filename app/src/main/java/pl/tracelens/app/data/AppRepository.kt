@@ -304,6 +304,9 @@ private fun TraceProject.toJson() = JSONObject().apply {
     put("gridDivisions", gridDivisions)
     put("overlayBlendMode", overlayBlendMode)
     put("blinkIntervalMs", blinkIntervalMs)
+    put("timelapseIntervalSeconds", timelapseIntervalSeconds)
+    put("coverPhoto", coverPhoto)
+    put("tripodReferencePhoto", tripodReferencePhoto)
     put("cameraId", cameraId)
     put("orientation", orientation)
     put("createdAt", createdAt)
@@ -328,6 +331,9 @@ private fun JSONObject.toTraceProject(): TraceProject {
         gridDivisions = optInt("gridDivisions", 4).coerceIn(2, 12),
         overlayBlendMode = optInt("overlayBlendMode").coerceIn(0, 2),
         blinkIntervalMs = optLong("blinkIntervalMs", 800L).coerceIn(250L, 2_000L),
+        timelapseIntervalSeconds = optInt("timelapseIntervalSeconds", 30).coerceIn(5, 3600),
+        coverPhoto = optString("coverPhoto").takeIf { it.isNotBlank() && it != "null" },
+        tripodReferencePhoto = optString("tripodReferencePhoto").takeIf { it.isNotBlank() && it != "null" },
         cameraId = optString("cameraId").takeIf { it.isNotBlank() && it != "null" },
         orientation = optInt("orientation"),
         progressPhotos = buildList { for (i in 0 until photos.length()) add(photos.getString(i)) },
