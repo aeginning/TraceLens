@@ -280,7 +280,7 @@ private fun ImageCard(
             Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp)) {
                 Text(
                     image.name,
-                    Modifier.fillMaxWidth().clickable(onClick = onRename),
+                    Modifier.fillMaxWidth().height(52.dp).clickable(onClick = onRename),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
