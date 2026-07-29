@@ -170,6 +170,32 @@ class AppRepository(private val context: Context) {
         }
     }
 
+    fun publishPreparedImage(name: String, bitmap: Bitmap) {
+        val safeName = name.substringBeforeLast('.').toSafeFolderName()
+        val values = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "${safeName}_TraceLens.png")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "${Environment.DIRECTORY_PICTURES}/TraceLens/Obrazy/")
+            put(MediaStore.Images.Media.IS_PENDING, 1)
+        }
+        val resolver = context.contentResolver
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
+            ?: error("System nie pozwolił utworzyć pliku w galerii")
+        try {
+            resolver.openOutputStream(uri)?.use { output ->
+                check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
+            } ?: error("Nie można otworzyć pliku w galerii")
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            check(resolver.update(uri, values, null, null) > 0) {
+                "Nie udało się zakończyć zapisu pliku w galerii"
+            }
+        } catch (error: Exception) {
+            resolver.delete(uri, null, null)
+            throw error
+        }
+    }
+
     fun deleteProjectFiles(projectId: String): Boolean {
         val directory = File(projectsDir, projectId)
         return !directory.exists() || directory.deleteRecursively()
@@ -202,6 +228,17 @@ private fun LibraryImage.toJson() = JSONObject().apply {
         put("invert", filters.invert)
         put("removeColor", filters.removeColor)
         put("colorTolerance", filters.colorTolerance.toDouble())
+        put("autoRemoveBackground", filters.autoRemoveBackground)
+        put("simplifyLevels", filters.simplifyLevels)
+        put("eraserPoints", JSONArray().apply {
+            filters.eraserPoints.forEach { point ->
+                put(JSONObject().apply {
+                    put("x", point.x.toDouble())
+                    put("y", point.y.toDouble())
+                    put("radius", point.radius.toDouble())
+                })
+            }
+        })
         put("cropLeft", filters.cropLeft.toDouble())
         put("cropTop", filters.cropTop.toDouble())
         put("cropRight", filters.cropRight.toDouble())
@@ -211,6 +248,7 @@ private fun LibraryImage.toJson() = JSONObject().apply {
 
 private fun JSONObject.toLibraryImage(): LibraryImage {
     val filterJson = optJSONObject("filters") ?: JSONObject()
+    val eraserJson = filterJson.optJSONArray("eraserPoints") ?: JSONArray()
     return LibraryImage(
         id = getString("id"),
         name = getString("name"),
@@ -226,6 +264,22 @@ private fun JSONObject.toLibraryImage(): LibraryImage {
                 filterJson.getInt("removeColor")
             } else null,
             colorTolerance = filterJson.optDouble("colorTolerance", 0.08).toFloat(),
+            autoRemoveBackground = filterJson.optBoolean("autoRemoveBackground"),
+            simplifyLevels = filterJson.optInt("simplifyLevels").let {
+                if (it == 0) 0 else it.coerceIn(2, 16)
+            },
+            eraserPoints = buildList {
+                for (index in 0 until eraserJson.length()) {
+                    val point = eraserJson.getJSONObject(index)
+                    add(
+                        EraserPoint(
+                            x = point.optDouble("x").toFloat().coerceIn(0f, 1f),
+                            y = point.optDouble("y").toFloat().coerceIn(0f, 1f),
+                            radius = point.optDouble("radius", 0.03).toFloat().coerceIn(0.005f, 0.25f),
+                        )
+                    )
+                }
+            },
             cropLeft = filterJson.optDouble("cropLeft", 0.0).toFloat(),
             cropTop = filterJson.optDouble("cropTop", 0.0).toFloat(),
             cropRight = filterJson.optDouble("cropRight", 1.0).toFloat(),

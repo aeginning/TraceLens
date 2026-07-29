@@ -13,6 +13,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,6 +56,13 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.ZoomIn
+import androidx.compose.material.icons.filled.AutoFixHigh
+import androidx.compose.material.icons.filled.CleaningServices
+import androidx.compose.material.icons.filled.Compare
+import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.filled.MonochromePhotos
+import androidx.compose.material.icons.filled.InvertColors
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -61,6 +72,9 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -83,10 +97,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -103,8 +119,10 @@ import androidx.compose.ui.window.DialogProperties
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.launch
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.data.ImageFilters
+import pl.tracelens.app.data.EraserPoint
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
 import pl.tracelens.app.ui.camera.TraceWorkspace
@@ -441,7 +459,13 @@ private fun EditorScreen(
     val original = remember(image.id) { viewModel.bitmap(image, processed = false) }
     var filters by remember(image.id) { mutableStateOf(image.filters) }
     var showCropDialog by remember { mutableStateOf(false) }
+    var eraserMode by remember { mutableStateOf(false) }
+    var eraserSize by remember { mutableStateOf(0.04f) }
+    var showOriginal by remember { mutableStateOf(false) }
+    val editorSnackbar = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
     Scaffold(
+        snackbarHost = { SnackbarHost(editorSnackbar) },
         topBar = {
             TopAppBar(
                 title = { Text("Edytor obrazu") },
@@ -455,20 +479,73 @@ private fun EditorScreen(
             )
         },
     ) { padding ->
-        LazyColumn(
-            Modifier.fillMaxSize().padding(padding),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            item {
-                if (original != null) {
-                    ColorPickImage(
-                        bitmap = original,
-                        filters = filters,
-                        onColor = { filters = filters.copy(removeColor = it) },
-                    )
+        Column(Modifier.fillMaxSize().padding(padding)) {
+            if (original != null) {
+                ColorPickImage(
+                    bitmap = original,
+                    filters = filters,
+                    showOriginal = showOriginal,
+                    eraserMode = eraserMode,
+                    eraserSize = eraserSize,
+                    onColor = { filters = filters.copy(removeColor = it) },
+                    onErase = { points ->
+                        filters = filters.copy(eraserPoints = filters.eraserPoints + points)
+                    },
+                )
+            }
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                FilledTonalButton(
+                    onClick = { eraserMode = !eraserMode },
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Icon(Icons.Default.CleaningServices, null)
+                    Spacer(Modifier.width(6.dp))
+                    Text(if (eraserMode) "Wyłącz gumkę" else "Gumka")
+                }
+                Row(
+                    modifier = Modifier.size(48.dp)
+                        .background(
+                            MaterialTheme.colorScheme.secondaryContainer,
+                            RoundedCornerShape(24.dp),
+                        )
+                        .pointerInput(Unit) {
+                            awaitEachGesture {
+                                awaitFirstDown(requireUnconsumed = false)
+                                showOriginal = true
+                                waitForUpOrCancellation()
+                                showOriginal = false
+                            }
+                        }
+                        .padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    Icon(Icons.Default.Compare, "Przytrzymaj, aby zobaczyć oryginał")
                 }
             }
+            LazyColumn(
+                Modifier.weight(1f).fillMaxWidth(),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                if (eraserMode) {
+                    item {
+                        Text("Rozmiar gumki: ${"%.0f".format(eraserSize * 100)}%")
+                        Slider(
+                            value = eraserSize,
+                            onValueChange = { eraserSize = it },
+                            valueRange = 0.01f..0.15f,
+                        )
+                        if (filters.eraserPoints.isNotEmpty()) {
+                            TextButton(onClick = { filters = filters.copy(eraserPoints = emptyList()) }) {
+                                Text("Wyczyść ślady gumki (${filters.eraserPoints.size})")
+                            }
+                        }
+                    }
+                }
             item {
                 FilledTonalButton(
                     onClick = { showCropDialog = true },
@@ -483,10 +560,59 @@ private fun EditorScreen(
                     )
                 }
             }
-            item { Text("Dotknij obrazu, aby wybrać kolor do usunięcia.", style = MaterialTheme.typography.bodySmall) }
-            item { ToggleRow("Skala szarości", filters.grayscale) { filters = filters.copy(grayscale = it) } }
-            item { ToggleRow("Kontur / szkic", filters.contour) { filters = filters.copy(contour = it) } }
-            item { ToggleRow("Odwróć kolory", filters.invert) { filters = filters.copy(invert = it) } }
+            item {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    EditorFilterButton(
+                        icon = Icons.Default.MonochromePhotos,
+                        label = "Skala szarości",
+                        selected = filters.grayscale,
+                    ) { filters = filters.copy(grayscale = !filters.grayscale) }
+                    EditorFilterButton(
+                        icon = Icons.Default.AutoFixHigh,
+                        label = "Kontur / szkic",
+                        selected = filters.contour,
+                    ) { filters = filters.copy(contour = !filters.contour) }
+                    EditorFilterButton(
+                        icon = Icons.Default.InvertColors,
+                        label = "Odwróć kolory",
+                        selected = filters.invert,
+                    ) { filters = filters.copy(invert = !filters.invert) }
+                    EditorFilterButton(
+                        icon = Icons.Default.CleaningServices,
+                        label = "Automatycznie usuń tło",
+                        selected = filters.autoRemoveBackground,
+                    ) {
+                        filters = filters.copy(autoRemoveBackground = !filters.autoRemoveBackground)
+                    }
+                    EditorFilterButton(
+                        icon = Icons.Default.ColorLens,
+                        label = "Uprość liczbę kolorów",
+                        selected = filters.simplifyLevels >= 2,
+                    ) {
+                        filters = filters.copy(
+                            simplifyLevels = if (filters.simplifyLevels >= 2) 0 else 8
+                        )
+                    }
+                }
+            }
+            item {
+                val simplifyEnabled = filters.simplifyLevels >= 2
+                if (simplifyEnabled) {
+                    Text("Poziomy na kanał: ${filters.simplifyLevels}")
+                    Slider(
+                        value = filters.simplifyLevels.toFloat(),
+                        onValueChange = {
+                            filters = filters.copy(simplifyLevels = it.toInt().coerceIn(2, 16))
+                        },
+                        valueRange = 2f..16f,
+                        steps = 13,
+                    )
+                }
+            }
             item {
                 Text("Kontrast: ${"%.0f".format(filters.contrast * 100)}%")
                 Slider(
@@ -500,7 +626,11 @@ private fun EditorScreen(
                     Column(Modifier.weight(1f)) {
                         Text("Wybrany kolor do usunięcia")
                         Text(
-                            if (filters.removeColor == null) "Nie wybrano koloru" else "Dotknij obrazu, aby zmienić",
+                            if (filters.removeColor == null) {
+                                "Dotknij obrazu, aby wybrać kolor do usunięcia"
+                            } else {
+                                "Wybrano kolor — dotknij obrazu, aby go zmienić"
+                            },
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
@@ -530,11 +660,36 @@ private fun EditorScreen(
                 )
             }
             item {
-                Button(
-                    onClick = { viewModel.updateFilters(image, filters) { onBack() } },
-                    enabled = original != null,
-                    modifier = Modifier.fillMaxWidth().height(56.dp),
-                ) { Text("Zapisz i wróć do biblioteki") }
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    FilledTonalButton(
+                        onClick = {
+                            viewModel.exportPreparedImage(image, filters) { resultMessage ->
+                                coroutineScope.launch {
+                                    editorSnackbar.showSnackbar(resultMessage)
+                                }
+                            }
+                        },
+                        enabled = original != null,
+                        modifier = Modifier.weight(1f).height(56.dp),
+                    ) {
+                        Icon(Icons.Default.SaveAlt, null)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Eksportuj")
+                    }
+                    Button(
+                        onClick = { viewModel.updateFilters(image, filters) { onBack() } },
+                        enabled = original != null,
+                        modifier = Modifier.weight(1f).height(56.dp),
+                    ) {
+                        Icon(Icons.Default.CheckCircle, null)
+                        Spacer(Modifier.width(6.dp))
+                        Text("Zapisz")
+                    }
+                }
+            }
             }
         }
     }
@@ -552,15 +707,64 @@ private fun EditorScreen(
 }
 
 @Composable
-private fun ColorPickImage(bitmap: Bitmap, filters: ImageFilters, onColor: (Int) -> Unit) {
-    val preview = remember(bitmap, filters) { pl.tracelens.app.image.ImageProcessor.process(bitmap, filters) }
+private fun EditorFilterButton(
+    icon: ImageVector,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    TooltipBox(
+        positionProvider = androidx.compose.material3.TooltipDefaults.rememberPlainTooltipPositionProvider(),
+        tooltip = { PlainTooltip { Text(label) } },
+        state = rememberTooltipState(),
+    ) {
+        Surface(
+            color = if (selected) {
+                MaterialTheme.colorScheme.primaryContainer
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
+            shape = RoundedCornerShape(14.dp),
+        ) {
+            IconButton(onClick = onClick) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = if (selected) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ColorPickImage(
+    bitmap: Bitmap,
+    filters: ImageFilters,
+    showOriginal: Boolean,
+    eraserMode: Boolean,
+    eraserSize: Float,
+    onColor: (Int) -> Unit,
+    onErase: (List<EraserPoint>) -> Unit,
+) {
+    val processed = remember(bitmap, filters) {
+        pl.tracelens.app.image.ImageProcessor.process(bitmap, filters)
+    }
+    val originalCrop = remember(bitmap, filters.cropLeft, filters.cropTop, filters.cropRight, filters.cropBottom) {
+        pl.tracelens.app.image.ImageProcessor.crop(bitmap, filters)
+    }
+    val preview = if (showOriginal) originalCrop else processed
     Image(
         preview.asImageBitmap(),
         "Podgląd",
-        Modifier.fillMaxWidth().height(320.dp)
+        Modifier.fillMaxWidth().height(260.dp).padding(horizontal = 16.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
-            .pointerInput(bitmap) {
-                detectTapGestures { position ->
+            .pointerInput(bitmap, filters, eraserMode, eraserSize) {
+                fun normalized(position: androidx.compose.ui.geometry.Offset): Pair<Float, Float>? {
                     val bitmapRatio = preview.width.toFloat() / preview.height
                     val viewRatio = size.width.toFloat() / size.height
                     val drawnWidth: Float
@@ -578,9 +782,41 @@ private fun ColorPickImage(bitmap: Bitmap, filters: ImageFilters, onColor: (Int)
                         left = (size.width - drawnWidth) / 2f
                         top = 0f
                     }
-                    if (position.x in left..(left + drawnWidth) && position.y in top..(top + drawnHeight)) {
-                        val normalizedX = ((position.x - left) / drawnWidth).coerceIn(0f, 1f)
-                        val normalizedY = ((position.y - top) / drawnHeight).coerceIn(0f, 1f)
+                    return if (position.x in left..(left + drawnWidth) && position.y in top..(top + drawnHeight)) {
+                        ((position.x - left) / drawnWidth).coerceIn(0f, 1f) to
+                            ((position.y - top) / drawnHeight).coerceIn(0f, 1f)
+                    } else null
+                }
+                if (eraserMode) {
+                    val stroke = mutableListOf<EraserPoint>()
+                    detectDragGestures(
+                        onDragStart = { position ->
+                            stroke.clear()
+                            normalized(position)?.let { (x, y) ->
+                                stroke += EraserPoint(x, y, eraserSize)
+                            }
+                        },
+                        onDrag = { change, _ ->
+                            change.consume()
+                            normalized(change.position)?.let { (x, y) ->
+                                val point = EraserPoint(x, y, eraserSize)
+                                val previous = stroke.lastOrNull()
+                                if (previous == null ||
+                                    kotlin.math.abs(previous.x - x) + kotlin.math.abs(previous.y - y) > eraserSize / 3f
+                                ) {
+                                    stroke += point
+                                }
+                            }
+                        },
+                        onDragEnd = {
+                            if (stroke.isNotEmpty()) onErase(stroke.toList())
+                            stroke.clear()
+                        },
+                        onDragCancel = { stroke.clear() },
+                    )
+                } else {
+                    detectTapGestures { position ->
+                        normalized(position)?.let { (normalizedX, normalizedY) ->
                         val sourceX = filters.cropLeft +
                             normalizedX * (filters.cropRight - filters.cropLeft)
                         val sourceY = filters.cropTop +
@@ -590,6 +826,7 @@ private fun ColorPickImage(bitmap: Bitmap, filters: ImageFilters, onColor: (Int)
                         val y = (sourceY * bitmap.height).toInt()
                             .coerceIn(0, bitmap.height - 1)
                         onColor(bitmap.getPixel(x, y))
+                        }
                     }
                 }
             },

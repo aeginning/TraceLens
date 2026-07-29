@@ -1,5 +1,11 @@
 package pl.tracelens.app.data
 
+data class EraserPoint(
+    val x: Float,
+    val y: Float,
+    val radius: Float,
+)
+
 data class ImageFilters(
     val grayscale: Boolean = false,
     val contour: Boolean = false,
@@ -7,6 +13,9 @@ data class ImageFilters(
     val invert: Boolean = false,
     val removeColor: Int? = null,
     val colorTolerance: Float = 0.08f,
+    val autoRemoveBackground: Boolean = false,
+    val simplifyLevels: Int = 0,
+    val eraserPoints: List<EraserPoint> = emptyList(),
     val cropLeft: Float = 0f,
     val cropTop: Float = 0f,
     val cropRight: Float = 1f,

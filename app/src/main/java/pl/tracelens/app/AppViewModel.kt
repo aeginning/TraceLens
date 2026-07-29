@@ -164,6 +164,26 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     fun publishProgressPhoto(projectName: String, file: java.io.File): Boolean =
         repository.publishProgressPhoto(projectName, file)
 
+    fun exportPreparedImage(
+        image: LibraryImage,
+        filters: ImageFilters,
+        onComplete: (String) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val original = requireNotNull(repository.loadBitmap(image, processed = false))
+                    repository.publishPreparedImage(image.name, ImageProcessor.process(original, filters))
+                }
+            }
+            onComplete(if (result.isSuccess) {
+                "Zapisano przygotowany obraz w galerii: Pictures/TraceLens/Obrazy."
+            } else {
+                "Nie udało się wyeksportować obrazu: ${result.exceptionOrNull()?.message ?: "nieznany błąd"}."
+            })
+        }
+    }
+
     private fun updateImage(updated: LibraryImage) {
         images = images.map { if (it.id == updated.id) updated else it }.sortedImages()
         repository.saveImages(images)

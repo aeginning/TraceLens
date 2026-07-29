@@ -22,6 +22,9 @@ object ImageProcessor {
         val rg = removeColor?.let(Color::green) ?: 0
         val rb = removeColor?.let(Color::blue) ?: 0
         val tolerance = filters.colorTolerance * 441.7f
+        val automaticBackground = if (filters.autoRemoveBackground) {
+            detectConnectedBackground(input, width, height, tolerance.coerceAtLeast(24f))
+        } else null
 
         for (index in input.indices) {
             val color = input[index]
@@ -30,7 +33,9 @@ object ImageProcessor {
             var b = Color.blue(color)
             var a = Color.alpha(color)
 
-            if (removeColor != null) {
+            if (automaticBackground?.get(index) == true) {
+                a = 0
+            } else if (removeColor != null) {
                 val distance = sqrt(
                     ((r - rr) * (r - rr) + (g - rg) * (g - rg) + (b - rb) * (b - rb)).toFloat()
                 )
@@ -51,11 +56,103 @@ object ImageProcessor {
             if (filters.invert) {
                 r = 255 - r; g = 255 - g; b = 255 - b
             }
+            if (filters.simplifyLevels >= 2) {
+                r = quantize(r, filters.simplifyLevels)
+                g = quantize(g, filters.simplifyLevels)
+                b = quantize(b, filters.simplifyLevels)
+            }
             output[index] = Color.argb(a, r, g, b)
         }
 
         val finalPixels = if (filters.contour) sobel(output, width, height) else output
+        applyEraser(finalPixels, width, height, filters)
         return Bitmap.createBitmap(finalPixels, width, height, Bitmap.Config.ARGB_8888)
+    }
+
+    private fun quantize(value: Int, levels: Int): Int {
+        val step = 255f / (levels.coerceIn(2, 16) - 1)
+        return (kotlin.math.round(value / step) * step).toInt().coerceIn(0, 255)
+    }
+
+    private fun detectConnectedBackground(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        tolerance: Float,
+    ): BooleanArray {
+        val result = BooleanArray(pixels.size)
+        if (pixels.isEmpty()) return result
+        val samples = intArrayOf(
+            pixels.first(),
+            pixels[width - 1],
+            pixels[(height - 1) * width],
+            pixels.last(),
+        )
+        val targetR = samples.sumOf { Color.red(it) } / samples.size
+        val targetG = samples.sumOf { Color.green(it) } / samples.size
+        val targetB = samples.sumOf { Color.blue(it) } / samples.size
+        fun matches(index: Int): Boolean {
+            val color = pixels[index]
+            val dr = Color.red(color) - targetR
+            val dg = Color.green(color) - targetG
+            val db = Color.blue(color) - targetB
+            return sqrt((dr * dr + dg * dg + db * db).toFloat()) <= tolerance
+        }
+        val queue = IntArray(pixels.size)
+        var head = 0
+        var tail = 0
+        fun offer(index: Int) {
+            if (!result[index] && matches(index)) {
+                result[index] = true
+                queue[tail++] = index
+            }
+        }
+        for (x in 0 until width) {
+            offer(x)
+            offer((height - 1) * width + x)
+        }
+        for (y in 0 until height) {
+            offer(y * width)
+            offer(y * width + width - 1)
+        }
+        while (head < tail) {
+            val index = queue[head++]
+            val x = index % width
+            val y = index / width
+            if (x > 0) offer(index - 1)
+            if (x + 1 < width) offer(index + 1)
+            if (y > 0) offer(index - width)
+            if (y + 1 < height) offer(index + width)
+        }
+        return result
+    }
+
+    private fun applyEraser(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        filters: ImageFilters,
+    ) {
+        val shortest = min(width, height).toFloat()
+        filters.eraserPoints.forEach { point ->
+            val centerX = point.x * width
+            val centerY = point.y * height
+            val radius = point.radius * shortest
+            val left = (centerX - radius).toInt().coerceAtLeast(0)
+            val right = (centerX + radius).toInt().coerceAtMost(width - 1)
+            val top = (centerY - radius).toInt().coerceAtLeast(0)
+            val bottom = (centerY + radius).toInt().coerceAtMost(height - 1)
+            val radiusSquared = radius * radius
+            for (y in top..bottom) {
+                for (x in left..right) {
+                    val dx = x - centerX
+                    val dy = y - centerY
+                    if (dx * dx + dy * dy <= radiusSquared) {
+                        pixels[y * width + x] = pixels[y * width + x] and 0x00FFFFFF
+                    }
+                }
+            }
+        }
     }
 
     private fun contrast(value: Int, amount: Float): Int =
