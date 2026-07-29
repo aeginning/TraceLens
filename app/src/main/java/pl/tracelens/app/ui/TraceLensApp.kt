@@ -393,6 +393,23 @@ private fun SettingsScreen(
                 save(settings.copy(showMovementWarning = it))
             }
         }
+        item {
+            FilledTonalButton(
+                onClick = {
+                    context.startActivity(
+                        Intent(
+                            Intent.ACTION_VIEW,
+                            android.net.Uri.parse("https://tracelens.kasztelan.me/privacy.php"),
+                        )
+                    )
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.OpenInNew, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Polityka prywatności")
+            }
+        }
     }
 }
 

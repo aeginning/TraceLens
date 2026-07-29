@@ -226,14 +226,7 @@ Zaznaczone funkcje zostaną wdrożone etapami. Podział ogranicza ryzyko wzajemn
 - [X] Porównanie obrazu przed i po edycji.
 - [X] Eksport przygotowanego obrazu do galerii telefonu.
 
-### Wersja 1.5 — przygotowanie do Google Play
-
-- [X] Produkcyjny wariant aplikacji i konfiguracja podpisu.
-- [X] Weryfikacja uprawnień, zasad prywatności i danych aplikacji.
-- [X] Materiały oraz metadane potrzebne do przygotowania karty sklepu.
-- [X] Pakiet Android App Bundle przeznaczony do wysłania do Google Play Console.
-
-**Planowany numer wersji:** `1.5`
+**Planowany numer wersji:** do ustalenia
 
 **Dodatkowe ustalenia:**
 

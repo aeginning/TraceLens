@@ -6,4 +6,8 @@ build/
 app/build/
 captures/
 *.apk
+*.aab
+google-play/assets/*-source.png
 .env.deploy
+.env.signing
+*.jks

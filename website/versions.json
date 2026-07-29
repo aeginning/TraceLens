@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.5",
+    "title": "Gotowa do Google Play",
+    "description": "Produkcyjny podpis, zoptymalizowany wariant release, polityka prywatności, materiały sklepu i pakiet Android App Bundle.",
+    "apk": "TraceLens-1.5.apk",
+    "date": "2026-07-30"
+  },
+  {
     "version": "1.4",
     "title": "Postęp i wygodniejsze projekty",
     "description": "Timelapse, okładki i miniatury postępu, udostępnianie galerii, wzorzec statywu, szybkie wznowienie oraz ustawienia domyślne projektów. Zawiera poprawki serii 1.4.x.",
