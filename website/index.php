@@ -36,7 +36,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <main>
     <section class="hero" id="start">
       <div class="hero-copy">
-        <p class="eyebrow"><span></span> Wersja 1.0 jest gotowa</p>
+        <p class="eyebrow"><span></span> Wersja <?= e($current['version']) ?> jest gotowa</p>
         <h1>Cyfrowa kalka,<br><em>którą masz zawsze przy sobie.</em></h1>
         <p class="lead">Nałóż wybrany obraz na podgląd aparatu, ustaw jego przezroczystość i odrysowuj bezpośrednio na papierze. TraceLens pomaga zachować proporcje i dokumentować każdy etap pracy.</p>
         <div class="hero-actions">

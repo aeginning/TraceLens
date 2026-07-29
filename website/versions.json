@@ -1,9 +1,15 @@
 [
   {
+    "version": "1.1",
+    "title": "Firmowy ekran startowy",
+    "description": "Fioletowa grafika TraceLens, subtelny wskaźnik ładowania i płynne przejście do aplikacji.",
+    "apk": "TraceLens-1.1.apk",
+    "date": "2026-07-30"
+  },
+  {
     "version": "1.0",
     "title": "Pierwsze kompletne wydanie",
     "description": "Biblioteka, edytor, projekty, aparat z nakładką i pełna galeria postępu.",
-    "apk": "TraceLens-1.0.apk",
     "date": "2026-07-29"
   },
   {

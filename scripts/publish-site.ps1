@@ -1,5 +1,5 @@
 param(
-    [string]$ApkPath = "releases\TraceLens-1.0.apk"
+    [string]$ApkPath = "releases\TraceLens-1.1.apk"
 )
 
 $ErrorActionPreference = "Stop"
