@@ -35,8 +35,10 @@ import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTransformGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -56,7 +58,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.CenterFocusStrong
-import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -77,6 +78,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -97,9 +99,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -107,6 +109,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
@@ -345,18 +348,43 @@ fun TraceWorkspace(
                 }
                 if (!showControls) {
                     Row(
-                        Modifier.align(Alignment.BottomCenter).padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        Modifier.align(Alignment.BottomCenter)
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
                     ) {
-                        Button(onClick = ::takeProgressPhoto) {
-                            Icon(Icons.Default.PhotoCamera, null)
-                            Spacer(Modifier.size(6.dp))
-                            Text("Zdjęcie")
+                        FilledIconButton(
+                            onClick = ::takeProgressPhoto,
+                            modifier = Modifier.size(56.dp),
+                        ) {
+                            Icon(Icons.Default.PhotoCamera, "Zrób zdjęcie postępu")
                         }
-                        Button(onClick = { showControls = true }) {
-                            Icon(Icons.Default.Tune, null)
-                            Spacer(Modifier.size(6.dp))
-                            Text("Sterowanie")
+                        Box(
+                            modifier = Modifier
+                                .size(56.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
+                                .pointerInput(Unit) {
+                                    awaitEachGesture {
+                                        awaitFirstDown(requireUnconsumed = false)
+                                        compareHeld = true
+                                        waitForUpOrCancellation()
+                                        compareHeld = false
+                                    }
+                                },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Default.VisibilityOff,
+                                "Przytrzymaj, aby ukryć nakładkę",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                            )
+                        }
+                        FilledIconButton(
+                            onClick = { showControls = true },
+                            modifier = Modifier.size(56.dp),
+                        ) {
+                            Icon(Icons.Default.Tune, "Pokaż sterowanie")
                         }
                     }
                 }
@@ -458,25 +486,6 @@ fun TraceWorkspace(
                             blinking = !blinking
                             overlayEnabled = true
                         }
-                        FilledTonalButton(
-                            onClick = { },
-                            modifier = Modifier.pointerInput(Unit) {
-                                detectTapGestures(onPress = {
-                                    compareHeld = true
-                                    tryAwaitRelease()
-                                    compareHeld = false
-                                })
-                            },
-                        ) {
-                            Icon(Icons.Default.VisibilityOff, null, Modifier.size(20.dp))
-                            Spacer(Modifier.size(6.dp))
-                            Text("Przytrzymaj: bez nakładki")
-                        }
-                        WorkspaceButton("Czytelność", Icons.Default.ColorLens) {
-                            val choices = listOf<Int?>(null, 0xFF6F45C8.toInt(), 0xFFE53935.toInt(), 0xFF000000.toInt())
-                            val next = (choices.indexOf(project.overlayTint) + 1).mod(choices.size)
-                            saveProject(project.copy(overlayTint = choices[next]))
-                        }
                         WorkspaceButton(
                             "Mieszanie ${blendModeLabel(project.overlayBlendMode)}",
                             Icons.Default.ScreenRotation,
@@ -492,9 +501,6 @@ fun TraceWorkspace(
                                 camera?.cameraControl?.enableTorch(next)
                                 torch = next
                             }
-                        }
-                        WorkspaceButton("Zdjęcie", Icons.Default.PhotoCamera) {
-                            takeProgressPhoto()
                         }
                         WorkspaceButton("Pion", Icons.Default.ScreenLockPortrait) {
                             saveProject(project.copy(orientation = 1))
@@ -616,7 +622,6 @@ private fun OverlayImage(
         bitmap.asImageBitmap(),
         "Nakładka",
         contentScale = ContentScale.Fit,
-        colorFilter = project.overlayTint?.let { ColorFilter.tint(Color(it)) },
         modifier = Modifier.fillMaxSize()
             .graphicsLayer {
                 translationX = project.offsetX

@@ -36,7 +36,6 @@ data class TraceProject(
     val opacity: Float = 0.25f,
     val gridEnabled: Boolean = false,
     val gridDivisions: Int = 4,
-    val overlayTint: Int? = null,
     val overlayBlendMode: Int = 0,
     val blinkIntervalMs: Long = 800L,
     val cameraId: String? = null,

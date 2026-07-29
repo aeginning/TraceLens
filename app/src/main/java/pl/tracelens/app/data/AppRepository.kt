@@ -248,7 +248,6 @@ private fun TraceProject.toJson() = JSONObject().apply {
     put("opacity", opacity.toDouble())
     put("gridEnabled", gridEnabled)
     put("gridDivisions", gridDivisions)
-    put("overlayTint", overlayTint)
     put("overlayBlendMode", overlayBlendMode)
     put("blinkIntervalMs", blinkIntervalMs)
     put("cameraId", cameraId)
@@ -273,7 +272,6 @@ private fun JSONObject.toTraceProject(): TraceProject {
         opacity = optDouble("opacity", 0.25).toFloat(),
         gridEnabled = optBoolean("gridEnabled"),
         gridDivisions = optInt("gridDivisions", 4).coerceIn(2, 12),
-        overlayTint = if (has("overlayTint") && !isNull("overlayTint")) getInt("overlayTint") else null,
         overlayBlendMode = optInt("overlayBlendMode").coerceIn(0, 2),
         blinkIntervalMs = optLong("blinkIntervalMs", 800L).coerceIn(250L, 2_000L),
         cameraId = optString("cameraId").takeIf { it.isNotBlank() && it != "null" },
