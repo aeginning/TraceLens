@@ -277,21 +277,25 @@ private fun ImageCard(
                     )
                 }
             }
-            Row(
-                Modifier.fillMaxWidth().padding(10.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp)) {
                 Text(
                     image.name,
-                    Modifier.weight(1f).clickable(onClick = onRename),
-                    maxLines = 1,
+                    Modifier.fillMaxWidth().clickable(onClick = onRename),
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-                IconButton(onClick = onRename, modifier = Modifier.size(36.dp)) {
-                    Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(20.dp))
-                }
-                IconButton(onClick = onEdit, modifier = Modifier.size(36.dp)) {
-                    Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(20.dp))
+                Row(
+                    Modifier.fillMaxWidth().padding(top = 4.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    IconButton(onClick = onRename, modifier = Modifier.size(40.dp)) {
+                        Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(22.dp))
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    IconButton(onClick = onEdit, modifier = Modifier.size(40.dp)) {
+                        Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(22.dp))
+                    }
                 }
             }
         }
