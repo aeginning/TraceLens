@@ -76,6 +76,7 @@ import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.QrCode
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -162,6 +163,7 @@ fun TraceLensApp(
     MaterialTheme {
         var screen: Screen by remember { mutableStateOf(Screen.Library) }
         var showLibrarySearch by remember { mutableStateOf(false) }
+        var showLibraryFilters by remember { mutableStateOf(false) }
         val snackbar = remember { SnackbarHostState() }
         val message = viewModel.message
         LaunchedEffect(message) {
@@ -198,11 +200,13 @@ fun TraceLensApp(
                     onProjects = { screen = Screen.Projects },
                     onSettings = { screen = Screen.Settings },
                     onSearch = { showLibrarySearch = !showLibrarySearch },
+                    onFilters = { showLibraryFilters = !showLibraryFilters },
                 ) { padding ->
                     LibraryScreen(
                         viewModel = viewModel,
                         modifier = Modifier.padding(padding),
                         showSearch = showLibrarySearch,
+                        showFilters = showLibraryFilters,
                         onEdit = { screen = Screen.Editor(it.id) },
                         onOpenProject = {
                             viewModel.markImageUsed(it.imageId)
@@ -289,6 +293,7 @@ private fun MainScaffold(
     onProjects: () -> Unit,
     onSettings: () -> Unit,
     onSearch: (() -> Unit)? = null,
+    onFilters: (() -> Unit)? = null,
     content: @Composable (androidx.compose.foundation.layout.PaddingValues) -> Unit,
 ) {
     Scaffold(
@@ -307,6 +312,11 @@ private fun MainScaffold(
                     if (onSearch != null) {
                         IconButton(onClick = onSearch) {
                             Icon(Icons.Default.Search, "Pokaż lub ukryj wyszukiwanie")
+                        }
+                    }
+                    if (onFilters != null) {
+                        IconButton(onClick = onFilters) {
+                            Icon(Icons.Default.FilterList, "Pokaż lub ukryj filtry")
                         }
                     }
                 },
@@ -516,6 +526,7 @@ private fun LibraryScreen(
     viewModel: AppViewModel,
     modifier: Modifier,
     showSearch: Boolean,
+    showFilters: Boolean,
     onEdit: (LibraryImage) -> Unit,
     onOpenProject: (TraceProject) -> Unit,
 ) {
@@ -559,7 +570,7 @@ private fun LibraryScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                if (showSearch || showFilters) item(span = { GridItemSpan(maxLineSpan) }) {
                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         if (showSearch) {
                             TextField(
@@ -571,46 +582,48 @@ private fun LibraryScreen(
                                 singleLine = true,
                             )
                         }
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            item {
-                                FilterChip(
-                                    selected = selectedCollection == null,
-                                    onClick = { selectedCollection = null },
-                                    label = { Text("Wszystkie") },
-                                )
-                            }
-                            item {
-                                IconButton(onClick = { showCreateCollection = true }) {
-                                    Icon(Icons.Default.Add, "Utwórz kolekcję")
+                        if (showFilters) {
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                item {
+                                    FilterChip(
+                                        selected = selectedCollection == null,
+                                        onClick = { selectedCollection = null },
+                                        label = { Text("Wszystkie") },
+                                    )
+                                }
+                                item {
+                                    IconButton(onClick = { showCreateCollection = true }) {
+                                        Icon(Icons.Default.Add, "Utwórz kolekcję")
+                                    }
+                                }
+                                items(collections, key = { it }) { collection ->
+                                    FilterChip(
+                                        selected = selectedCollection == collection,
+                                        onClick = {
+                                            selectedCollection =
+                                                if (selectedCollection == collection) null else collection
+                                        },
+                                        label = { Text(collection) },
+                                    )
                                 }
                             }
-                            items(collections, key = { it }) { collection ->
-                                FilterChip(
-                                    selected = selectedCollection == collection,
-                                    onClick = {
-                                        selectedCollection =
-                                            if (selectedCollection == collection) null else collection
-                                    },
-                                    label = { Text(collection) },
-                                )
-                            }
-                        }
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Icon(Icons.Default.Sort, null)
-                            LazyRow(
-                                modifier = Modifier.weight(1f),
+                            Row(
+                                Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                items(LibrarySort.entries) { option ->
-                                    FilterChip(
-                                        selected = sort == option,
-                                        onClick = { sort = option },
-                                        label = { Text(option.label) },
-                                    )
+                                Icon(Icons.Default.Sort, null)
+                                LazyRow(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    items(LibrarySort.entries) { option ->
+                                        FilterChip(
+                                            selected = sort == option,
+                                            onClick = { sort = option },
+                                            label = { Text(option.label) },
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -1634,6 +1647,7 @@ private fun LocalTransferDialog(server: LocalTransferServer, onDismiss: () -> Un
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Image(qr.asImageBitmap(), "Kod QR transferu", Modifier.fillMaxWidth())
+                Spacer(Modifier.height(16.dp))
                 Text("Zeskanuj kod drugim telefonem połączonym z tą samą siecią Wi‑Fi.")
                 Text("Nie zamykaj tego okna do zakończenia pobierania.", style = MaterialTheme.typography.bodySmall)
             }
