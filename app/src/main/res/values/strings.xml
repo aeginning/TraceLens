@@ -270,4 +270,12 @@
     <string name="pattern_flower">Flower</string>
     <string name="pattern_butterfly">Butterfly</string>
     <string name="add_pattern">Add pattern</string>
+    <string name="pattern_author_license">%1$s · %2$s</string>
+    <string name="add_to_library">Add to library</string>
+    <string name="create_project_from_pattern">Create project</string>
+    <string name="pattern_added">Pattern “%1$s” added to the library.</string>
+    <plurals name="patterns_count_plural">
+        <item quantity="one">%1$d offline pattern</item>
+        <item quantity="other">%1$d offline patterns</item>
+    </plurals>
 </resources>

@@ -137,6 +137,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -162,6 +163,7 @@ private sealed interface Screen {
     data object Library : Screen
     data object Projects : Screen
     data object Settings : Screen
+    data object Patterns : Screen
     data class Editor(val imageId: String) : Screen
     data class Workspace(val projectId: String) : Screen
     data class Gallery(val projectId: String, val fromWorkspace: Boolean) : Screen
@@ -226,6 +228,7 @@ fun TraceLensApp(
                         showSearch = showLibrarySearch,
                         showFilters = showLibraryFilters,
                         onEdit = { screen = Screen.Editor(it.id) },
+                        onOpenPatterns = { screen = Screen.Patterns },
                         onOpenProject = {
                             viewModel.markImageUsed(it.imageId)
                             screen = Screen.Workspace(it.id)
@@ -261,6 +264,14 @@ fun TraceLensApp(
                         modifier = Modifier.padding(padding),
                     )
                 }
+                Screen.Patterns -> StarterPatternsGalleryScreen(
+                    viewModel = viewModel,
+                    onBack = { screen = Screen.Library },
+                    onProjectCreated = {
+                        viewModel.markImageUsed(it.imageId)
+                        screen = Screen.Workspace(it.id)
+                    },
+                )
                 is Screen.Editor -> {
                     val image = viewModel.images.firstOrNull { it.id == current.imageId }
                     if (image == null) screen = Screen.Library
@@ -642,6 +653,7 @@ private fun LibraryScreen(
     showSearch: Boolean,
     showFilters: Boolean,
     onEdit: (LibraryImage) -> Unit,
+    onOpenPatterns: () -> Unit,
     onOpenProject: (TraceProject) -> Unit,
 ) {
     var imageToRename by remember { mutableStateOf<LibraryImage?>(null) }
@@ -649,7 +661,6 @@ private fun LibraryScreen(
     var imageToDelete by remember { mutableStateOf<LibraryImage?>(null) }
     var imageCollections by remember { mutableStateOf<LibraryImage?>(null) }
     var showCreateCollection by remember { mutableStateOf(false) }
-    var showStarterPatterns by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var selectedCollection by remember { mutableStateOf<String?>(null) }
     var sort by remember { mutableStateOf(LibrarySort.Favorites) }
@@ -763,7 +774,7 @@ private fun LibraryScreen(
                 }
             }
             FilledTonalButton(
-                onClick = { showStarterPatterns = true },
+                onClick = onOpenPatterns,
                 modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
             ) {
                 Icon(Icons.Default.Star, null)
@@ -777,7 +788,7 @@ private fun LibraryScreen(
         }
         if (viewModel.images.isEmpty()) {
             FilledTonalButton(
-                onClick = { showStarterPatterns = true },
+                onClick = onOpenPatterns,
                 modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
             ) {
                 Icon(Icons.Default.Star, null)
@@ -785,17 +796,6 @@ private fun LibraryScreen(
                 Text(stringResource(R.string.open_starter_patterns))
             }
         }
-    }
-    if (showStarterPatterns) {
-        StarterPatternsDialog(
-            onDismiss = { showStarterPatterns = false },
-            onAdd = { pattern, name ->
-                viewModel.addStarterPattern(pattern, name) {
-                    showStarterPatterns = false
-                    onEdit(it)
-                }
-            },
-        )
     }
     imageCollections?.let { image ->
         ImageCollectionsDialog(
@@ -865,62 +865,207 @@ private fun LibraryScreen(
 }
 
 @Composable
-private fun StarterPatternsDialog(
-    onDismiss: () -> Unit,
-    onAdd: (pl.tracelens.app.image.StarterPattern, String) -> Unit,
+private fun StarterPatternsGalleryScreen(
+    viewModel: AppViewModel,
+    onBack: () -> Unit,
+    onProjectCreated: (TraceProject) -> Unit,
 ) {
     val context = LocalContext.current
     val locale = LocalConfiguration.current.locales[0]
     val patterns = remember { pl.tracelens.app.image.StarterPatterns.load(context) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.starter_patterns)) },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                Text(
-                    stringResource(R.string.starter_patterns_detail),
-                    style = MaterialTheme.typography.bodySmall,
-                )
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth().height(420.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(patterns, key = { it.id }) { pattern ->
-                        val name = pl.tracelens.app.image.StarterPatterns.localizedName(pattern, locale)
-                        val preview = remember(pattern) {
-                            pl.tracelens.app.image.StarterPatterns.bitmap(context, pattern)
+    var selectedIndex by remember { mutableStateOf<Int?>(null) }
+    var imageForProject by remember { mutableStateOf<LibraryImage?>(null) }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        Text(stringResource(R.string.starter_patterns))
+                        Text(
+                            pluralStringResource(
+                                R.plurals.patterns_count_plural,
+                                patterns.size,
+                                patterns.size,
+                            ),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
+                    }
+                },
+            )
+        },
+    ) { padding ->
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(150.dp),
+            modifier = Modifier.fillMaxSize().padding(padding),
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
+            items(patterns, key = { it.id }) { pattern ->
+                val index = patterns.indexOf(pattern)
+                val name = pl.tracelens.app.image.StarterPatterns.localizedName(pattern, locale)
+                val preview = remember(pattern.id) {
+                    pl.tracelens.app.image.StarterPatterns.bitmap(context, pattern)
+                }
+                Card(onClick = { selectedIndex = index }) {
+                    Column {
+                        Box(
+                            Modifier.fillMaxWidth().height(190.dp)
+                                .background(MaterialTheme.colorScheme.surfaceVariant),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            if (preview != null) {
+                                Image(
+                                    preview.asImageBitmap(),
+                                    name,
+                                    Modifier.fillMaxSize().padding(8.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
                         }
-                        Card {
+                        Text(
+                            name,
+                            Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        Text(
+                            stringResource(
+                                R.string.pattern_author_license,
+                                pattern.author,
+                                pattern.license,
+                            ),
+                            Modifier.padding(horizontal = 10.dp).padding(bottom = 10.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    selectedIndex?.let { initialIndex ->
+        if (patterns.isNotEmpty()) {
+            val pagerState = rememberPagerState(
+                initialPage = initialIndex.coerceIn(0, patterns.lastIndex)
+            ) { patterns.size }
+            Dialog(
+                onDismissRequest = { selectedIndex = null },
+                properties = DialogProperties(
+                    usePlatformDefaultWidth = false,
+                    decorFitsSystemWindows = false,
+                ),
+            ) {
+                Surface(color = Color.Black, modifier = Modifier.fillMaxSize()) {
+                    Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize(),
+                        ) { page ->
+                            val pattern = patterns[page]
+                            val name = pl.tracelens.app.image.StarterPatterns
+                                .localizedName(pattern, locale)
+                            val bitmap = remember(pattern.id) {
+                                pl.tracelens.app.image.StarterPatterns.bitmap(context, pattern)
+                            }
+                            if (bitmap != null) {
+                                Image(
+                                    bitmap.asImageBitmap(),
+                                    name,
+                                    Modifier.fillMaxSize().padding(24.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                            }
+                        }
+                        IconButton(
+                            onClick = { selectedIndex = null },
+                            modifier = Modifier.align(Alignment.TopStart)
+                                .background(Color.Black.copy(alpha = 0.55f)),
+                        ) {
+                            Icon(
+                                Icons.Default.ArrowBack,
+                                stringResource(R.string.close),
+                                tint = Color.White,
+                            )
+                        }
+                        Column(
+                            Modifier.align(Alignment.BottomCenter)
+                                .fillMaxWidth()
+                                .background(Color.Black.copy(alpha = 0.72f))
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            val pattern = patterns[pagerState.currentPage]
+                            val name = pl.tracelens.app.image.StarterPatterns
+                                .localizedName(pattern, locale)
+                            Text(name, color = Color.White, style = MaterialTheme.typography.titleLarge)
+                            Text(
+                                stringResource(
+                                    R.string.pattern_author_license,
+                                    pattern.author,
+                                    pattern.license,
+                                ),
+                                color = Color.White.copy(alpha = 0.8f),
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                            Text(
+                                "${pagerState.currentPage + 1} / ${patterns.size}",
+                                color = Color.White,
+                            )
                             Row(
-                                Modifier.fillMaxWidth().padding(10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
-                                if (preview != null) {
-                                    Image(
-                                        preview.asImageBitmap(),
-                                        name,
-                                        Modifier.size(86.dp),
-                                        contentScale = ContentScale.Fit,
-                                    )
+                                FilledTonalButton(
+                                    onClick = { viewModel.addStarterPattern(pattern, name) },
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Icon(Icons.Default.PhotoLibrary, null)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(stringResource(R.string.add_to_library))
                                 }
-                                Text(name, Modifier.weight(1f))
-                                IconButton(onClick = { onAdd(pattern, name) }) {
-                                    Icon(
-                                        Icons.Default.Add,
-                                        stringResource(R.string.add_pattern),
-                                    )
+                                Button(
+                                    onClick = {
+                                        viewModel.addStarterPattern(pattern, name) {
+                                            imageForProject = it
+                                            selectedIndex = null
+                                        }
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                ) {
+                                    Icon(Icons.Default.Add, null)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(stringResource(R.string.create_project_from_pattern))
                                 }
                             }
                         }
                     }
                 }
             }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
-        },
-    )
+        }
+    }
+
+    imageForProject?.let { image ->
+        CreateProjectDialog(
+            images = listOf(image),
+            fixedImage = image,
+            onDismiss = { imageForProject = null },
+            onCreate = { name, selectedImage ->
+                imageForProject = null
+                onProjectCreated(viewModel.createProject(name, selectedImage))
+            },
+        )
+    }
 }
 
 @Composable

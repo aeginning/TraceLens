@@ -74,6 +74,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             }.onSuccess { image ->
                 images = (images + image).sortedImages()
                 repository.saveImages(images)
+                message = repository.text(R.string.pattern_added, localizedName)
                 onComplete(image)
             }.onFailure { message = it.message ?: repository.text(R.string.operation_failed) }
             busy = false
