@@ -1,0 +1,7 @@
+What's new in TraceLens 1.9.4:
+
+• 64 new beginner-friendly tracing patterns.
+• 16 categories including animals, plants, vehicles, space and fantasy.
+• At least 4 patterns in every category.
+• 72 patterns available completely offline.
+• Polish and English names with optimized image assets.

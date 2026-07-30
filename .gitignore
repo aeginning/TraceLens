@@ -16,3 +16,4 @@ tools/pattern-curator/build/
 tools/pattern-curator/dist/
 tools/pattern-curator/*.spec
 tools/pattern-curator/__pycache__/
+google-play/releases/**/artifacts/

@@ -1,4 +1,4 @@
-# Lista publikacyjna Google Play — TraceLens 1.5
+# Lista publikacyjna Google Play — TraceLens 1.9.4
 
 ## Gotowe w repozytorium
 
@@ -7,7 +7,7 @@
 - [x] Minimalny Android 10 (`minSdk 29`).
 - [x] Produkcyjny wariant `release` z R8 i usuwaniem nieużywanych zasobów.
 - [x] Lokalny klucz wysyłania poza repozytorium Git.
-- [x] Podpisany Android App Bundle.
+- [x] Podpisany Android App Bundle z `versionCode 28`.
 - [x] Audyt uprawnień.
 - [x] Publiczna polityka prywatności i odnośnik w aplikacji.
 - [x] Projekt deklaracji Data Safety.
@@ -16,15 +16,21 @@
 
 ## Do wykonania w Play Console przez właściciela konta
 
-- [ ] Utworzyć aplikację z identyfikatorem `pl.tracelens.app`.
-- [ ] Zaakceptować regulaminy i skonfigurować Play App Signing.
-- [ ] Przesłać `TraceLens-1.5.aab` jako pierwsze wydanie testu wewnętrznego.
+- [x] Utworzono aplikację z identyfikatorem `pl.tracelens.app`.
+- [x] Skonfigurowano Play App Signing i wcześniejszy test wewnętrzny.
+- [ ] Otworzyć **Testowanie → Test zamknięty** i utworzyć ścieżkę `Alpha`.
+- [ ] Przesłać `TraceLens-1.9.4-alpha.aab`.
+- [ ] Wkleić informacje o wersji z `releases/1.9.4-alpha/release-notes-pl.txt`.
+- [ ] Dodać listę testerów albo Grupę dyskusyjną Google do ścieżki Alpha.
+- [ ] Wybrać kraje i regiony dostępne w teście.
+- [ ] Zapisać wersję, sprawdzić podsumowanie i rozpocząć wdrażanie do Alpha.
 - [ ] Uzupełnić Data Safety według `data-safety-pl.md`.
 - [ ] Uzupełnić ankietę klasyfikacji treści.
 - [ ] Ustawić grupę docelową i deklarację reklam.
 - [ ] Wkleić opis oraz przesłać materiały z katalogu `assets`.
 - [ ] Dodać kraje dystrybucji i zapisać ustawienie aplikacji jako bezpłatnej.
-- [ ] Dodać testerów i przeprowadzić test wewnętrzny przed produkcją.
+- [ ] Otworzyć link akceptacji testu na koncie testera i zainstalować wersję
+  z Google Play.
 
 ## Bezpieczeństwo klucza
 
