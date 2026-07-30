@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.7",
+    "title": "Przenoszenie projektów",
+    "description": "Import obrazów przez systemowe udostępnianie, kompletne archiwa projektów, bezpieczny import oraz lokalny transfer kodem QR. Zawiera także czytelniejsze karty projektów i zwijane filtry biblioteki.",
+    "apk": "TraceLens-1.7.apk",
+    "date": "2026-07-30"
+  },
+  {
     "version": "1.6",
     "title": "Porządek w obrazach i projektach",
     "description": "Wyszukiwanie i sortowanie biblioteki, kolekcje obrazów, kompaktowe kafelki, zmiana nazw i archiwum projektów oraz kontrola zajętego miejsca. Zawiera poprawki serii 1.6.x.",

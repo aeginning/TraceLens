@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [1.7](1.7.md) — import, archiwa projektów i lokalny transfer QR
 - [1.6.1](1.6.1.md) — kompaktowa biblioteka, rozwijane wyszukiwanie i szybkie tworzenie kolekcji
 - [1.6](1.6.md) — wyszukiwanie, kolekcje, archiwum projektów i bezpieczne sprzątanie
 - [1.5](1.5.md) — produkcyjny podpis, polityka prywatności i pakiet Google Play

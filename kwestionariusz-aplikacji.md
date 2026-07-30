@@ -22,7 +22,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Cofnij/Ponów w edytorze** — historia operacji bez utraty oryginału.
 - [ ] **Pędzel przywracający** — odzyskiwanie fragmentów usuniętych gumką lub filtrem tła.
 - [X] **Eksport i import projektu** — jedno archiwum zawierające obraz, ustawienia i zdjęcia postępu.
-- [X] **Import przez systemowe „Udostępnij do TraceLens”** — szybkie przekazanie obrazu z galerii, przeglądarki lub innej aplikacji.
 - [X] **Samouczek pierwszego uruchomienia**.
 - [ ] **Testy na większej liczbie telefonów** — różni producenci, aparaty i proporcje ekranów.
 
@@ -103,8 +102,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 - [ ] **Duplikowanie projektu** z zachowaniem konfiguracji.
 - [ ] **Wyszukiwanie i sortowanie projektów**.
-- [X] **Eksport projektu do jednego archiwum**.
-- [X] **Import wcześniej wyeksportowanego projektu**.
 - [ ] **Kopia całej biblioteki i wszystkich projektów**.
 - [ ] **Przenoszenie danych na drugi telefon bez konta i chmury**.
 - [ ] **Eksport paczki diagnostycznej** bez prywatnych zdjęć.
@@ -245,7 +242,6 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 - [ ] **Automatyczna ocena złożoności obrazu** na podstawie liczby krawędzi i kolorów.
 - [ ] **Podobne wzory** wyliczane lokalnie z tagów, bez profilowania użytkownika.
 - [ ] **Paczki tematyczne** — zwierzęta, kwiaty, pojazdy, dekoracje.
-- [X] **Kod QR projektu lub wzoru** do przeniesienia na drugi telefon bez konta.
 - [ ] **Tryb prezentacyjny projektu** — uporządkowana galeria gotowa do pokazania.
 - [ ] **Lista licencji i autorów pobranych wzorów** dostępna także offline.
 - [ ] **Automatyczne tworzenie kopii oryginału przed każdą destrukcyjną operacją**.
@@ -255,17 +251,6 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 ## Proponowany podział kolejnych etapów
 
 Poniższa roadmapa obejmuje wyłącznie funkcje oznaczone wyżej przez użytkownika jako wybrane. Powtórzone wymagania zostały scalone w pojedyncze zadania.
-
-### Wersja 1.7 — import, eksport i przenoszenie
-
-- Import obrazu przez systemowe polecenie „Udostępnij do TraceLens”.
-- Eksport projektu do jednego archiwum wraz z obrazem, konfiguracją i zdjęciami postępu.
-- Import wcześniej wyeksportowanego projektu.
-- Kod QR projektu lub wzoru do szybkiego rozpoczęcia przenoszenia na drugi telefon.
-
-**Dlaczego razem:** najpierw zostanie zdefiniowany stabilny format archiwum projektu, a następnie ten sam mechanizm będzie można wykorzystać przy udostępnianiu i kodach QR.
-
-**Założenie techniczne:** kod QR nie powinien zawierać całego projektu. Może zawierać niewielki identyfikator, adres pobrania albo dane potrzebne do bezpośredniego transferu pomiędzy urządzeniami.
 
 ### Wersja 1.8 — pierwsze uruchomienie, dostępność i języki
 
@@ -329,6 +314,6 @@ Funkcje rozpoznawania kartki nie zostały zaznaczone do najbliższej realizacji 
 - stabilizacja nakładki,
 - opcjonalne markery stabilizacyjne.
 
-**Planowany numer wersji:** `1.7`
+**Planowany numer wersji:** `1.8`
 
-**Kolejność realizacji:** `1.7` → `1.8` → `1.9` → `1.10` → `1.11`
+**Kolejność realizacji:** `1.8` → `1.9` → `1.10` → `1.11`
