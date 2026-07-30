@@ -12,6 +12,7 @@ aplikacji TraceLens.
 - regulacja tolerancji koloru,
 - zapisywanie PNG z przezroczystością,
 - lista wielokrotnie używanych autorów,
+- wybór kategorii i zapis tagów wyszukiwania,
 - licencje `AI_GENERATED`, `OWN_WORK`, `CC0-1.0`, `CC-BY-4.0` i `CUSTOM`,
 - zapis generatora, modelu, promptu, źródła i uwag licencyjnych,
 - automatyczna aktualizacja manifestu odczytywanego przez aplikację Android.
@@ -31,3 +32,5 @@ Narzędzie zapisuje grafiki w:
 i aktualizuje:
 
 `app/src/main/assets/starter_patterns/manifest.json`
+
+Kategorie używane w pakiecie są opisane w `docs/pattern-categories.md`.

@@ -9,6 +9,7 @@ Plik `manifest.json` zawiera dane odczytywane przez aplikację Android:
 - stabilny identyfikator wzoru,
 - ścieżkę do PNG,
 - polską i angielską nazwę,
+- kategorię i tagi wyszukiwania,
 - autora,
 - licencję,
 - źródło lub generator,
@@ -40,11 +41,16 @@ Wzory gwiazdy, serca, kwiatu i motyla są oryginalnymi, geometrycznymi
 grafikami projektu TraceLens. Zostały zapisane jako PNG w katalogu wzorów,
 a ich pochodzenie jest udokumentowane w manifeście jako `OWN_WORK`.
 
+Pierwsza seria wzorów AI obejmuje psa, kota, ptaka i konia. Grafiki mają
+spójny styl kolorowanki, gruby kontur i przezroczyste tło. Ich generator,
+opis promptu oraz sposób przygotowania są zapisane w manifeście.
+
 ## Dodawanie kolejnych wzorów
 
 Do przygotowania nowej grafiki służy aplikacja:
 
 `tools/pattern-curator/dist/TraceLens-Pattern-Curator.exe`
 
-Narzędzie zapisuje PNG i aktualizuje manifest. Nie należy ręcznie dodawać
-grafiki bez odpowiadającego jej wpisu licencyjnego.
+Narzędzie zapisuje PNG oraz aktualizuje manifest w schemacie 2. Przy zapisie
+należy wybrać kategorię i podać angielskie tagi rozdzielone przecinkami. Nie
+należy ręcznie dodawać grafiki bez odpowiadającego jej wpisu licencyjnego.

@@ -21,6 +21,11 @@ LICENSES = [
     "CC-BY-4.0",
     "CUSTOM",
 ]
+CATEGORIES = [
+    "pets", "birds", "farm-animals", "wild-animals", "sea-animals",
+    "dinosaurs", "plants", "landscapes", "vehicles", "food",
+    "everyday-objects", "sports", "fantasy", "space", "seasonal", "symbols",
+]
 
 
 def find_catalog() -> Path:
@@ -154,6 +159,11 @@ class PatternCurator(tk.Tk):
 
         self.title_pl = self._entry(form_frame, "Nazwa polska")
         self.title_en = self._entry(form_frame, "Nazwa angielska")
+        ttk.Label(form_frame, text="Kategoria").pack(anchor="w", pady=(10, 2))
+        self.category = ttk.Combobox(form_frame, values=CATEGORIES, state="readonly")
+        self.category.set("pets")
+        self.category.pack(fill="x")
+        self.tags = self._entry(form_frame, "Tagi (po przecinku, po angielsku)")
         ttk.Label(form_frame, text="Autor").pack(anchor="w", pady=(10, 2))
         author_row = ttk.Frame(form_frame)
         author_row.pack(fill="x")
@@ -362,10 +372,11 @@ class PatternCurator(tk.Tk):
         title_en = self.title_en.get().strip()
         author = self.author.get().strip()
         license_name = self.license.get().strip()
-        if not all((title_pl, title_en, author, license_name)):
+        category = self.category.get().strip()
+        if not all((title_pl, title_en, author, license_name, category)):
             messagebox.showwarning(
                 APP_TITLE,
-                "Uzupełnij polską i angielską nazwę, autora oraz licencję.",
+                "Uzupełnij nazwy, kategorię, autora oraz licencję.",
             )
             return
         if license_name == "AI_GENERATED" and not self.source.get().strip():
@@ -388,7 +399,7 @@ class PatternCurator(tk.Tk):
                 Image.Resampling.LANCZOS,
             )
         image.save(output, "PNG", optimize=True)
-        manifest = {"schemaVersion": 1, "patterns": []}
+        manifest = {"schemaVersion": 2, "patterns": []}
         if self.manifest_path.exists():
             try:
                 manifest = json.loads(self.manifest_path.read_text(encoding="utf-8"))
@@ -398,6 +409,8 @@ class PatternCurator(tk.Tk):
             "id": pattern_id,
             "file": f"images/{file_name}",
             "name": {"en": title_en, "pl": title_pl},
+            "category": category,
+            "tags": [tag.strip().lower() for tag in self.tags.get().split(",") if tag.strip()],
             "author": author,
             "license": license_name,
             "source": self.source.get().strip(),
@@ -407,7 +420,7 @@ class PatternCurator(tk.Tk):
         }
         patterns = [item for item in manifest.get("patterns", []) if item.get("id") != pattern_id]
         patterns.append(entry)
-        manifest["schemaVersion"] = 1
+        manifest["schemaVersion"] = 2
         manifest["patterns"] = sorted(patterns, key=lambda item: item["id"])
         self.manifest_path.write_text(
             json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",

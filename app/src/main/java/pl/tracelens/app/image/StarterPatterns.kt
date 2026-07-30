@@ -11,6 +11,8 @@ data class StarterPattern(
     val file: String,
     val nameEn: String,
     val namePl: String,
+    val category: String,
+    val tags: List<String>,
     val author: String,
     val license: String,
     val source: String,
@@ -32,6 +34,12 @@ object StarterPatterns {
                         file = item.getString("file"),
                         nameEn = names.getString("en"),
                         namePl = names.optString("pl", names.getString("en")),
+                        category = item.optString("category", "other"),
+                        tags = item.optJSONArray("tags")?.let { tags ->
+                            buildList {
+                                for (tagIndex in 0 until tags.length()) add(tags.getString(tagIndex))
+                            }
+                        }.orEmpty(),
                         author = item.getString("author"),
                         license = item.getString("license"),
                         source = item.optString("source"),
