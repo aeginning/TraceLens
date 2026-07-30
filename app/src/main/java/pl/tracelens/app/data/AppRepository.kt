@@ -77,6 +77,28 @@ class AppRepository(private val context: Context) {
         projectsFile.writeText(array.toString(2))
     }
 
+    fun storageSummary() = StorageSummary(
+        imagesBytes = imagesDir.recursiveSize(),
+        projectsBytes = projectsDir.recursiveSize(),
+        cacheBytes = context.cacheDir.recursiveSize(),
+    )
+
+    fun cleanupOrphanedFiles(images: List<LibraryImage>, projects: List<TraceProject>): Long {
+        val before = storageSummary().totalBytes
+        val validImageFiles = images.flatMap {
+            listOfNotNull(it.originalFileName, it.processedFileName)
+        }.toSet()
+        imagesDir.listFiles()?.filter { it.isFile && it.name !in validImageFiles }?.forEach {
+            it.delete()
+        }
+        val validProjectIds = projects.map { it.id }.toSet()
+        projectsDir.listFiles()?.filter { it.isDirectory && it.name !in validProjectIds }?.forEach {
+            it.deleteRecursively()
+        }
+        context.cacheDir.listFiles()?.forEach { it.deleteRecursively() }
+        return (before - storageSummary().totalBytes).coerceAtLeast(0L)
+    }
+
     fun importImage(uri: Uri): LibraryImage {
         val id = UUID.randomUUID().toString()
         val displayName = queryDisplayName(uri) ?: "Obraz ${id.take(6)}"
@@ -247,6 +269,8 @@ private fun LibraryImage.toJson() = JSONObject().apply {
     put("originalFileName", originalFileName)
     put("processedFileName", processedFileName)
     put("favorite", favorite)
+    put("collectionNames", JSONArray(collectionNames))
+    put("lastUsedAt", lastUsedAt)
     put("createdAt", createdAt)
     put("filters", JSONObject().apply {
         put("grayscale", filters.grayscale)
@@ -276,12 +300,16 @@ private fun LibraryImage.toJson() = JSONObject().apply {
 private fun JSONObject.toLibraryImage(): LibraryImage {
     val filterJson = optJSONObject("filters") ?: JSONObject()
     val eraserJson = filterJson.optJSONArray("eraserPoints") ?: JSONArray()
+    val collectionsJson = optJSONArray("collectionNames") ?: JSONArray()
     return LibraryImage(
         id = getString("id"),
         name = getString("name"),
         originalFileName = getString("originalFileName"),
         processedFileName = optString("processedFileName").takeIf { it.isNotBlank() && it != "null" },
         favorite = optBoolean("favorite"),
+        collectionNames = buildList {
+            for (index in 0 until collectionsJson.length()) add(collectionsJson.getString(index))
+        },
         filters = ImageFilters(
             grayscale = filterJson.optBoolean("grayscale"),
             contour = filterJson.optBoolean("contour"),
@@ -313,6 +341,7 @@ private fun JSONObject.toLibraryImage(): LibraryImage {
             cropBottom = filterJson.optDouble("cropBottom", 1.0).toFloat(),
         ),
         createdAt = optLong("createdAt", System.currentTimeMillis()),
+        lastUsedAt = optLong("lastUsedAt", optLong("createdAt", System.currentTimeMillis())),
     )
 }
 
@@ -339,6 +368,7 @@ private fun TraceProject.toJson() = JSONObject().apply {
     put("createdAt", createdAt)
     put("modifiedAt", modifiedAt)
     put("progressPhotos", JSONArray(progressPhotos))
+    put("archived", archived)
 }
 
 private fun JSONObject.toTraceProject(): TraceProject {
@@ -364,7 +394,11 @@ private fun JSONObject.toTraceProject(): TraceProject {
         cameraId = optString("cameraId").takeIf { it.isNotBlank() && it != "null" },
         orientation = optInt("orientation"),
         progressPhotos = buildList { for (i in 0 until photos.length()) add(photos.getString(i)) },
+        archived = optBoolean("archived"),
         createdAt = optLong("createdAt", System.currentTimeMillis()),
         modifiedAt = optLong("modifiedAt", System.currentTimeMillis()),
     )
 }
+
+private fun File.recursiveSize(): Long =
+    if (!exists()) 0L else if (isFile) length() else listFiles()?.sumOf { it.recursiveSize() } ?: 0L

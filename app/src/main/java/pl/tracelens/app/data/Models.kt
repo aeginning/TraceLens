@@ -28,8 +28,10 @@ data class LibraryImage(
     val originalFileName: String,
     val processedFileName: String? = null,
     val favorite: Boolean = false,
+    val collectionNames: List<String> = emptyList(),
     val filters: ImageFilters = ImageFilters(),
     val createdAt: Long = System.currentTimeMillis(),
+    val lastUsedAt: Long = createdAt,
 )
 
 data class AppSettings(
@@ -65,6 +67,15 @@ data class TraceProject(
     val cameraId: String? = null,
     val orientation: Int = 0,
     val progressPhotos: List<String> = emptyList(),
+    val archived: Boolean = false,
     val createdAt: Long = System.currentTimeMillis(),
     val modifiedAt: Long = System.currentTimeMillis(),
 )
+
+data class StorageSummary(
+    val imagesBytes: Long,
+    val projectsBytes: Long,
+    val cacheBytes: Long,
+) {
+    val totalBytes: Long get() = imagesBytes + projectsBytes + cacheBytes
+}

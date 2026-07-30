@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
@@ -65,6 +66,9 @@ import androidx.compose.material.icons.filled.SaveAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material.icons.filled.MonochromePhotos
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.ColorLens
@@ -168,7 +172,10 @@ fun TraceLensApp(viewModel: AppViewModel) {
                         viewModel = viewModel,
                         modifier = Modifier.padding(padding),
                         onEdit = { screen = Screen.Editor(it.id) },
-                        onOpenProject = { screen = Screen.Workspace(it.id) },
+                        onOpenProject = {
+                            viewModel.markImageUsed(it.imageId)
+                            screen = Screen.Workspace(it.id)
+                        },
                     )
                 }
                 Screen.Projects -> MainScaffold(
@@ -181,7 +188,10 @@ fun TraceLensApp(viewModel: AppViewModel) {
                     ProjectsScreen(
                         viewModel = viewModel,
                         modifier = Modifier.padding(padding),
-                        onOpen = { screen = Screen.Workspace(it.id) },
+                        onOpen = {
+                            viewModel.markImageUsed(it.imageId)
+                            screen = Screen.Workspace(it.id)
+                        },
                         onGallery = { screen = Screen.Gallery(it.id, false) },
                     )
                 }
@@ -294,6 +304,10 @@ private fun SettingsScreen(
 ) {
     val context = LocalContext.current
     val settings = viewModel.appSettings
+    var storageRefresh by remember { mutableStateOf(0) }
+    val storage = remember(viewModel.images, viewModel.projects, storageRefresh) {
+        viewModel.storageSummary()
+    }
     val cameras = remember {
         val manager = context.getSystemService(android.content.Context.CAMERA_SERVICE) as CameraManager
         manager.cameraIdList.mapIndexed { index, id ->
@@ -410,7 +424,49 @@ private fun SettingsScreen(
                 Text("Polityka prywatności")
             }
         }
+        item {
+            Text("Pamięć aplikacji", fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(6.dp))
+            Text("Łącznie: ${formatStorageBytes(storage.totalBytes)}")
+            Text(
+                "Obrazy: ${formatStorageBytes(storage.imagesBytes)} · " +
+                    "projekty: ${formatStorageBytes(storage.projectsBytes)} · " +
+                    "pamięć podręczna: ${formatStorageBytes(storage.cacheBytes)}",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "Bezpieczne czyszczenie usuwa wyłącznie pliki, które nie należą już do biblioteki ani projektów, oraz pamięć podręczną.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+            Spacer(Modifier.height(8.dp))
+            FilledTonalButton(
+                onClick = {
+                    viewModel.cleanupStorage()
+                    storageRefresh++
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.CleaningServices, null)
+                Spacer(Modifier.width(8.dp))
+                Text("Wyczyść bezpiecznie")
+            }
+        }
     }
+}
+
+private fun formatStorageBytes(bytes: Long): String = when {
+    bytes >= 1024L * 1024L * 1024L -> "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
+    bytes >= 1024L * 1024L -> "%.1f MB".format(bytes / (1024.0 * 1024.0))
+    bytes >= 1024L -> "%.1f kB".format(bytes / 1024.0)
+    else -> "$bytes B"
+}
+
+private enum class LibrarySort(val label: String) {
+    Favorites("Ulubione"),
+    Name("Nazwa"),
+    Added("Data dodania"),
+    LastUsed("Ostatnio używane"),
 }
 
 @Composable
@@ -423,6 +479,26 @@ private fun LibraryScreen(
     var imageToRename by remember { mutableStateOf<LibraryImage?>(null) }
     var imageForProject by remember { mutableStateOf<LibraryImage?>(null) }
     var imageToDelete by remember { mutableStateOf<LibraryImage?>(null) }
+    var imageCollections by remember { mutableStateOf<LibraryImage?>(null) }
+    var query by remember { mutableStateOf("") }
+    var selectedCollection by remember { mutableStateOf<String?>(null) }
+    var sort by remember { mutableStateOf(LibrarySort.Favorites) }
+    val collections = viewModel.images.flatMap { it.collectionNames }
+        .distinctBy { it.lowercase() }
+        .sortedBy { it.lowercase() }
+    val visibleImages = viewModel.images
+        .filter { it.name.contains(query.trim(), ignoreCase = true) }
+        .filter { selectedCollection == null || selectedCollection in it.collectionNames }
+        .let { images ->
+            when (sort) {
+                LibrarySort.Favorites -> images.sortedWith(
+                    compareByDescending<LibraryImage> { it.favorite }.thenByDescending { it.createdAt }
+                )
+                LibrarySort.Name -> images.sortedBy { it.name.lowercase() }
+                LibrarySort.Added -> images.sortedByDescending { it.createdAt }
+                LibrarySort.LastUsed -> images.sortedByDescending { it.lastUsedAt }
+            }
+        }
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri != null) viewModel.importImage(uri, onEdit)
     }
@@ -436,12 +512,62 @@ private fun LibraryScreen(
             )
         } else {
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(150.dp),
+                columns = GridCells.Adaptive(165.dp),
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp, 12.dp, 12.dp, 96.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                items(viewModel.images, key = { it.id }) { image ->
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text("Szukaj obrazu") },
+                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                            singleLine = true,
+                        )
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            item {
+                                FilterChip(
+                                    selected = selectedCollection == null,
+                                    onClick = { selectedCollection = null },
+                                    label = { Text("Wszystkie") },
+                                )
+                            }
+                            items(collections, key = { it }) { collection ->
+                                FilterChip(
+                                    selected = selectedCollection == collection,
+                                    onClick = {
+                                        selectedCollection =
+                                            if (selectedCollection == collection) null else collection
+                                    },
+                                    label = { Text(collection) },
+                                )
+                            }
+                        }
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(Icons.Default.Sort, null)
+                            LazyRow(
+                                modifier = Modifier.weight(1f),
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                items(LibrarySort.entries) { option ->
+                                    FilterChip(
+                                        selected = sort == option,
+                                        onClick = { sort = option },
+                                        label = { Text(option.label) },
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                items(visibleImages, key = { it.id }) { image ->
                     ImageCard(
                         image = image,
                         bitmap = viewModel.bitmap(image),
@@ -449,6 +575,7 @@ private fun LibraryScreen(
                         onRename = { imageToRename = image },
                         onEdit = { onEdit(image) },
                         onCreateProject = { imageForProject = image },
+                        onCollections = { imageCollections = image },
                         onDelete = { imageToDelete = image },
                     )
                 }
@@ -458,6 +585,17 @@ private fun LibraryScreen(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
             ) { Icon(Icons.Default.Add, "Dodaj obraz") }
         }
+    }
+    imageCollections?.let { image ->
+        ImageCollectionsDialog(
+            image = image,
+            availableCollections = collections,
+            onDismiss = { imageCollections = null },
+            onSave = {
+                viewModel.updateImageCollections(image, it)
+                imageCollections = null
+            },
+        )
     }
     imageToRename?.let { image ->
         RenameImageDialog(
@@ -515,6 +653,7 @@ private fun ImageCard(
     onRename: () -> Unit,
     onEdit: () -> Unit,
     onCreateProject: () -> Unit,
+    onCollections: () -> Unit,
     onDelete: () -> Unit,
 ) {
     Card(onClick = onEdit) {
@@ -562,6 +701,9 @@ private fun ImageCard(
                         IconButton(onClick = onCreateProject, modifier = Modifier.size(32.dp)) {
                             Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(20.dp))
                         }
+                        IconButton(onClick = onCollections, modifier = Modifier.size(32.dp)) {
+                            Icon(Icons.Default.Folder, "Kolekcje obrazu", Modifier.size(20.dp))
+                        }
                         IconButton(onClick = onDelete, modifier = Modifier.size(32.dp)) {
                             Icon(Icons.Default.Delete, "Usuń obraz z biblioteki", Modifier.size(20.dp))
                         }
@@ -570,6 +712,75 @@ private fun ImageCard(
             }
         }
     }
+}
+
+@Composable
+private fun ImageCollectionsDialog(
+    image: LibraryImage,
+    availableCollections: List<String>,
+    onDismiss: () -> Unit,
+    onSave: (List<String>) -> Unit,
+) {
+    var selected by remember(image.id) { mutableStateOf(image.collectionNames.toSet()) }
+    var newCollection by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Kolekcje obrazu") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(image.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                if (availableCollections.isNotEmpty()) {
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(availableCollections, key = { it }) { collection ->
+                            FilterChip(
+                                selected = collection in selected,
+                                onClick = {
+                                    selected = if (collection in selected) {
+                                        selected - collection
+                                    } else {
+                                        selected + collection
+                                    }
+                                },
+                                label = { Text(collection) },
+                            )
+                        }
+                    }
+                }
+                TextField(
+                    value = newCollection,
+                    onValueChange = { newCollection = it },
+                    label = { Text("Nowa kolekcja") },
+                    singleLine = true,
+                    trailingIcon = {
+                        IconButton(
+                            onClick = {
+                                val normalized = newCollection.trim()
+                                if (normalized.isNotEmpty()) {
+                                    selected = selected + normalized
+                                    newCollection = ""
+                                }
+                            },
+                        ) { Icon(Icons.Default.Add, "Dodaj kolekcję") }
+                    },
+                )
+                if (selected.isEmpty()) {
+                    Text("Obraz nie należy do żadnej kolekcji.", style = MaterialTheme.typography.bodySmall)
+                } else {
+                    Text(
+                        "Wybrane: ${selected.sorted().joinToString()}",
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(onClick = {
+                val pending = newCollection.trim()
+                onSave((selected + pending.takeIf { it.isNotEmpty() }.orEmpty()).filter { it.isNotEmpty() })
+            }) { Text("Zapisz") }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+    )
 }
 
 @Composable
@@ -1090,6 +1301,10 @@ private fun ProjectsScreen(
 ) {
     var createDialog by remember { mutableStateOf(false) }
     var projectToDelete by remember { mutableStateOf<TraceProject?>(null) }
+    var projectToRename by remember { mutableStateOf<TraceProject?>(null) }
+    var showArchived by remember { mutableStateOf(false) }
+    val visibleProjects = viewModel.projects.filter { it.archived == showArchived }
+    val lastActiveProject = viewModel.projects.firstOrNull { !it.archived }
     Box(modifier.fillMaxSize()) {
         if (viewModel.projects.isEmpty()) {
             EmptyState(
@@ -1105,21 +1320,44 @@ private fun ProjectsScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item {
-                    val lastProject = viewModel.projects.first()
-                    FilledTonalButton(
-                        onClick = { onOpen(lastProject) },
-                        modifier = Modifier.fillMaxWidth().height(56.dp),
-                    ) {
-                        Icon(Icons.Default.PlayArrow, null)
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            "Wznów ostatni projekt: ${lastProject.name}",
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FilterChip(
+                            selected = !showArchived,
+                            onClick = { showArchived = false },
+                            label = { Text("Aktywne") },
+                        )
+                        FilterChip(
+                            selected = showArchived,
+                            onClick = { showArchived = true },
+                            label = { Text("Archiwum") },
                         )
                     }
                 }
-                items(viewModel.projects, key = { it.id }) { project ->
+                if (!showArchived && lastActiveProject != null) {
+                    item {
+                        FilledTonalButton(
+                            onClick = { onOpen(lastActiveProject) },
+                            modifier = Modifier.fillMaxWidth().height(56.dp),
+                        ) {
+                            Icon(Icons.Default.PlayArrow, null)
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                "Wznów ostatni projekt: ${lastActiveProject.name}",
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+                if (visibleProjects.isEmpty()) {
+                    item {
+                        Text(
+                            if (showArchived) "Archiwum jest puste." else "Brak aktywnych projektów.",
+                            modifier = Modifier.padding(vertical = 24.dp),
+                        )
+                    }
+                }
+                items(visibleProjects, key = { it.id }) { project ->
                     val image = viewModel.imageForProject(project)
                     Card(onClick = { onOpen(project) }, modifier = Modifier.fillMaxWidth()) {
                         Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -1147,6 +1385,15 @@ private fun ProjectsScreen(
                             ) {
                                 Icon(Icons.Default.PhotoLibrary, "Otwórz zdjęcia postępu")
                             }
+                            IconButton(onClick = { projectToRename = project }) {
+                                Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę projektu")
+                            }
+                            IconButton(onClick = { viewModel.toggleProjectArchive(project) }) {
+                                Icon(
+                                    if (project.archived) Icons.Default.Unarchive else Icons.Default.Archive,
+                                    if (project.archived) "Przywróć projekt" else "Archiwizuj projekt",
+                                )
+                            }
                             IconButton(onClick = { projectToDelete = project }) {
                                 Icon(Icons.Default.Delete, "Usuń projekt")
                             }
@@ -1160,6 +1407,16 @@ private fun ProjectsScreen(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
             ) { Icon(Icons.Default.Add, "Nowy projekt") }
         }
+    }
+    projectToRename?.let { project ->
+        RenameProjectDialog(
+            project = project,
+            onDismiss = { projectToRename = null },
+            onRename = {
+                viewModel.renameProject(project, it)
+                projectToRename = null
+            },
+        )
     }
     if (createDialog) {
         ProjectImageSelectorDialog(
@@ -1191,6 +1448,33 @@ private fun ProjectsScreen(
             },
         )
     }
+}
+
+@Composable
+private fun RenameProjectDialog(
+    project: TraceProject,
+    onDismiss: () -> Unit,
+    onRename: (String) -> Unit,
+) {
+    var name by remember(project.id) { mutableStateOf(project.name) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Zmień nazwę projektu") },
+        text = {
+            TextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("Nazwa projektu") },
+                singleLine = true,
+            )
+        },
+        confirmButton = {
+            Button(onClick = { onRename(name) }, enabled = name.trim().isNotEmpty()) {
+                Text("Zapisz")
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+    )
 }
 
 private enum class ProjectImageFilter {

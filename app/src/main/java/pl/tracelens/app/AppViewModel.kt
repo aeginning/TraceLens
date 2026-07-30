@@ -17,6 +17,7 @@ import pl.tracelens.app.data.AppSettings
 import pl.tracelens.app.data.ImageFilters
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
+import pl.tracelens.app.data.StorageSummary
 import pl.tracelens.app.image.ImageProcessor
 import java.util.UUID
 
@@ -124,6 +125,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         )
         projects = listOf(project) + projects
         repository.saveProjects(projects)
+        markImageUsed(image.id)
         return project
     }
 
@@ -137,6 +139,47 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         projects = projects.map { if (it.id == updated.id) updated else it }
             .sortedByDescending { it.modifiedAt }
         repository.saveProjects(projects)
+    }
+
+    fun renameProject(project: TraceProject, name: String) {
+        val normalized = name.trim().replace(Regex("\\s+"), " ")
+        if (normalized.isBlank()) {
+            message = "Nazwa projektu nie może być pusta."
+            return
+        }
+        updateProject(project.copy(name = normalized))
+        message = "Zmieniono nazwę projektu."
+    }
+
+    fun toggleProjectArchive(project: TraceProject) {
+        updateProject(project.copy(archived = !project.archived))
+        message = if (project.archived) "Przywrócono projekt." else "Projekt przeniesiono do archiwum."
+    }
+
+    fun updateImageCollections(image: LibraryImage, names: List<String>) {
+        val normalized = names.map { it.trim().replace(Regex("\\s+"), " ") }
+            .filter { it.isNotBlank() }
+            .distinctBy { it.lowercase() }
+            .sortedBy { it.lowercase() }
+        updateImage(image.copy(collectionNames = normalized))
+        message = "Zapisano kolekcje obrazu."
+    }
+
+    fun markImageUsed(imageId: String) {
+        images.firstOrNull { it.id == imageId }?.let {
+            updateImage(it.copy(lastUsedAt = System.currentTimeMillis()))
+        }
+    }
+
+    fun storageSummary(): StorageSummary = repository.storageSummary()
+
+    fun cleanupStorage() {
+        val freed = repository.cleanupOrphanedFiles(images, projects)
+        message = if (freed > 0) {
+            "Bezpieczne sprzątanie zakończone. Zwolniono ${formatBytes(freed)}."
+        } else {
+            "Nie znaleziono zbędnych plików do usunięcia."
+        }
     }
 
     fun deleteProject(project: TraceProject) {
@@ -223,6 +266,13 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
 
 private fun List<LibraryImage>.sortedImages() =
     sortedWith(compareByDescending<LibraryImage> { it.favorite }.thenByDescending { it.createdAt })
+
+private fun formatBytes(bytes: Long): String = when {
+    bytes >= 1024L * 1024L * 1024L -> "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
+    bytes >= 1024L * 1024L -> "%.1f MB".format(bytes / (1024.0 * 1024.0))
+    bytes >= 1024L -> "%.1f KB".format(bytes / 1024.0)
+    else -> "$bytes B"
+}
 
 class AppViewModelFactory(private val repository: AppRepository) : ViewModelProvider.Factory {
     @Suppress("UNCHECKED_CAST")

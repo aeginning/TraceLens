@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.6",
+    "title": "Porządek w obrazach i projektach",
+    "description": "Wyszukiwanie i sortowanie biblioteki, kolekcje obrazów, zmiana nazw i archiwum projektów oraz kontrola zajętego miejsca z bezpiecznym sprzątaniem.",
+    "apk": "TraceLens-1.6.apk",
+    "date": "2026-07-30"
+  },
+  {
     "version": "1.5",
     "title": "Gotowa do Google Play",
     "description": "Produkcyjny podpis, zoptymalizowany wariant release, polityka prywatności, materiały sklepu i pakiet Android App Bundle.",

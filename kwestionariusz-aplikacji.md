@@ -86,9 +86,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Biblioteka obrazów
 
-- [X] **Wyszukiwarka po nazwie**.
-- [X] **Sortowanie** — nazwa, data dodania, ostatnie użycie i ulubione.
-- [X] **Foldery i kolekcje**.
 - [ ] **Tagi**.
 - [ ] **Lista ostatnio używanych obrazów**.
 - [ ] **Wykrywanie duplikatów podczas importu**.
@@ -104,15 +101,12 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Projekty i kopie zapasowe
 
-- [X] **Zmiana nazwy istniejącego projektu**.
 - [ ] **Duplikowanie projektu** z zachowaniem konfiguracji.
-- [X] **Archiwizowanie zakończonych projektów**.
 - [ ] **Wyszukiwanie i sortowanie projektów**.
 - [X] **Eksport projektu do jednego archiwum**.
 - [X] **Import wcześniej wyeksportowanego projektu**.
 - [ ] **Kopia całej biblioteki i wszystkich projektów**.
 - [ ] **Przenoszenie danych na drugi telefon bez konta i chmury**.
-- [X] **Informacja o zajętym miejscu** i narzędzie sprzątania danych.
 - [ ] **Eksport paczki diagnostycznej** bez prywatnych zdjęć.
 
 **Uwagi:**
@@ -262,19 +256,6 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 
 Poniższa roadmapa obejmuje wyłącznie funkcje oznaczone wyżej przez użytkownika jako wybrane. Powtórzone wymagania zostały scalone w pojedyncze zadania.
 
-### Wersja 1.6 — organizacja biblioteki i projektów
-
-- Wyszukiwanie obrazów po nazwie.
-- Sortowanie obrazów według nazwy, daty dodania, ostatniego użycia i ulubionych.
-- Foldery i kolekcje obrazów.
-- Zmiana nazwy istniejącego projektu.
-- Archiwizowanie i przywracanie zakończonych projektów.
-- Informacja o zajętym miejscu oraz narzędzie bezpiecznego sprzątania danych.
-
-**Dlaczego razem:** wszystkie zadania zmieniają sposób przeglądania i organizowania lokalnych danych, ale nie ingerują w aparat ani format eksportu.
-
-**Najważniejsza decyzja przed implementacją:** czy obraz może należeć do wielu kolekcji, czy tylko do jednego folderu.
-
 ### Wersja 1.7 — import, eksport i przenoszenie
 
 - Import obrazu przez systemowe polecenie „Udostępnij do TraceLens”.
@@ -348,6 +329,6 @@ Funkcje rozpoznawania kartki nie zostały zaznaczone do najbliższej realizacji 
 - stabilizacja nakładki,
 - opcjonalne markery stabilizacyjne.
 
-**Planowany numer wersji:** `1.6`
+**Planowany numer wersji:** `1.7`
 
-**Kolejność realizacji:** `1.6` → `1.7` → `1.8` → `1.9` → `1.10` → `1.11`
+**Kolejność realizacji:** `1.7` → `1.8` → `1.9` → `1.10` → `1.11`
