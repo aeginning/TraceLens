@@ -4,9 +4,15 @@
     {
       "id": "star",
       "file": "images/star.png",
-      "name": { "en": "Star", "pl": "Gwiazda" },
+      "name": {
+        "en": "Star",
+        "pl": "Gwiazda"
+      },
       "category": "symbols",
-      "tags": ["star", "shape"],
+      "tags": [
+        "star",
+        "shape"
+      ],
       "author": "TraceLens",
       "license": "OWN_WORK",
       "source": "TraceLens source code",
@@ -17,9 +23,15 @@
     {
       "id": "heart",
       "file": "images/heart.png",
-      "name": { "en": "Heart", "pl": "Serce" },
+      "name": {
+        "en": "Heart",
+        "pl": "Serce"
+      },
       "category": "symbols",
-      "tags": ["heart", "shape"],
+      "tags": [
+        "heart",
+        "shape"
+      ],
       "author": "TraceLens",
       "license": "OWN_WORK",
       "source": "TraceLens source code",
@@ -30,9 +42,15 @@
     {
       "id": "flower",
       "file": "images/flower.png",
-      "name": { "en": "Flower", "pl": "Kwiat" },
+      "name": {
+        "en": "Flower",
+        "pl": "Kwiat"
+      },
       "category": "plants",
-      "tags": ["flower", "plant"],
+      "tags": [
+        "flower",
+        "plant"
+      ],
       "author": "TraceLens",
       "license": "OWN_WORK",
       "source": "TraceLens source code",
@@ -43,9 +61,15 @@
     {
       "id": "butterfly",
       "file": "images/butterfly.png",
-      "name": { "en": "Butterfly", "pl": "Motyl" },
+      "name": {
+        "en": "Butterfly",
+        "pl": "Motyl"
+      },
       "category": "wild-animals",
-      "tags": ["butterfly", "insect"],
+      "tags": [
+        "butterfly",
+        "insect"
+      ],
       "author": "TraceLens",
       "license": "OWN_WORK",
       "source": "TraceLens source code",
@@ -56,9 +80,16 @@
     {
       "id": "dog-friendly",
       "file": "images/dog-friendly.png",
-      "name": { "en": "Friendly dog", "pl": "Przyjazny pies" },
+      "name": {
+        "en": "Friendly dog",
+        "pl": "Przyjazny pies"
+      },
       "category": "pets",
-      "tags": ["dog", "puppy", "pet"],
+      "tags": [
+        "dog",
+        "puppy",
+        "pet"
+      ],
       "author": "TraceLens AI Studio",
       "license": "AI_GENERATED",
       "source": "OpenAI built-in image generation tool",
@@ -69,9 +100,16 @@
     {
       "id": "cat-friendly",
       "file": "images/cat-friendly.png",
-      "name": { "en": "Friendly cat", "pl": "Przyjazny kot" },
+      "name": {
+        "en": "Friendly cat",
+        "pl": "Przyjazny kot"
+      },
       "category": "pets",
-      "tags": ["cat", "kitten", "pet"],
+      "tags": [
+        "cat",
+        "kitten",
+        "pet"
+      ],
       "author": "TraceLens AI Studio",
       "license": "AI_GENERATED",
       "source": "OpenAI built-in image generation tool",
@@ -82,9 +120,16 @@
     {
       "id": "bird-songbird",
       "file": "images/bird-songbird.png",
-      "name": { "en": "Little songbird", "pl": "Mały ptak" },
+      "name": {
+        "en": "Little songbird",
+        "pl": "Mały ptak"
+      },
       "category": "birds",
-      "tags": ["bird", "songbird", "animal"],
+      "tags": [
+        "bird",
+        "songbird",
+        "animal"
+      ],
       "author": "TraceLens AI Studio",
       "license": "AI_GENERATED",
       "source": "OpenAI built-in image generation tool",
@@ -95,14 +140,1220 @@
     {
       "id": "horse-friendly",
       "file": "images/horse-friendly.png",
-      "name": { "en": "Friendly horse", "pl": "Przyjazny koń" },
+      "name": {
+        "en": "Friendly horse",
+        "pl": "Przyjazny koń"
+      },
       "category": "farm-animals",
-      "tags": ["horse", "farm", "animal"],
+      "tags": [
+        "horse",
+        "farm",
+        "animal"
+      ],
       "author": "TraceLens AI Studio",
       "license": "AI_GENERATED",
       "source": "OpenAI built-in image generation tool",
       "model": "",
       "prompt": "Friendly standing horse, simple bold coloring-book line art for hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "pets-rabbit",
+      "file": "images/pets-rabbit.png",
+      "name": {
+        "en": "Rabbit",
+        "pl": "Królik"
+      },
+      "category": "pets",
+      "tags": [
+        "rabbit"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Rabbit, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "pets-hamster",
+      "file": "images/pets-hamster.png",
+      "name": {
+        "en": "Hamster",
+        "pl": "Chomik"
+      },
+      "category": "pets",
+      "tags": [
+        "hamster"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Hamster, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "pets-guinea-pig",
+      "file": "images/pets-guinea-pig.png",
+      "name": {
+        "en": "Guinea pig",
+        "pl": "Świnka morska"
+      },
+      "category": "pets",
+      "tags": [
+        "guinea pig",
+        "guinea",
+        "pig"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Guinea pig, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "pets-turtle",
+      "file": "images/pets-turtle.png",
+      "name": {
+        "en": "Pet turtle",
+        "pl": "Żółw domowy"
+      },
+      "category": "pets",
+      "tags": [
+        "pet turtle",
+        "pet",
+        "turtle"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Pet turtle, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "birds-owl",
+      "file": "images/birds-owl.png",
+      "name": {
+        "en": "Owl",
+        "pl": "Sowa"
+      },
+      "category": "birds",
+      "tags": [
+        "owl"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Owl, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "birds-duck",
+      "file": "images/birds-duck.png",
+      "name": {
+        "en": "Duck",
+        "pl": "Kaczka"
+      },
+      "category": "birds",
+      "tags": [
+        "duck"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Duck, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "birds-flamingo",
+      "file": "images/birds-flamingo.png",
+      "name": {
+        "en": "Flamingo",
+        "pl": "Flaming"
+      },
+      "category": "birds",
+      "tags": [
+        "flamingo"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Flamingo, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "birds-eagle",
+      "file": "images/birds-eagle.png",
+      "name": {
+        "en": "Eagle",
+        "pl": "Orzeł"
+      },
+      "category": "birds",
+      "tags": [
+        "eagle"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Eagle, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "farm-cow",
+      "file": "images/farm-cow.png",
+      "name": {
+        "en": "Cow",
+        "pl": "Krowa"
+      },
+      "category": "farm-animals",
+      "tags": [
+        "cow"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Cow, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "farm-pig",
+      "file": "images/farm-pig.png",
+      "name": {
+        "en": "Pig",
+        "pl": "Świnka"
+      },
+      "category": "farm-animals",
+      "tags": [
+        "pig"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Pig, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "farm-sheep",
+      "file": "images/farm-sheep.png",
+      "name": {
+        "en": "Sheep",
+        "pl": "Owca"
+      },
+      "category": "farm-animals",
+      "tags": [
+        "sheep"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Sheep, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "farm-goat",
+      "file": "images/farm-goat.png",
+      "name": {
+        "en": "Goat",
+        "pl": "Koza"
+      },
+      "category": "farm-animals",
+      "tags": [
+        "goat"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Goat, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "wild-lion",
+      "file": "images/wild-lion.png",
+      "name": {
+        "en": "Lion",
+        "pl": "Lew"
+      },
+      "category": "wild-animals",
+      "tags": [
+        "lion"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Lion, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "wild-elephant",
+      "file": "images/wild-elephant.png",
+      "name": {
+        "en": "Elephant",
+        "pl": "Słoń"
+      },
+      "category": "wild-animals",
+      "tags": [
+        "elephant"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Elephant, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "wild-giraffe",
+      "file": "images/wild-giraffe.png",
+      "name": {
+        "en": "Giraffe",
+        "pl": "Żyrafa"
+      },
+      "category": "wild-animals",
+      "tags": [
+        "giraffe"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Giraffe, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "wild-fox",
+      "file": "images/wild-fox.png",
+      "name": {
+        "en": "Fox",
+        "pl": "Lis"
+      },
+      "category": "wild-animals",
+      "tags": [
+        "fox"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Fox, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sea-dolphin",
+      "file": "images/sea-dolphin.png",
+      "name": {
+        "en": "Dolphin",
+        "pl": "Delfin"
+      },
+      "category": "sea-animals",
+      "tags": [
+        "dolphin"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Dolphin, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sea-whale",
+      "file": "images/sea-whale.png",
+      "name": {
+        "en": "Whale",
+        "pl": "Wieloryb"
+      },
+      "category": "sea-animals",
+      "tags": [
+        "whale"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Whale, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sea-octopus",
+      "file": "images/sea-octopus.png",
+      "name": {
+        "en": "Octopus",
+        "pl": "Ośmiornica"
+      },
+      "category": "sea-animals",
+      "tags": [
+        "octopus"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Octopus, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sea-seahorse",
+      "file": "images/sea-seahorse.png",
+      "name": {
+        "en": "Seahorse",
+        "pl": "Konik morski"
+      },
+      "category": "sea-animals",
+      "tags": [
+        "seahorse"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Seahorse, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "dinosaurs-trex",
+      "file": "images/dinosaurs-trex.png",
+      "name": {
+        "en": "Tyrannosaurus rex",
+        "pl": "Tyranozaur"
+      },
+      "category": "dinosaurs",
+      "tags": [
+        "tyrannosaurus rex",
+        "tyrannosaurus",
+        "rex"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Tyrannosaurus rex, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "dinosaurs-triceratops",
+      "file": "images/dinosaurs-triceratops.png",
+      "name": {
+        "en": "Triceratops",
+        "pl": "Triceratops"
+      },
+      "category": "dinosaurs",
+      "tags": [
+        "triceratops"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Triceratops, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "dinosaurs-stegosaurus",
+      "file": "images/dinosaurs-stegosaurus.png",
+      "name": {
+        "en": "Stegosaurus",
+        "pl": "Stegozaur"
+      },
+      "category": "dinosaurs",
+      "tags": [
+        "stegosaurus"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Stegosaurus, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "dinosaurs-brachiosaurus",
+      "file": "images/dinosaurs-brachiosaurus.png",
+      "name": {
+        "en": "Brachiosaurus",
+        "pl": "Brachiozaur"
+      },
+      "category": "dinosaurs",
+      "tags": [
+        "brachiosaurus"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Brachiosaurus, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "plants-rose",
+      "file": "images/plants-rose.png",
+      "name": {
+        "en": "Rose",
+        "pl": "Róża"
+      },
+      "category": "plants",
+      "tags": [
+        "rose"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Rose, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "plants-sunflower",
+      "file": "images/plants-sunflower.png",
+      "name": {
+        "en": "Sunflower",
+        "pl": "Słonecznik"
+      },
+      "category": "plants",
+      "tags": [
+        "sunflower"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Sunflower, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "plants-cactus",
+      "file": "images/plants-cactus.png",
+      "name": {
+        "en": "Cactus",
+        "pl": "Kaktus"
+      },
+      "category": "plants",
+      "tags": [
+        "cactus"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Cactus, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "plants-oak",
+      "file": "images/plants-oak.png",
+      "name": {
+        "en": "Oak tree",
+        "pl": "Dąb"
+      },
+      "category": "plants",
+      "tags": [
+        "oak tree",
+        "oak",
+        "tree"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Oak tree, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "landscapes-mountain",
+      "file": "images/landscapes-mountain.png",
+      "name": {
+        "en": "Mountain sunrise",
+        "pl": "Wschód nad górami"
+      },
+      "category": "landscapes",
+      "tags": [
+        "mountain sunrise",
+        "mountain",
+        "sunrise"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Mountain sunrise, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "landscapes-beach",
+      "file": "images/landscapes-beach.png",
+      "name": {
+        "en": "Tropical beach",
+        "pl": "Tropikalna plaża"
+      },
+      "category": "landscapes",
+      "tags": [
+        "tropical beach",
+        "tropical",
+        "beach"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Tropical beach, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "landscapes-forest",
+      "file": "images/landscapes-forest.png",
+      "name": {
+        "en": "Forest clearing",
+        "pl": "Leśna polana"
+      },
+      "category": "landscapes",
+      "tags": [
+        "forest clearing",
+        "forest",
+        "clearing"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Forest clearing, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "landscapes-waterfall",
+      "file": "images/landscapes-waterfall.png",
+      "name": {
+        "en": "Waterfall",
+        "pl": "Wodospad"
+      },
+      "category": "landscapes",
+      "tags": [
+        "waterfall"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Waterfall, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "vehicles-car",
+      "file": "images/vehicles-car.png",
+      "name": {
+        "en": "Car",
+        "pl": "Samochód"
+      },
+      "category": "vehicles",
+      "tags": [
+        "car"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Car, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "vehicles-bicycle",
+      "file": "images/vehicles-bicycle.png",
+      "name": {
+        "en": "Bicycle",
+        "pl": "Rower"
+      },
+      "category": "vehicles",
+      "tags": [
+        "bicycle"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Bicycle, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "vehicles-train",
+      "file": "images/vehicles-train.png",
+      "name": {
+        "en": "Locomotive",
+        "pl": "Lokomotywa"
+      },
+      "category": "vehicles",
+      "tags": [
+        "locomotive"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Locomotive, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "vehicles-airplane",
+      "file": "images/vehicles-airplane.png",
+      "name": {
+        "en": "Airplane",
+        "pl": "Samolot"
+      },
+      "category": "vehicles",
+      "tags": [
+        "airplane"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Airplane, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "food-apple",
+      "file": "images/food-apple.png",
+      "name": {
+        "en": "Apple",
+        "pl": "Jabłko"
+      },
+      "category": "food",
+      "tags": [
+        "apple"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Apple, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "food-cupcake",
+      "file": "images/food-cupcake.png",
+      "name": {
+        "en": "Cupcake",
+        "pl": "Babeczka"
+      },
+      "category": "food",
+      "tags": [
+        "cupcake"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Cupcake, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "food-pizza",
+      "file": "images/food-pizza.png",
+      "name": {
+        "en": "Pizza slice",
+        "pl": "Kawałek pizzy"
+      },
+      "category": "food",
+      "tags": [
+        "pizza slice",
+        "pizza",
+        "slice"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Pizza slice, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "food-icecream",
+      "file": "images/food-icecream.png",
+      "name": {
+        "en": "Ice cream",
+        "pl": "Lody"
+      },
+      "category": "food",
+      "tags": [
+        "ice cream",
+        "ice",
+        "cream"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Ice cream, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "objects-lamp",
+      "file": "images/objects-lamp.png",
+      "name": {
+        "en": "Table lamp",
+        "pl": "Lampka"
+      },
+      "category": "everyday-objects",
+      "tags": [
+        "table lamp",
+        "table",
+        "lamp"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Table lamp, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "objects-teapot",
+      "file": "images/objects-teapot.png",
+      "name": {
+        "en": "Teapot",
+        "pl": "Czajniczek"
+      },
+      "category": "everyday-objects",
+      "tags": [
+        "teapot"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Teapot, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "objects-alarmclock",
+      "file": "images/objects-alarmclock.png",
+      "name": {
+        "en": "Alarm clock",
+        "pl": "Budzik"
+      },
+      "category": "everyday-objects",
+      "tags": [
+        "alarm clock",
+        "alarm",
+        "clock"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Alarm clock, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "objects-umbrella",
+      "file": "images/objects-umbrella.png",
+      "name": {
+        "en": "Umbrella",
+        "pl": "Parasol"
+      },
+      "category": "everyday-objects",
+      "tags": [
+        "umbrella"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Umbrella, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sports-football",
+      "file": "images/sports-football.png",
+      "name": {
+        "en": "Soccer ball",
+        "pl": "Piłka nożna"
+      },
+      "category": "sports",
+      "tags": [
+        "soccer ball",
+        "soccer",
+        "ball"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Soccer ball, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sports-basketball",
+      "file": "images/sports-basketball.png",
+      "name": {
+        "en": "Basketball hoop",
+        "pl": "Kosz do koszykówki"
+      },
+      "category": "sports",
+      "tags": [
+        "basketball hoop",
+        "basketball",
+        "hoop"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Basketball hoop, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sports-tennis",
+      "file": "images/sports-tennis.png",
+      "name": {
+        "en": "Tennis racket",
+        "pl": "Rakieta tenisowa"
+      },
+      "category": "sports",
+      "tags": [
+        "tennis racket",
+        "tennis",
+        "racket"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Tennis racket, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "sports-skate",
+      "file": "images/sports-skate.png",
+      "name": {
+        "en": "Roller skate",
+        "pl": "Wrotka"
+      },
+      "category": "sports",
+      "tags": [
+        "roller skate",
+        "roller",
+        "skate"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Roller skate, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "fantasy-dragon",
+      "file": "images/fantasy-dragon.png",
+      "name": {
+        "en": "Baby dragon",
+        "pl": "Mały smok"
+      },
+      "category": "fantasy",
+      "tags": [
+        "baby dragon",
+        "baby",
+        "dragon"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Baby dragon, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "fantasy-unicorn",
+      "file": "images/fantasy-unicorn.png",
+      "name": {
+        "en": "Unicorn",
+        "pl": "Jednorożec"
+      },
+      "category": "fantasy",
+      "tags": [
+        "unicorn"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Unicorn, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "fantasy-castle",
+      "file": "images/fantasy-castle.png",
+      "name": {
+        "en": "Fairy-tale castle",
+        "pl": "Baśniowy zamek"
+      },
+      "category": "fantasy",
+      "tags": [
+        "fairy-tale castle",
+        "fairy",
+        "tale",
+        "castle"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Fairy-tale castle, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "fantasy-mermaid",
+      "file": "images/fantasy-mermaid.png",
+      "name": {
+        "en": "Mermaid",
+        "pl": "Syrenka"
+      },
+      "category": "fantasy",
+      "tags": [
+        "mermaid"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Mermaid, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "space-rocket",
+      "file": "images/space-rocket.png",
+      "name": {
+        "en": "Rocket",
+        "pl": "Rakieta"
+      },
+      "category": "space",
+      "tags": [
+        "rocket"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Rocket, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "space-astronaut",
+      "file": "images/space-astronaut.png",
+      "name": {
+        "en": "Astronaut",
+        "pl": "Astronauta"
+      },
+      "category": "space",
+      "tags": [
+        "astronaut"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Astronaut, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "space-saturn",
+      "file": "images/space-saturn.png",
+      "name": {
+        "en": "Saturn",
+        "pl": "Saturn"
+      },
+      "category": "space",
+      "tags": [
+        "saturn"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Saturn, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "space-alien",
+      "file": "images/space-alien.png",
+      "name": {
+        "en": "Friendly alien",
+        "pl": "Przyjazny kosmita"
+      },
+      "category": "space",
+      "tags": [
+        "friendly alien",
+        "friendly",
+        "alien"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Friendly alien, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "seasonal-snowman",
+      "file": "images/seasonal-snowman.png",
+      "name": {
+        "en": "Snowman",
+        "pl": "Bałwan"
+      },
+      "category": "seasonal",
+      "tags": [
+        "snowman"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Snowman, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "seasonal-pumpkin",
+      "file": "images/seasonal-pumpkin.png",
+      "name": {
+        "en": "Halloween pumpkin",
+        "pl": "Dynia halloweenowa"
+      },
+      "category": "seasonal",
+      "tags": [
+        "halloween pumpkin",
+        "halloween",
+        "pumpkin"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Halloween pumpkin, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "seasonal-easteregg",
+      "file": "images/seasonal-easteregg.png",
+      "name": {
+        "en": "Easter egg",
+        "pl": "Pisanka"
+      },
+      "category": "seasonal",
+      "tags": [
+        "easter egg",
+        "easter",
+        "egg"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Easter egg, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "seasonal-christmastree",
+      "file": "images/seasonal-christmastree.png",
+      "name": {
+        "en": "Christmas tree",
+        "pl": "Choinka"
+      },
+      "category": "seasonal",
+      "tags": [
+        "christmas tree",
+        "christmas",
+        "tree"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Christmas tree, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "symbols-moon",
+      "file": "images/symbols-moon.png",
+      "name": {
+        "en": "Crescent moon",
+        "pl": "Księżyc"
+      },
+      "category": "symbols",
+      "tags": [
+        "crescent moon",
+        "crescent",
+        "moon"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Crescent moon, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "symbols-rainbow",
+      "file": "images/symbols-rainbow.png",
+      "name": {
+        "en": "Rainbow",
+        "pl": "Tęcza"
+      },
+      "category": "symbols",
+      "tags": [
+        "rainbow"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Rainbow, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "symbols-crown",
+      "file": "images/symbols-crown.png",
+      "name": {
+        "en": "Crown",
+        "pl": "Korona"
+      },
+      "category": "symbols",
+      "tags": [
+        "crown"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Crown, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
+      "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
+    },
+    {
+      "id": "symbols-lightning",
+      "file": "images/symbols-lightning.png",
+      "name": {
+        "en": "Lightning bolt",
+        "pl": "Błyskawica"
+      },
+      "category": "symbols",
+      "tags": [
+        "lightning bolt",
+        "lightning",
+        "bolt"
+      ],
+      "author": "TraceLens AI Studio",
+      "license": "AI_GENERATED",
+      "source": "OpenAI built-in image generation tool",
+      "model": "",
+      "prompt": "Lightning bolt, simple black-and-white coloring-book line art with thick outlines for beginner hand tracing.",
       "licenseNotes": "AI-generated for TraceLens and locally processed to remove the chroma-key background."
     }
   ]

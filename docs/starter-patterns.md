@@ -45,6 +45,10 @@ Pierwsza seria wzorów AI obejmuje psa, kota, ptaka i konia. Grafiki mają
 spójny styl kolorowanki, gruby kontur i przezroczyste tło. Ich generator,
 opis promptu oraz sposób przygotowania są zapisane w manifeście.
 
+Rozszerzony pakiet zawiera co najmniej cztery wzory w każdej z 16 kategorii.
+Łącznie aplikacja udostępnia 72 wzory offline, z czego 64 powstały jako
+spójna seria prostych czarno-białych ilustracji do odrysowywania.
+
 ## Dodawanie kolejnych wzorów
 
 Do przygotowania nowej grafiki służy aplikacja:
