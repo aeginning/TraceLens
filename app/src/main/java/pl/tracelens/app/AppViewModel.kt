@@ -27,6 +27,12 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     }
     var images by mutableStateOf(repository.loadImages().sortedImages())
         private set
+    var collectionNames by mutableStateOf(
+        (repository.loadCollectionNames() + images.flatMap { it.collectionNames })
+            .distinctBy { it.lowercase() }
+            .sortedBy { it.lowercase() }
+    )
+        private set
     var projects by mutableStateOf(repository.loadProjects().sortedByDescending { it.modifiedAt })
         private set
     var appSettings by mutableStateOf(repository.loadSettings())
@@ -162,7 +168,27 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             .distinctBy { it.lowercase() }
             .sortedBy { it.lowercase() }
         updateImage(image.copy(collectionNames = normalized))
+        collectionNames = (collectionNames + normalized)
+            .distinctBy { it.lowercase() }
+            .sortedBy { it.lowercase() }
+        repository.saveCollectionNames(collectionNames)
         message = "Zapisano kolekcje obrazu."
+    }
+
+    fun createCollection(name: String): Boolean {
+        val normalized = name.trim().replace(Regex("\\s+"), " ")
+        if (normalized.isBlank()) {
+            message = "Nazwa kolekcji nie może być pusta."
+            return false
+        }
+        if (collectionNames.any { it.equals(normalized, ignoreCase = true) }) {
+            message = "Taka kolekcja już istnieje."
+            return false
+        }
+        collectionNames = (collectionNames + normalized).sortedBy { it.lowercase() }
+        repository.saveCollectionNames(collectionNames)
+        message = "Utworzono kolekcję „$normalized”."
+        return true
     }
 
     fun markImageUsed(imageId: String) {

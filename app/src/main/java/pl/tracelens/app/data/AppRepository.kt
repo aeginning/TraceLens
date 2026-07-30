@@ -63,6 +63,14 @@ class AppRepository(private val context: Context) {
         metadataFile.writeText(array.toString(2))
     }
 
+    fun loadCollectionNames(): List<String> =
+        preferences.getStringSet("collectionNames", emptySet()).orEmpty()
+            .sortedBy { it.lowercase() }
+
+    fun saveCollectionNames(names: List<String>) {
+        preferences.edit().putStringSet("collectionNames", names.toSet()).apply()
+    }
+
     fun loadProjects(): List<TraceProject> = runCatching {
         if (!projectsFile.exists()) return emptyList()
         val array = JSONArray(projectsFile.readText())
