@@ -18,12 +18,12 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 ## Najważniejsze kandydatury do kolejnego wydania
 
 - [ ] **Wyszukiwarka biblioteki** — wyszukiwanie przygotowanych obrazów po nazwie.
-- [ ] **Zmiana nazwy projektu**.
+- [X] **Zmiana nazwy projektu**.
 - [ ] **Cofnij/Ponów w edytorze** — historia operacji bez utraty oryginału.
 - [ ] **Pędzel przywracający** — odzyskiwanie fragmentów usuniętych gumką lub filtrem tła.
-- [ ] **Eksport i import projektu** — jedno archiwum zawierające obraz, ustawienia i zdjęcia postępu.
-- [ ] **Import przez systemowe „Udostępnij do TraceLens”** — szybkie przekazanie obrazu z galerii, przeglądarki lub innej aplikacji.
-- [ ] **Samouczek pierwszego uruchomienia**.
+- [X] **Eksport i import projektu** — jedno archiwum zawierające obraz, ustawienia i zdjęcia postępu.
+- [X] **Import przez systemowe „Udostępnij do TraceLens”** — szybkie przekazanie obrazu z galerii, przeglądarki lub innej aplikacji.
+- [X] **Samouczek pierwszego uruchomienia**.
 - [ ] **Testy na większej liczbie telefonów** — różni producenci, aparaty i proporcje ekranów.
 
 **Uwagi i wybór priorytetu:**
@@ -39,7 +39,7 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Stabilizacja nakładki** — utrzymywanie grafiki na kartce po niewielkim poruszeniu telefonu.
 - [ ] **Markery stabilizacyjne** — drukowane znaczniki w rogach kartki dla dokładniejszego śledzenia.
 - [ ] **Kalibracja rzeczywistego rozmiaru** — ustawienie grafiki w centymetrach.
-- [ ] **Ręczny punkt ostrości** — dotknięcie miejsca, na którym kamera ma ustawić ostrość.
+- [X] **Ręczny punkt ostrości** — dotknięcie miejsca, na którym kamera ma ustawić ostrość.
 - [ ] **Ręczna kompensacja ekspozycji**.
 - [ ] **Zoom cyfrowy kamery** niezależny od skali nakładki.
 - [ ] **Zamrożenie klatki z kamery** podczas precyzyjnego ustawiania grafiki.
@@ -53,10 +53,10 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Narzędzia wspomagające odrysowywanie
 
-- [ ] **Zmiana koloru i przezroczystości siatki**.
-- [ ] **Zmiana koloru konturu nakładki**.
+- [X] **Zmiana koloru i przezroczystości siatki**.
+- [X] **Zmiana koloru konturu nakładki**.
 - [ ] **Szybkie wartości przezroczystości** — np. 10%, 25%, 50% i 75%.
-- [ ] **Podział pracy na fragmenty** — przyciemnianie obszarów poza aktualnie rysowaną częścią.
+- [X] **Podział pracy na fragmenty** — przyciemnianie obszarów poza aktualnie rysowaną częścią.
 - [ ] **Lupa** — powiększenie fragmentu wskazanego palcem.
 - [ ] **Ochrona przed przypadkowym dotknięciem** — czasowa blokada wszystkich kontrolek.
 - [ ] **Profile pracy** — np. ołówek, farby, ściana, mała kartka i duży format.
@@ -74,8 +74,8 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Presety filtrów** — zapis i ponowne użycie zestawu ustawień.
 - [ ] **Obsługa SVG** z zachowaniem jakości skalowania.
 - [ ] **Obsługa WebP**.
-- [ ] **Automatyczne prostowanie i obracanie obrazu**.
-- [ ] **Usuwanie drobnych artefaktów tła** — czyszczenie pojedynczych pikseli i małych wysp.
+- [X] **Automatyczne prostowanie i obracanie obrazu**.
+- [X] **Usuwanie drobnych artefaktów tła** — czyszczenie pojedynczych pikseli i małych wysp.
 - [ ] **Podgląd na szachownicy** — czytelniejsze przedstawienie przezroczystych obszarów.
 
 **Uwagi:**
@@ -86,15 +86,15 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Biblioteka obrazów
 
-- [ ] **Wyszukiwarka po nazwie**.
-- [ ] **Sortowanie** — nazwa, data dodania, ostatnie użycie i ulubione.
-- [ ] **Foldery i kolekcje**.
+- [X] **Wyszukiwarka po nazwie**.
+- [X] **Sortowanie** — nazwa, data dodania, ostatnie użycie i ulubione.
+- [X] **Foldery i kolekcje**.
 - [ ] **Tagi**.
 - [ ] **Lista ostatnio używanych obrazów**.
 - [ ] **Wykrywanie duplikatów podczas importu**.
 - [ ] **Zaznaczanie wielu obrazów** i operacje zbiorcze.
-- [ ] **Udostępnianie obrazu do TraceLens z innej aplikacji**.
-- [ ] **Wbudowany pakiet startowy** — kilka prostych, legalnych wzorów dostępnych bez internetu.
+- [X] **Udostępnianie obrazu do TraceLens z innej aplikacji**.
+- [X] **Wbudowany pakiet startowy** — kilka prostych, legalnych wzorów dostępnych bez internetu.
 
 **Uwagi:**
 
@@ -104,15 +104,15 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Projekty i kopie zapasowe
 
-- [ ] **Zmiana nazwy istniejącego projektu**.
+- [X] **Zmiana nazwy istniejącego projektu**.
 - [ ] **Duplikowanie projektu** z zachowaniem konfiguracji.
-- [ ] **Archiwizowanie zakończonych projektów**.
+- [X] **Archiwizowanie zakończonych projektów**.
 - [ ] **Wyszukiwanie i sortowanie projektów**.
-- [ ] **Eksport projektu do jednego archiwum**.
-- [ ] **Import wcześniej wyeksportowanego projektu**.
+- [X] **Eksport projektu do jednego archiwum**.
+- [X] **Import wcześniej wyeksportowanego projektu**.
 - [ ] **Kopia całej biblioteki i wszystkich projektów**.
 - [ ] **Przenoszenie danych na drugi telefon bez konta i chmury**.
-- [ ] **Informacja o zajętym miejscu** i narzędzie sprzątania danych.
+- [X] **Informacja o zajętym miejscu** i narzędzie sprzątania danych.
 - [ ] **Eksport paczki diagnostycznej** bez prywatnych zdjęć.
 
 **Uwagi:**
@@ -137,15 +137,15 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Wygoda i dostępność
 
-- [ ] **Samouczek pierwszego uruchomienia**.
-- [ ] **Opcjonalne podpowiedzi tekstowe przy ikonach**.
+- [X] **Samouczek pierwszego uruchomienia**.
+- [X] **Opcjonalne podpowiedzi tekstowe przy ikonach**.
 - [ ] **Regulacja jasności ekranu w aplikacji**.
 - [ ] **Tryb oszczędzania energii**.
-- [ ] **Rozbudowany monitor temperatury i baterii**.
+- [X] **Rozbudowany monitor temperatury i baterii**.
 - [ ] **Sygnał haptyczny** po zablokowaniu nakładki lub wykonaniu zdjęcia.
-- [ ] **Własny wybór motywu** — jasny, ciemny lub systemowy.
+- [X] **Własny wybór motywu** — jasny, ciemny lub systemowy.
 - [ ] **Alternatywny rozmiar kontrolek i tekstu**.
-- [ ] **Język angielski**.
+- [X] **Język angielski**.
 
 **Uwagi:**
 
@@ -155,12 +155,12 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Dystrybucja i jakość
 
-- [ ] **Sprawdzanie dostępności aktualizacji** z Google Play lub strony TraceLens.
+- [X] **Sprawdzanie dostępności aktualizacji** z Google Play lub strony TraceLens.
 - [ ] **Testy na różnych rozdzielczościach i urządzeniach**.
 - [ ] **Test długiej pracy** — kamera, ekran, timelapse i latarka przez kilkadziesiąt minut.
 - [ ] **Automatyczne testy migracji danych** pomiędzy kolejnymi wersjami.
 - [ ] **Automatyczne testy najważniejszych ekranów**.
-- [ ] **Raport awarii przechowywany lokalnie** i eksportowany wyłącznie na żądanie.
+- [X] **Raport awarii przechowywany lokalnie** i eksportowany wyłącznie na żądanie.
 
 **Uwagi:**
 
@@ -251,7 +251,7 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 - [ ] **Automatyczna ocena złożoności obrazu** na podstawie liczby krawędzi i kolorów.
 - [ ] **Podobne wzory** wyliczane lokalnie z tagów, bez profilowania użytkownika.
 - [ ] **Paczki tematyczne** — zwierzęta, kwiaty, pojazdy, dekoracje.
-- [ ] **Kod QR projektu lub wzoru** do przeniesienia na drugi telefon bez konta.
+- [X] **Kod QR projektu lub wzoru** do przeniesienia na drugi telefon bez konta.
 - [ ] **Tryb prezentacyjny projektu** — uporządkowana galeria gotowa do pokazania.
 - [ ] **Lista licencji i autorów pobranych wzorów** dostępna także offline.
 - [ ] **Automatyczne tworzenie kopii oryginału przed każdą destrukcyjną operacją**.
@@ -260,27 +260,94 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 
 ## Proponowany podział kolejnych etapów
 
-### Wersja 1.6 — organizacja i przenoszenie danych
+Poniższa roadmapa obejmuje wyłącznie funkcje oznaczone wyżej przez użytkownika jako wybrane. Powtórzone wymagania zostały scalone w pojedyncze zadania.
 
-- [ ] Wyszukiwanie i sortowanie obrazów.
-- [ ] Zmiana nazwy oraz duplikowanie projektów.
-- [ ] Eksport i import projektu.
-- [ ] Import obrazów przez systemowe „Udostępnij”.
-- [ ] Cofnij/Ponów oraz pędzel przywracający.
+### Wersja 1.6 — organizacja biblioteki i projektów
 
-### Wersja 1.7 — katalog wzorów
+- Wyszukiwanie obrazów po nazwie.
+- Sortowanie obrazów według nazwy, daty dodania, ostatniego użycia i ulubionych.
+- Foldery i kolekcje obrazów.
+- Zmiana nazwy istniejącego projektu.
+- Archiwizowanie i przywracanie zakończonych projektów.
+- Informacja o zajętym miejscu oraz narzędzie bezpiecznego sprzątania danych.
 
-- [ ] Publiczny katalog tylko do odczytu.
-- [ ] Kategorie, wyszukiwanie i cache lokalny.
-- [ ] Import wzoru do biblioteki.
-- [ ] Informacje o autorze i licencji.
-- [ ] Otwieranie zewnętrznych źródeł w przeglądarce.
+**Dlaczego razem:** wszystkie zadania zmieniają sposób przeglądania i organizowania lokalnych danych, ale nie ingerują w aparat ani format eksportu.
 
-### Wersja 2.0 — inteligentne pozycjonowanie
+**Najważniejsza decyzja przed implementacją:** czy obraz może należeć do wielu kolekcji, czy tylko do jednego folderu.
 
-- [ ] Wykrywanie kartki.
-- [ ] Korekcja perspektywy.
-- [ ] Stabilizacja nakładki.
-- [ ] Opcjonalne markery stabilizacyjne.
+### Wersja 1.7 — import, eksport i przenoszenie
 
-**Planowany numer wersji:** do ustalenia
+- Import obrazu przez systemowe polecenie „Udostępnij do TraceLens”.
+- Eksport projektu do jednego archiwum wraz z obrazem, konfiguracją i zdjęciami postępu.
+- Import wcześniej wyeksportowanego projektu.
+- Kod QR projektu lub wzoru do szybkiego rozpoczęcia przenoszenia na drugi telefon.
+
+**Dlaczego razem:** najpierw zostanie zdefiniowany stabilny format archiwum projektu, a następnie ten sam mechanizm będzie można wykorzystać przy udostępnianiu i kodach QR.
+
+**Założenie techniczne:** kod QR nie powinien zawierać całego projektu. Może zawierać niewielki identyfikator, adres pobrania albo dane potrzebne do bezpośredniego transferu pomiędzy urządzeniami.
+
+### Wersja 1.8 — pierwsze uruchomienie, dostępność i języki
+
+- Samouczek pierwszego uruchomienia.
+- Opcjonalne podpowiedzi tekstowe przy ikonach.
+- Wybór motywu: jasny, ciemny lub systemowy.
+- Język angielski.
+
+**Dlaczego razem:** dodanie języka angielskiego wymaga przeniesienia tekstów interfejsu do zasobów tłumaczeń. To dobry moment, aby ujednolicić komunikaty, podpowiedzi i treść samouczka.
+
+**Najważniejsza decyzja przed implementacją:** czy język ma być zawsze zgodny z systemem, czy użytkownik może wybrać go ręcznie w ustawieniach.
+
+### Wersja 1.9 — dokładniejszy edytor i pakiet startowy
+
+- Automatyczne prostowanie i obracanie importowanego obrazu.
+- Usuwanie drobnych artefaktów tła, pojedynczych pikseli i małych wysp.
+- Wbudowany pakiet prostych, legalnych wzorów dostępnych offline.
+
+**Dlaczego razem:** wydanie skupia się na doprowadzeniu obrazu do stanu gotowego do odrysowania przed utworzeniem projektu.
+
+**Wymaganie prawne:** każdy wzór w pakiecie startowym musi mieć udokumentowane źródło i licencję pozwalającą na dystrybucję z aplikacją.
+
+### Wersja 1.10 — precyzja podczas rysowania
+
+- Ręczny punkt ostrości wybierany dotknięciem podglądu.
+- Zmiana koloru i przezroczystości siatki.
+- Zmiana koloru konturu nakładki.
+- Podział pracy na fragmenty i przyciemnianie nieaktywnego obszaru.
+- Rozbudowany monitor temperatury i poziomu baterii.
+
+**Dlaczego razem:** wszystkie funkcje działają bezpośrednio na ekranie aparatu i powinny zostać przetestowane wspólnie podczas dłuższej sesji rysowania.
+
+**Ryzyko:** zmiany gestów na podglądzie nie mogą kolidować ze skalowaniem, obracaniem nakładki ani blokadą jej położenia.
+
+### Wersja 1.11 — aktualizacje i diagnostyka
+
+- Sprawdzanie dostępności aktualizacji z Google Play lub strony TraceLens.
+- Lokalny raport awarii przechowywany na urządzeniu.
+- Eksport raportu wyłącznie po świadomej decyzji użytkownika.
+
+**Dlaczego razem:** wydanie skupia się na utrzymaniu aplikacji po szerszej publikacji i diagnozowaniu problemów bez automatycznej telemetrii.
+
+**Założenie prywatności:** aplikacja nie wysyła raportów samodzielnie. Użytkownik przegląda zakres danych i uruchamia systemowe udostępnianie.
+
+### Dalszy etap — katalog wzorów
+
+Społecznościowy katalog pozostaje w backlogu, ale nie został jeszcze oznaczony do realizacji. Najbezpieczniej rozpocząć go dopiero po ukończeniu lokalnej organizacji biblioteki i importu przez „Udostępnij”.
+
+- Publiczny katalog tylko do odczytu.
+- Kategorie, wyszukiwanie i cache lokalny.
+- Import wzoru do biblioteki.
+- Informacje o autorze oraz licencji.
+- Moderowane zgłaszanie nowych grafik na stronie.
+
+### Dalszy etap — inteligentne pozycjonowanie 2.0
+
+Funkcje rozpoznawania kartki nie zostały zaznaczone do najbliższej realizacji i pozostają kierunkiem długoterminowym:
+
+- wykrywanie kartki,
+- korekcja perspektywy,
+- stabilizacja nakładki,
+- opcjonalne markery stabilizacyjne.
+
+**Planowany numer wersji:** `1.6`
+
+**Kolejność realizacji:** `1.6` → `1.7` → `1.8` → `1.9` → `1.10` → `1.11`
