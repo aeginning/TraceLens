@@ -256,4 +256,18 @@
     <string name="default_image_name">Obraz %1$s</string>
     <string name="archive_missing_manifest">Brak manifestu projektu.</string>
     <string name="archive_too_large">Archiwum przekracza limit 500 MB.</string>
+    <string name="straighten_image">Wyprostuj automatycznie</string>
+    <string name="rotate_left">Obróć w lewo</string>
+    <string name="rotate_right">Obróć w prawo</string>
+    <string name="rotation_value">Obrót: %1$d°</string>
+    <string name="artifact_cleanup">Usuń drobne artefakty</string>
+    <string name="artifact_cleanup_value">Czyszczenie artefaktów: %1$d%%</string>
+    <string name="starter_patterns">Pakiet wzorów</string>
+    <string name="starter_patterns_detail">Proste wzory offline utworzone dla TraceLens. Połączenie z internetem nie jest potrzebne.</string>
+    <string name="open_starter_patterns">Przeglądaj wzory</string>
+    <string name="pattern_star">Gwiazda</string>
+    <string name="pattern_heart">Serce</string>
+    <string name="pattern_flower">Kwiat</string>
+    <string name="pattern_butterfly">Motyl</string>
+    <string name="add_pattern">Dodaj wzór</string>
 </resources>

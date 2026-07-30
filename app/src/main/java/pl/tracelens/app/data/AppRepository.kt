@@ -132,13 +132,26 @@ class AppRepository(private val context: Context) {
         return LibraryImage(id, displayName, fileName)
     }
 
+    fun importGeneratedImage(name: String, bitmap: Bitmap): LibraryImage {
+        val id = UUID.randomUUID().toString()
+        val fileName = "$id.png"
+        FileOutputStream(File(imagesDir, fileName)).use {
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
+        }
+        return LibraryImage(id = id, name = name, originalFileName = fileName)
+    }
+
     fun imageFile(image: LibraryImage, processed: Boolean = true): File {
         val name = if (processed) image.processedFileName ?: image.originalFileName else image.originalFileName
         return File(imagesDir, name)
     }
 
-    fun loadBitmap(image: LibraryImage, processed: Boolean = true): Bitmap? =
-        BitmapFactory.decodeFile(imageFile(image, processed).absolutePath)
+    fun loadBitmap(image: LibraryImage, processed: Boolean = true): Bitmap? {
+        val file = imageFile(image, processed)
+        val bitmap = BitmapFactory.decodeFile(file.absolutePath) ?: return null
+        if (processed && image.processedFileName != null) return bitmap
+        return applyExifOrientation(file, bitmap)
+    }
 
     fun loadThumbnail(image: LibraryImage, maxSize: Int = 360): Bitmap? {
         val path = imageFile(image).absolutePath
@@ -150,10 +163,12 @@ class AppRepository(private val context: Context) {
         ) {
             sampleSize *= 2
         }
-        return BitmapFactory.decodeFile(
+        val bitmap = BitmapFactory.decodeFile(
             path,
             BitmapFactory.Options().apply { inSampleSize = sampleSize },
-        )
+        ) ?: return null
+        return if (image.processedFileName != null) bitmap
+        else applyExifOrientation(imageFile(image, processed = false), bitmap)
     }
 
     fun saveProcessed(image: LibraryImage, bitmap: Bitmap): LibraryImage {
@@ -192,6 +207,10 @@ class AppRepository(private val context: Context) {
             file.absolutePath,
             BitmapFactory.Options().apply { inSampleSize = sampleSize },
         ) ?: return null
+        return applyExifOrientation(file, bitmap)
+    }
+
+    private fun applyExifOrientation(file: File, bitmap: Bitmap): Bitmap {
         val exif = runCatching { ExifInterface(file) }.getOrNull() ?: return bitmap
         val matrix = Matrix().apply {
             if (exif.isFlipped) postScale(-1f, 1f)
@@ -460,6 +479,8 @@ private fun LibraryImage.toJson() = JSONObject().apply {
         put("colorTolerance", filters.colorTolerance.toDouble())
         put("autoRemoveBackground", filters.autoRemoveBackground)
         put("simplifyLevels", filters.simplifyLevels)
+        put("rotationDegrees", filters.rotationDegrees.toDouble())
+        put("artifactCleanup", filters.artifactCleanup)
         put("eraserPoints", JSONArray().apply {
             filters.eraserPoints.forEach { point ->
                 put(JSONObject().apply {
@@ -502,6 +523,9 @@ private fun JSONObject.toLibraryImage(): LibraryImage {
             simplifyLevels = filterJson.optInt("simplifyLevels").let {
                 if (it == 0) 0 else it.coerceIn(2, 16)
             },
+            rotationDegrees = filterJson.optDouble("rotationDegrees", 0.0).toFloat()
+                .coerceIn(-180f, 180f),
+            artifactCleanup = filterJson.optInt("artifactCleanup", 0).coerceIn(0, 100),
             eraserPoints = buildList {
                 for (index in 0 until eraserJson.length()) {
                     val point = eraserJson.getJSONObject(index)

@@ -20,6 +20,8 @@ import pl.tracelens.app.data.TraceProject
 import pl.tracelens.app.data.StorageSummary
 import pl.tracelens.app.data.LocalTransferServer
 import pl.tracelens.app.image.ImageProcessor
+import pl.tracelens.app.image.StarterPattern
+import pl.tracelens.app.image.StarterPatterns
 import java.util.UUID
 
 class AppViewModel(private val repository: AppRepository) : ViewModel() {
@@ -50,6 +52,26 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             busy = true
             runCatching {
                 withContext(Dispatchers.IO) { repository.importImage(uri) }
+            }.onSuccess { image ->
+                images = (images + image).sortedImages()
+                repository.saveImages(images)
+                onComplete(image)
+            }.onFailure { message = it.message ?: repository.text(R.string.operation_failed) }
+            busy = false
+        }
+    }
+
+    fun addStarterPattern(
+        pattern: StarterPattern,
+        localizedName: String,
+        onComplete: (LibraryImage) -> Unit = {},
+    ) {
+        viewModelScope.launch {
+            busy = true
+            runCatching {
+                withContext(Dispatchers.Default) {
+                    repository.importGeneratedImage(localizedName, StarterPatterns.create(pattern))
+                }
             }.onSuccess { image ->
                 images = (images + image).sortedImages()
                 repository.saveImages(images)

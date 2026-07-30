@@ -2,6 +2,7 @@ package pl.tracelens.app.image
 
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.Matrix
 import pl.tracelens.app.data.ImageFilters
 import kotlin.math.abs
 import kotlin.math.max
@@ -10,7 +11,7 @@ import kotlin.math.sqrt
 
 object ImageProcessor {
     fun process(source: Bitmap, filters: ImageFilters): Bitmap {
-        val bitmap = downscale(crop(source, filters), 2048)
+        val bitmap = downscale(crop(rotate(source, filters.rotationDegrees), filters), 2048)
         val width = bitmap.width
         val height = bitmap.height
         val input = IntArray(width * height)
@@ -65,6 +66,9 @@ object ImageProcessor {
         }
 
         val finalPixels = if (filters.contour) sobel(output, width, height) else output
+        if (filters.artifactCleanup > 0) {
+            removeSmallIslands(finalPixels, width, height, filters.artifactCleanup)
+        }
         applyEraser(finalPixels, width, height, filters)
         return Bitmap.createBitmap(finalPixels, width, height, Bitmap.Config.ARGB_8888)
     }
@@ -72,6 +76,88 @@ object ImageProcessor {
     private fun quantize(value: Int, levels: Int): Int {
         val step = 255f / (levels.coerceIn(2, 16) - 1)
         return (kotlin.math.round(value / step) * step).toInt().coerceIn(0, 255)
+    }
+
+    /**
+     * Estimates a small skew angle from strong luminance edges. The returned value is the
+     * corrective rotation, limited to ±15 degrees so a photograph cannot be turned sideways.
+     */
+    fun detectStraighteningAngle(source: Bitmap): Float {
+        val bitmap = downscale(source, 640)
+        val width = bitmap.width
+        val height = bitmap.height
+        if (width < 16 || height < 16) return 0f
+        val pixels = IntArray(width * height)
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+        var bestAngle = 0
+        var bestScore = Double.NEGATIVE_INFINITY
+        for (angle in -15..15) {
+            val radians = Math.toRadians(angle.toDouble())
+            val cos = kotlin.math.cos(radians)
+            val sin = kotlin.math.sin(radians)
+            val bins = DoubleArray(height + width)
+            for (y in 2 until height - 2 step 2) {
+                for (x in 2 until width - 2 step 2) {
+                    fun lum(px: Int) = 0.299 * Color.red(px) + 0.587 * Color.green(px) + 0.114 * Color.blue(px)
+                    val gx = lum(pixels[y * width + x + 1]) - lum(pixels[y * width + x - 1])
+                    val gy = lum(pixels[(y + 1) * width + x]) - lum(pixels[(y - 1) * width + x])
+                    val strength = kotlin.math.abs(gx) + kotlin.math.abs(gy)
+                    if (strength > 80) {
+                        val projected = (y * cos - x * sin + width / 2).toInt()
+                        if (projected in bins.indices) bins[projected] += strength
+                    }
+                }
+            }
+            val mean = bins.average()
+            val score = bins.sumOf { (it - mean) * (it - mean) }
+            if (score > bestScore) {
+                bestScore = score
+                bestAngle = angle
+            }
+        }
+        return (-bestAngle).toFloat()
+    }
+
+    private fun rotate(source: Bitmap, degrees: Float): Bitmap {
+        if (kotlin.math.abs(degrees) < 0.05f) return source
+        val matrix = Matrix().apply { postRotate(degrees) }
+        return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+    }
+
+    private fun removeSmallIslands(pixels: IntArray, width: Int, height: Int, strength: Int) {
+        val visited = BooleanArray(pixels.size)
+        val queue = IntArray(pixels.size)
+        val component = IntArray(pixels.size)
+        val limit = (1 + pixels.size * strength / 2_000_000).coerceAtMost(2_000)
+        for (start in pixels.indices) {
+            if (visited[start] || Color.alpha(pixels[start]) < 24) continue
+            var head = 0
+            var tail = 0
+            var count = 0
+            visited[start] = true
+            queue[tail++] = start
+            while (head < tail) {
+                val index = queue[head++]
+                component[count++] = index
+                if (count > limit) break
+                val x = index % width
+                val neighbors = intArrayOf(
+                    if (x > 0) index - 1 else -1,
+                    if (x + 1 < width) index + 1 else -1,
+                    if (index >= width) index - width else -1,
+                    if (index + width < pixels.size) index + width else -1,
+                )
+                neighbors.forEach { next ->
+                    if (next >= 0 && !visited[next] && Color.alpha(pixels[next]) >= 24) {
+                        visited[next] = true
+                        queue[tail++] = next
+                    }
+                }
+            }
+            if (count <= limit && head == tail) {
+                for (i in 0 until count) pixels[component[i]] = pixels[component[i]] and 0x00FFFFFF
+            }
+        }
     }
 
     private fun detectConnectedBackground(

@@ -256,4 +256,18 @@
     <string name="default_image_name">Image %1$s</string>
     <string name="archive_missing_manifest">The project manifest is missing.</string>
     <string name="archive_too_large">The archive exceeds the 500 MB limit.</string>
+    <string name="straighten_image">Auto straighten</string>
+    <string name="rotate_left">Rotate left</string>
+    <string name="rotate_right">Rotate right</string>
+    <string name="rotation_value">Rotation: %1$d°</string>
+    <string name="artifact_cleanup">Remove small artifacts</string>
+    <string name="artifact_cleanup_value">Artifact cleanup: %1$d%%</string>
+    <string name="starter_patterns">Starter patterns</string>
+    <string name="starter_patterns_detail">Simple offline patterns created for TraceLens. No internet connection is required.</string>
+    <string name="open_starter_patterns">Browse patterns</string>
+    <string name="pattern_star">Star</string>
+    <string name="pattern_heart">Heart</string>
+    <string name="pattern_flower">Flower</string>
+    <string name="pattern_butterfly">Butterfly</string>
+    <string name="add_pattern">Add pattern</string>
 </resources>

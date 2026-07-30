@@ -69,6 +69,9 @@ import androidx.compose.material.icons.filled.AutoFixHigh
 import androidx.compose.material.icons.filled.CleaningServices
 import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.SaveAlt
+import androidx.compose.material.icons.filled.RotateLeft
+import androidx.compose.material.icons.filled.RotateRight
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Settings
@@ -645,6 +648,7 @@ private fun LibraryScreen(
     var imageToDelete by remember { mutableStateOf<LibraryImage?>(null) }
     var imageCollections by remember { mutableStateOf<LibraryImage?>(null) }
     var showCreateCollection by remember { mutableStateOf(false) }
+    var showStarterPatterns by remember { mutableStateOf(false) }
     var query by remember { mutableStateOf("") }
     var selectedCollection by remember { mutableStateOf<String?>(null) }
     var sort by remember { mutableStateOf(LibrarySort.Favorites) }
@@ -757,11 +761,40 @@ private fun LibraryScreen(
                     )
                 }
             }
+            FilledTonalButton(
+                onClick = { showStarterPatterns = true },
+                modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
+            ) {
+                Icon(Icons.Default.Star, null)
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(R.string.open_starter_patterns))
+            }
             FloatingActionButton(
                 onClick = { picker.launch(arrayOf("image/png", "image/jpeg")) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
             ) { Icon(Icons.Default.Add, stringResource(R.string.add_image)) }
         }
+        if (viewModel.images.isEmpty()) {
+            FilledTonalButton(
+                onClick = { showStarterPatterns = true },
+                modifier = Modifier.align(Alignment.BottomStart).padding(20.dp),
+            ) {
+                Icon(Icons.Default.Star, null)
+                Spacer(Modifier.width(6.dp))
+                Text(stringResource(R.string.open_starter_patterns))
+            }
+        }
+    }
+    if (showStarterPatterns) {
+        StarterPatternsDialog(
+            onDismiss = { showStarterPatterns = false },
+            onAdd = { pattern, name ->
+                viewModel.addStarterPattern(pattern, name) {
+                    showStarterPatterns = false
+                    onEdit(it)
+                }
+            },
+        )
     }
     imageCollections?.let { image ->
         ImageCollectionsDialog(
@@ -828,6 +861,65 @@ private fun LibraryScreen(
             },
         )
     }
+}
+
+@Composable
+private fun StarterPatternsDialog(
+    onDismiss: () -> Unit,
+    onAdd: (pl.tracelens.app.image.StarterPattern, String) -> Unit,
+) {
+    val patterns = listOf(
+        pl.tracelens.app.image.StarterPattern.Star to stringResource(R.string.pattern_star),
+        pl.tracelens.app.image.StarterPattern.Heart to stringResource(R.string.pattern_heart),
+        pl.tracelens.app.image.StarterPattern.Flower to stringResource(R.string.pattern_flower),
+        pl.tracelens.app.image.StarterPattern.Butterfly to stringResource(R.string.pattern_butterfly),
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.starter_patterns)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    stringResource(R.string.starter_patterns_detail),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().height(420.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    items(patterns) { (pattern, name) ->
+                        val preview = remember(pattern) {
+                            pl.tracelens.app.image.StarterPatterns.create(pattern, 240)
+                        }
+                        Card {
+                            Row(
+                                Modifier.fillMaxWidth().padding(10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                Image(
+                                    preview.asImageBitmap(),
+                                    name,
+                                    Modifier.size(86.dp),
+                                    contentScale = ContentScale.Fit,
+                                )
+                                Text(name, Modifier.weight(1f))
+                                IconButton(onClick = { onAdd(pattern, name) }) {
+                                    Icon(
+                                        Icons.Default.Add,
+                                        stringResource(R.string.add_pattern),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) }
+        },
+    )
 }
 
 @Composable
@@ -1146,6 +1238,54 @@ private fun EditorScreen(
                 }
             }
             item {
+                Text(stringResource(R.string.rotation_value, filters.rotationDegrees.toInt()))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilledTonalButton(
+                        onClick = {
+                            filters = filters.copy(
+                                rotationDegrees = normalizeRotation(filters.rotationDegrees - 90f)
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Default.RotateLeft, stringResource(R.string.rotate_left))
+                    }
+                    FilledTonalButton(
+                        onClick = {
+                            original?.let {
+                                filters = filters.copy(
+                                    rotationDegrees = pl.tracelens.app.image.ImageProcessor
+                                        .detectStraighteningAngle(it)
+                                )
+                            }
+                        },
+                        enabled = original != null,
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Default.Straighten, stringResource(R.string.straighten_image))
+                    }
+                    FilledTonalButton(
+                        onClick = {
+                            filters = filters.copy(
+                                rotationDegrees = normalizeRotation(filters.rotationDegrees + 90f)
+                            )
+                        },
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        Icon(Icons.Default.RotateRight, stringResource(R.string.rotate_right))
+                    }
+                }
+                Slider(
+                    value = filters.rotationDegrees.coerceIn(-15f, 15f),
+                    onValueChange = { filters = filters.copy(rotationDegrees = it) },
+                    valueRange = -15f..15f,
+                    steps = 29,
+                )
+            }
+            item {
                 Row(
                     Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -1197,6 +1337,17 @@ private fun EditorScreen(
                         steps = 13,
                     )
                 }
+            }
+            item {
+                Text(stringResource(R.string.artifact_cleanup_value, filters.artifactCleanup))
+                Slider(
+                    value = filters.artifactCleanup.toFloat(),
+                    onValueChange = {
+                        filters = filters.copy(artifactCleanup = it.toInt().coerceIn(0, 100))
+                    },
+                    valueRange = 0f..100f,
+                    steps = 19,
+                )
             }
             item {
                 Text(stringResource(R.string.contrast_value, (filters.contrast * 100).toInt()))
@@ -1492,6 +1643,13 @@ private fun CropImageDialog(
 
 private fun ImageFilters.isCropped(): Boolean =
     cropLeft > 0.001f || cropTop > 0.001f || cropRight < 0.999f || cropBottom < 0.999f
+
+private fun normalizeRotation(value: Float): Float {
+    var normalized = value % 360f
+    if (normalized > 180f) normalized -= 360f
+    if (normalized < -180f) normalized += 360f
+    return normalized
+}
 
 @Composable
 private fun ToggleRow(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {

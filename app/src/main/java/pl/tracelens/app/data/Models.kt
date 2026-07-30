@@ -15,6 +15,8 @@ data class ImageFilters(
     val colorTolerance: Float = 0.08f,
     val autoRemoveBackground: Boolean = false,
     val simplifyLevels: Int = 0,
+    val rotationDegrees: Float = 0f,
+    val artifactCleanup: Int = 0,
     val eraserPoints: List<EraserPoint> = emptyList(),
     val cropLeft: Float = 0f,
     val cropTop: Float = 0f,
