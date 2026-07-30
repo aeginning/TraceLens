@@ -12,6 +12,8 @@ import android.hardware.camera2.CameraManager
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
@@ -402,6 +404,46 @@ private fun SettingsScreen(
     ) {
         item {
             Text(stringResource(R.string.appearance), fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.language), style = MaterialTheme.typography.bodySmall)
+            val selectedLanguage = AppCompatDelegate.getApplicationLocales()
+                .toLanguageTags()
+                .substringBefore(',')
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item {
+                    FilterChip(
+                        selected = selectedLanguage.isBlank(),
+                        onClick = {
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.getEmptyLocaleList()
+                            )
+                        },
+                        label = { Text(stringResource(R.string.language_system)) },
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = selectedLanguage.startsWith("en"),
+                        onClick = {
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.forLanguageTags("en")
+                            )
+                        },
+                        label = { Text(stringResource(R.string.language_english)) },
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = selectedLanguage.startsWith("pl"),
+                        onClick = {
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.forLanguageTags("pl")
+                            )
+                        },
+                        label = { Text(stringResource(R.string.language_polish)) },
+                    )
+                }
+            }
             Spacer(Modifier.height(8.dp))
             Text(stringResource(R.string.theme), style = MaterialTheme.typography.bodySmall)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

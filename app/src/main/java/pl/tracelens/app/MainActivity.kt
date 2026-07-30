@@ -3,7 +3,6 @@ package pl.tracelens.app
 import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.Crossfade
@@ -27,10 +26,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.core.view.WindowCompat
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.delay
 import pl.tracelens.app.ui.TraceLensApp
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     private var incomingIntent by mutableStateOf<Intent?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {

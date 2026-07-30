@@ -8,6 +8,10 @@
     <string name="nav_projects">Projekty</string>
     <string name="nav_settings">Ustawienia</string>
     <string name="appearance">Wygląd i dostępność</string>
+    <string name="language">Język</string>
+    <string name="language_system">Systemowy</string>
+    <string name="language_english">English</string>
+    <string name="language_polish">Polski</string>
     <string name="theme">Motyw</string>
     <string name="theme_system">Systemowy</string>
     <string name="theme_light">Jasny</string>
