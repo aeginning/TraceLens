@@ -18,6 +18,7 @@ import pl.tracelens.app.data.ImageFilters
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
 import pl.tracelens.app.data.StorageSummary
+import pl.tracelens.app.data.LocalTransferServer
 import pl.tracelens.app.image.ImageProcessor
 import java.util.UUID
 
@@ -213,6 +214,78 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         projects = projects.filterNot { it.id == project.id }
         repository.saveProjects(projects)
         message = "Projekt „${project.name}” został usunięty."
+    }
+
+    fun exportProject(project: TraceProject, uri: Uri) {
+        val image = imageForProject(project) ?: run {
+            message = "Nie znaleziono obrazu projektu."
+            return
+        }
+        viewModelScope.launch {
+            busy = true
+            runCatching {
+                withContext(Dispatchers.IO) { repository.exportProject(uri, project, image) }
+            }.onSuccess {
+                message = "Projekt „${project.name}” został wyeksportowany."
+            }.onFailure {
+                message = it.message ?: "Nie udało się wyeksportować projektu."
+            }
+            busy = false
+        }
+    }
+
+    fun shareProject(project: TraceProject, onReady: (Uri) -> Unit) {
+        val image = imageForProject(project) ?: run {
+            message = "Nie znaleziono obrazu projektu."
+            return
+        }
+        viewModelScope.launch {
+            busy = true
+            runCatching {
+                withContext(Dispatchers.IO) {
+                    repository.createShareableProjectArchive(project, image)
+                }
+            }.onSuccess(onReady).onFailure {
+                message = it.message ?: "Nie udało się przygotować projektu do udostępnienia."
+            }
+            busy = false
+        }
+    }
+
+    fun prepareLocalTransfer(project: TraceProject, onReady: (LocalTransferServer) -> Unit) {
+        val image = imageForProject(project) ?: return
+        viewModelScope.launch {
+            busy = true
+            runCatching {
+                withContext(Dispatchers.IO) { repository.createLocalTransfer(project, image) }
+            }.onSuccess(onReady).onFailure {
+                message = it.message ?: "Nie udało się uruchomić transferu lokalnego."
+            }
+            busy = false
+        }
+    }
+
+    fun importProject(uri: Uri, onComplete: (TraceProject) -> Unit = {}) {
+        viewModelScope.launch {
+            busy = true
+            runCatching {
+                withContext(Dispatchers.IO) { repository.importProject(uri) }
+            }.onSuccess { imported ->
+                images = (images + imported.image).sortedImages()
+                projects = (listOf(imported.project) + projects).sortedByDescending { it.modifiedAt }
+                collectionNames = (collectionNames + imported.image.collectionNames)
+                    .distinctBy { it.lowercase() }
+                    .sortedBy { it.lowercase() }
+                repository.saveImages(images)
+                repository.saveProjects(projects)
+                repository.saveCollectionNames(collectionNames)
+                message = "Zaimportowano projekt „${imported.project.name}”."
+                onComplete(imported.project)
+            }.onFailure {
+                message = it.message ?: "Nie udało się zaimportować projektu."
+            }
+            busy = false
+        }
     }
 
     fun addProgressPhoto(project: TraceProject, fileName: String): TraceProject {

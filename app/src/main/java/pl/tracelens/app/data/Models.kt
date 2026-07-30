@@ -79,3 +79,8 @@ data class StorageSummary(
 ) {
     val totalBytes: Long get() = imagesBytes + projectsBytes + cacheBytes
 }
+
+data class ImportedProject(
+    val image: LibraryImage,
+    val project: TraceProject,
+)

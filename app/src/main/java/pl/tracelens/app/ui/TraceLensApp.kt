@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.Color as AndroidColor
 import android.hardware.camera2.CameraCharacteristics
 import android.hardware.camera2.CameraManager
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -72,6 +73,9 @@ import androidx.compose.material.icons.filled.Unarchive
 import androidx.compose.material.icons.filled.MonochromePhotos
 import androidx.compose.material.icons.filled.InvertColors
 import androidx.compose.material.icons.filled.ColorLens
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FileUpload
+import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -135,6 +139,9 @@ import pl.tracelens.app.data.AppSettings
 import pl.tracelens.app.data.EraserPoint
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
+import pl.tracelens.app.data.LocalTransferServer
+import com.google.zxing.BarcodeFormat
+import com.google.zxing.MultiFormatWriter
 import pl.tracelens.app.ui.camera.TraceWorkspace
 
 private sealed interface Screen {
@@ -147,7 +154,11 @@ private sealed interface Screen {
 }
 
 @Composable
-fun TraceLensApp(viewModel: AppViewModel) {
+fun TraceLensApp(
+    viewModel: AppViewModel,
+    incomingIntent: Intent? = null,
+    onIncomingIntentConsumed: () -> Unit = {},
+) {
     MaterialTheme {
         var screen: Screen by remember { mutableStateOf(Screen.Library) }
         var showLibrarySearch by remember { mutableStateOf(false) }
@@ -157,6 +168,24 @@ fun TraceLensApp(viewModel: AppViewModel) {
             if (message != null) {
                 snackbar.showSnackbar(message)
                 viewModel.consumeMessage()
+            }
+        }
+        LaunchedEffect(incomingIntent) {
+            if (incomingIntent != null) {
+                @Suppress("DEPRECATION")
+                val uri = when (incomingIntent.action) {
+                    Intent.ACTION_SEND -> incomingIntent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)
+                    Intent.ACTION_VIEW -> incomingIntent.data
+                    else -> null
+                }
+                if (uri != null) {
+                    if (incomingIntent.type?.startsWith("image/") == true) {
+                        viewModel.importImage(uri) { image -> screen = Screen.Editor(image.id) }
+                    } else {
+                        viewModel.importProject(uri) { screen = Screen.Projects }
+                    }
+                }
+                onIncomingIntentConsumed()
             }
         }
 
@@ -1354,20 +1383,49 @@ private fun ProjectsScreen(
     onOpen: (TraceProject) -> Unit,
     onGallery: (TraceProject) -> Unit,
 ) {
+    val context = LocalContext.current
     var createDialog by remember { mutableStateOf(false) }
     var projectToDelete by remember { mutableStateOf<TraceProject?>(null) }
     var projectToRename by remember { mutableStateOf<TraceProject?>(null) }
+    var projectToExport by remember { mutableStateOf<TraceProject?>(null) }
+    var transferServer by remember { mutableStateOf<LocalTransferServer?>(null) }
     var showArchived by remember { mutableStateOf(false) }
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/vnd.tracelens.project"),
+    ) { uri ->
+        val project = projectToExport
+        projectToExport = null
+        if (uri != null && project != null) viewModel.exportProject(project, uri)
+    }
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument(),
+    ) { uri ->
+        if (uri != null) viewModel.importProject(uri)
+    }
     val visibleProjects = viewModel.projects.filter { it.archived == showArchived }
     val lastActiveProject = viewModel.projects.firstOrNull { !it.archived }
     Box(modifier.fillMaxSize()) {
         if (viewModel.projects.isEmpty()) {
             EmptyState(
                 title = "Brak projektów",
-                detail = if (viewModel.images.isEmpty()) "Najpierw dodaj obraz w bibliotece." else "Utwórz projekt i rozpocznij odrysowywanie.",
+                detail = if (viewModel.images.isEmpty()) {
+                    "Zaimportuj wcześniejszy projekt albo dodaj obraz w bibliotece."
+                } else {
+                    "Zaimportuj wcześniejszy projekt albo utwórz nowy."
+                },
                 button = "Nowy projekt",
                 enabled = viewModel.images.isNotEmpty(),
                 onClick = { createDialog = true },
+                secondaryButton = "Importuj projekt",
+                onSecondaryClick = {
+                    importLauncher.launch(
+                        arrayOf(
+                            "application/vnd.tracelens.project",
+                            "application/zip",
+                            "application/octet-stream",
+                        )
+                    )
+                },
             )
         } else {
             LazyColumn(
@@ -1375,7 +1433,11 @@ private fun ProjectsScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         FilterChip(
                             selected = !showArchived,
                             onClick = { showArchived = false },
@@ -1386,6 +1448,20 @@ private fun ProjectsScreen(
                             onClick = { showArchived = true },
                             label = { Text("Archiwum") },
                         )
+                        Spacer(Modifier.weight(1f))
+                        IconButton(
+                            onClick = {
+                                importLauncher.launch(
+                                    arrayOf(
+                                        "application/vnd.tracelens.project",
+                                        "application/zip",
+                                        "application/octet-stream",
+                                    )
+                                )
+                            },
+                        ) {
+                            Icon(Icons.Default.FileUpload, "Importuj projekt")
+                        }
                     }
                 }
                 if (!showArchived && lastActiveProject != null) {
@@ -1415,44 +1491,72 @@ private fun ProjectsScreen(
                 items(visibleProjects, key = { it.id }) { project ->
                     val image = viewModel.imageForProject(project)
                     Card(onClick = { onOpen(project) }, modifier = Modifier.fillMaxWidth()) {
-                        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.padding(12.dp)) {
                             val previewPhoto = project.coverPhoto ?: project.progressPhotos.lastOrNull()
                             val bitmap = if (previewPhoto != null) {
                                 remember(project.id, previewPhoto) {
                                     viewModel.progressBitmap(project.id, previewPhoto, 320)
                                 }
                             } else image?.let(viewModel::bitmap)
-                            if (bitmap != null) {
-                                Image(
-                                    bitmap.asImageBitmap(), null,
-                                    Modifier.size(72.dp).background(MaterialTheme.colorScheme.surfaceVariant),
-                                    contentScale = ContentScale.Fit,
-                                )
-                            } else Icon(Icons.Default.Image, null, Modifier.size(72.dp))
-                            Spacer(Modifier.width(12.dp))
-                            Column(Modifier.weight(1f)) {
-                                Text(project.name, fontWeight = FontWeight.SemiBold)
-                                Text("${project.progressPhotos.size} zdjęć postępu", style = MaterialTheme.typography.bodySmall)
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                if (bitmap != null) {
+                                    Image(
+                                        bitmap.asImageBitmap(), null,
+                                        Modifier.size(88.dp).background(MaterialTheme.colorScheme.surfaceVariant),
+                                        contentScale = ContentScale.Fit,
+                                    )
+                                } else Icon(Icons.Default.Image, null, Modifier.size(88.dp))
+                                Spacer(Modifier.width(14.dp))
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        project.name,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                    )
+                                    Text(
+                                        "${project.progressPhotos.size} zdjęć postępu",
+                                        style = MaterialTheme.typography.bodySmall,
+                                    )
+                                }
+                                Icon(Icons.Default.PlayArrow, "Otwórz")
                             }
-                            IconButton(
-                                onClick = { onGallery(project) },
-                                enabled = project.progressPhotos.isNotEmpty(),
+                            Spacer(Modifier.height(6.dp))
+                            Row(
+                                Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceEvenly,
                             ) {
-                                Icon(Icons.Default.PhotoLibrary, "Otwórz zdjęcia postępu")
+                                IconButton(
+                                    onClick = { onGallery(project) },
+                                    enabled = project.progressPhotos.isNotEmpty(),
+                                ) { Icon(Icons.Default.PhotoLibrary, "Otwórz zdjęcia postępu") }
+                                IconButton(onClick = { projectToRename = project }) {
+                                    Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę projektu")
+                                }
+                                IconButton(onClick = { viewModel.toggleProjectArchive(project) }) {
+                                    Icon(
+                                        if (project.archived) Icons.Default.Unarchive else Icons.Default.Archive,
+                                        if (project.archived) "Przywróć projekt" else "Archiwizuj projekt",
+                                    )
+                                }
+                                IconButton(
+                                    onClick = {
+                                        projectToExport = project
+                                        exportLauncher.launch("${project.name}.tracelens")
+                                    },
+                                ) { Icon(Icons.Default.FileDownload, "Eksportuj projekt") }
+                                IconButton(
+                                    onClick = {
+                                        viewModel.prepareLocalTransfer(project) {
+                                            transferServer?.close()
+                                            transferServer = it
+                                        }
+                                    },
+                                ) { Icon(Icons.Default.QrCode, "Przenieś przez kod QR") }
+                                IconButton(onClick = { projectToDelete = project }) {
+                                    Icon(Icons.Default.Delete, "Usuń projekt")
+                                }
                             }
-                            IconButton(onClick = { projectToRename = project }) {
-                                Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę projektu")
-                            }
-                            IconButton(onClick = { viewModel.toggleProjectArchive(project) }) {
-                                Icon(
-                                    if (project.archived) Icons.Default.Unarchive else Icons.Default.Archive,
-                                    if (project.archived) "Przywróć projekt" else "Archiwizuj projekt",
-                                )
-                            }
-                            IconButton(onClick = { projectToDelete = project }) {
-                                Icon(Icons.Default.Delete, "Usuń projekt")
-                            }
-                            Icon(Icons.Default.PlayArrow, "Otwórz")
                         }
                     }
                 }
@@ -1503,6 +1607,39 @@ private fun ProjectsScreen(
             },
         )
     }
+    transferServer?.let { server ->
+        LocalTransferDialog(
+            server = server,
+            onDismiss = {
+                server.close()
+                transferServer = null
+            },
+        )
+    }
+}
+
+@Composable
+private fun LocalTransferDialog(server: LocalTransferServer, onDismiss: () -> Unit) {
+    val qr = remember(server.url) {
+        val matrix = MultiFormatWriter().encode(server.url, BarcodeFormat.QR_CODE, 700, 700)
+        Bitmap.createBitmap(700, 700, Bitmap.Config.RGB_565).apply {
+            for (y in 0 until 700) for (x in 0 until 700) {
+                setPixel(x, y, if (matrix[x, y]) AndroidColor.BLACK else AndroidColor.WHITE)
+            }
+        }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Przenieś projekt") },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Image(qr.asImageBitmap(), "Kod QR transferu", Modifier.fillMaxWidth())
+                Text("Zeskanuj kod drugim telefonem połączonym z tą samą siecią Wi‑Fi.")
+                Text("Nie zamykaj tego okna do zakończenia pobierania.", style = MaterialTheme.typography.bodySmall)
+            }
+        },
+        confirmButton = { Button(onClick = onDismiss) { Text("Zakończ") } },
+    )
 }
 
 @Composable
@@ -2011,6 +2148,8 @@ private fun EmptyState(
     button: String,
     enabled: Boolean = true,
     onClick: () -> Unit,
+    secondaryButton: String? = null,
+    onSecondaryClick: () -> Unit = {},
 ) {
     Column(
         Modifier.fillMaxSize().padding(32.dp),
@@ -2023,6 +2162,21 @@ private fun EmptyState(
         Spacer(Modifier.height(8.dp))
         Text(detail, style = MaterialTheme.typography.bodyMedium)
         Spacer(Modifier.height(20.dp))
-        Button(onClick = onClick, enabled = enabled) { Text(button) }
+        if (secondaryButton != null) {
+            FilledTonalButton(
+                onClick = onSecondaryClick,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.FileUpload, null)
+                Spacer(Modifier.width(8.dp))
+                Text(secondaryButton)
+            }
+            Spacer(Modifier.height(10.dp))
+        }
+        Button(
+            onClick = onClick,
+            enabled = enabled,
+            modifier = Modifier.fillMaxWidth(),
+        ) { Text(button) }
     }
 }

@@ -15,6 +15,9 @@ import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.util.UUID
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
 
 class AppRepository(private val context: Context) {
     private val imagesDir = File(context.filesDir, "images").apply { mkdirs() }
@@ -258,11 +261,171 @@ class AppRepository(private val context: Context) {
         return !directory.exists() || directory.deleteRecursively()
     }
 
+    fun exportProject(uri: Uri, project: TraceProject, image: LibraryImage) {
+        val output = context.contentResolver.openOutputStream(uri)
+            ?: error("Nie można otworzyć pliku docelowego.")
+        ZipOutputStream(output.buffered()).use { zip ->
+            val manifest = JSONObject().apply {
+                put("format", "TraceLensProject")
+                put("formatVersion", 1)
+                put("exportedAt", System.currentTimeMillis())
+                put("image", image.toJson())
+                put("project", project.toJson())
+            }
+            zip.putNextEntry(ZipEntry("manifest.json"))
+            zip.write(manifest.toString(2).toByteArray(Charsets.UTF_8))
+            zip.closeEntry()
+
+            addFileToZip(zip, imageFile(image, processed = false), "image/original")
+            image.processedFileName?.let {
+                addFileToZip(zip, File(imagesDir, it), "image/processed")
+            }
+            val projectDirectory = File(projectsDir, project.id)
+            if (projectDirectory.exists()) {
+                projectDirectory.walkTopDown().filter { it.isFile }.forEach { file ->
+                    val relative = file.relativeTo(projectDirectory).invariantSeparatorsPath
+                    addFileToZip(zip, file, "project-files/$relative")
+                }
+            }
+        }
+    }
+
+    fun createShareableProjectArchive(project: TraceProject, image: LibraryImage): Uri {
+        val directory = File(context.cacheDir, "project-archives").apply { mkdirs() }
+        val file = File(directory, "${project.name.toSafeFolderName()}.tracelens")
+        file.outputStream().use { output ->
+            ZipOutputStream(output.buffered()).use { zip ->
+                val manifest = JSONObject().apply {
+                    put("format", "TraceLensProject")
+                    put("formatVersion", 1)
+                    put("exportedAt", System.currentTimeMillis())
+                    put("image", image.toJson())
+                    put("project", project.toJson())
+                }
+                zip.putNextEntry(ZipEntry("manifest.json"))
+                zip.write(manifest.toString(2).toByteArray(Charsets.UTF_8))
+                zip.closeEntry()
+                addFileToZip(zip, imageFile(image, processed = false), "image/original")
+                image.processedFileName?.let {
+                    addFileToZip(zip, File(imagesDir, it), "image/processed")
+                }
+                val projectDirectory = File(projectsDir, project.id)
+                if (projectDirectory.exists()) {
+                    projectDirectory.walkTopDown().filter { it.isFile }.forEach { source ->
+                        val relative = source.relativeTo(projectDirectory).invariantSeparatorsPath
+                        addFileToZip(zip, source, "project-files/$relative")
+                    }
+                }
+            }
+        }
+        return FileProvider.getUriForFile(context, "${context.packageName}.files", file)
+    }
+
+    fun createLocalTransfer(project: TraceProject, image: LibraryImage): LocalTransferServer {
+        createShareableProjectArchive(project, image)
+        val file = File(
+            File(context.cacheDir, "project-archives"),
+            "${project.name.toSafeFolderName()}.tracelens",
+        )
+        return LocalTransferServer(file)
+    }
+
+    fun importProject(uri: Uri): ImportedProject {
+        val temporary = File(context.cacheDir, "project-import-${UUID.randomUUID()}").apply { mkdirs() }
+        try {
+            val input = context.contentResolver.openInputStream(uri)
+                ?: error("Nie można otworzyć archiwum.")
+            var extractedBytes = 0L
+            ZipInputStream(input.buffered()).use { zip ->
+                var entry = zip.nextEntry
+                while (entry != null) {
+                    val target = File(temporary, entry.name)
+                    val rootPath = temporary.canonicalPath + File.separator
+                    require(target.canonicalPath.startsWith(rootPath)) { "Archiwum zawiera nieprawidłową ścieżkę." }
+                    if (entry.isDirectory) {
+                        target.mkdirs()
+                    } else {
+                        target.parentFile?.mkdirs()
+                        target.outputStream().use { output ->
+                            val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                            var read = zip.read(buffer)
+                            while (read >= 0) {
+                                if (read > 0) {
+                                    extractedBytes += read
+                                    require(extractedBytes <= 500L * 1024L * 1024L) {
+                                        "Archiwum przekracza limit 500 MB."
+                                    }
+                                    output.write(buffer, 0, read)
+                                }
+                                read = zip.read(buffer)
+                            }
+                        }
+                    }
+                    zip.closeEntry()
+                    entry = zip.nextEntry
+                }
+            }
+            val manifestFile = File(temporary, "manifest.json")
+            require(manifestFile.isFile) { "Brak manifestu projektu." }
+            val manifest = JSONObject(manifestFile.readText())
+            require(manifest.optString("format") == "TraceLensProject") { "To nie jest archiwum TraceLens." }
+            require(manifest.optInt("formatVersion") == 1) { "Nieobsługiwana wersja archiwum." }
+
+            val sourceImage = manifest.getJSONObject("image").toLibraryImage()
+            val sourceProject = manifest.getJSONObject("project").toTraceProject()
+            val originalSource = File(temporary, "image/original")
+            require(originalSource.isFile) { "Archiwum nie zawiera obrazu źródłowego." }
+
+            val newImageId = UUID.randomUUID().toString()
+            val extension = sourceImage.originalFileName.substringAfterLast('.', "png")
+                .takeIf { it.matches(Regex("[A-Za-z0-9]{1,5}")) } ?: "png"
+            val originalName = "$newImageId.$extension"
+            originalSource.copyTo(File(imagesDir, originalName))
+            val processedSource = File(temporary, "image/processed")
+            val processedName = if (processedSource.isFile) "${newImageId}_processed.png" else null
+            if (processedName != null) processedSource.copyTo(File(imagesDir, processedName))
+
+            val newProjectId = UUID.randomUUID().toString()
+            val importedProjectDirectory = File(temporary, "project-files")
+            if (importedProjectDirectory.exists()) {
+                importedProjectDirectory.copyRecursively(File(projectsDir, newProjectId), overwrite = true)
+            }
+            val now = System.currentTimeMillis()
+            val image = sourceImage.copy(
+                id = newImageId,
+                name = "${sourceImage.name} (import)",
+                originalFileName = originalName,
+                processedFileName = processedName,
+                favorite = false,
+                createdAt = now,
+                lastUsedAt = now,
+            )
+            val project = sourceProject.copy(
+                id = newProjectId,
+                name = "${sourceProject.name} (import)",
+                imageId = newImageId,
+                archived = false,
+                createdAt = now,
+                modifiedAt = now,
+            )
+            return ImportedProject(image, project)
+        } finally {
+            temporary.deleteRecursively()
+        }
+    }
+
     private fun queryDisplayName(uri: Uri): String? {
         val projection = arrayOf(android.provider.OpenableColumns.DISPLAY_NAME)
         return context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
             if (cursor.moveToFirst()) cursor.getString(0) else null
         }
+    }
+
+    private fun addFileToZip(zip: ZipOutputStream, file: File, entryName: String) {
+        if (!file.isFile) return
+        zip.putNextEntry(ZipEntry(entryName))
+        file.inputStream().use { it.copyTo(zip) }
+        zip.closeEntry()
     }
 }
 

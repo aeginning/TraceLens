@@ -3,4 +3,7 @@
     <files-path
         name="project_photos"
         path="projects/" />
+    <cache-path
+        name="project_archives"
+        path="project-archives/" />
 </paths>

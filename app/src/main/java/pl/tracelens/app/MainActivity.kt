@@ -1,5 +1,6 @@
 package pl.tracelens.app
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
@@ -29,8 +30,11 @@ import kotlinx.coroutines.delay
 import pl.tracelens.app.ui.TraceLensApp
 
 class MainActivity : ComponentActivity() {
+    private var incomingIntent by mutableStateOf<Intent?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        incomingIntent = intent.takeIf { it.action != Intent.ACTION_MAIN }
         enableEdgeToEdge()
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContent {
@@ -70,9 +74,19 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                 } else {
-                    TraceLensApp(viewModel)
+                    TraceLensApp(
+                        viewModel = viewModel,
+                        incomingIntent = incomingIntent,
+                        onIncomingIntentConsumed = { incomingIntent = null },
+                    )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        incomingIntent = intent
     }
 }

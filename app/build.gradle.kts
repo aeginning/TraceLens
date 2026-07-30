@@ -80,6 +80,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
     implementation("androidx.exifinterface:exifinterface:1.4.2")
+    implementation("com.google.zxing:core:3.5.4")
 
     val cameraX = "1.6.1"
     implementation("androidx.camera:camera-core:$cameraX")
