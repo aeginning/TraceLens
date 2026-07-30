@@ -40,6 +40,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -538,6 +539,10 @@ private fun LibraryScreen(
     var query by remember { mutableStateOf("") }
     var selectedCollection by remember { mutableStateOf<String?>(null) }
     var sort by remember { mutableStateOf(LibrarySort.Favorites) }
+    val gridState = rememberLazyGridState()
+    LaunchedEffect(showSearch, showFilters) {
+        if (showSearch || showFilters) gridState.animateScrollToItem(0)
+    }
     val collections = viewModel.collectionNames
     val visibleImages = viewModel.images
         .filter { it.name.contains(query.trim(), ignoreCase = true) }
@@ -566,6 +571,7 @@ private fun LibraryScreen(
         } else {
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(150.dp),
+                state = gridState,
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(12.dp, 12.dp, 12.dp, 96.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
