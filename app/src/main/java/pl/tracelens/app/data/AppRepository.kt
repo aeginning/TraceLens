@@ -11,6 +11,8 @@ import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import androidx.core.content.FileProvider
 import pl.tracelens.app.R
+import pl.tracelens.app.image.StarterPattern
+import pl.tracelens.app.image.StarterPatterns
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -139,6 +141,13 @@ class AppRepository(private val context: Context) {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
         return LibraryImage(id = id, name = name, originalFileName = fileName)
+    }
+
+    fun importStarterPattern(pattern: StarterPattern, name: String): LibraryImage {
+        val bitmap = requireNotNull(StarterPatterns.bitmap(context, pattern)) {
+            text(R.string.cannot_open_image)
+        }
+        return importGeneratedImage(name, bitmap)
     }
 
     fun imageFile(image: LibraryImage, processed: Boolean = true): File {

@@ -11,3 +11,8 @@ google-play/assets/*-source.png
 .env.deploy
 .env.signing
 *.jks
+tools/pattern-curator/.build-tools/
+tools/pattern-curator/build/
+tools/pattern-curator/dist/
+tools/pattern-curator/*.spec
+tools/pattern-curator/__pycache__/

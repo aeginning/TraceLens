@@ -135,6 +135,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -868,12 +869,9 @@ private fun StarterPatternsDialog(
     onDismiss: () -> Unit,
     onAdd: (pl.tracelens.app.image.StarterPattern, String) -> Unit,
 ) {
-    val patterns = listOf(
-        pl.tracelens.app.image.StarterPattern.Star to stringResource(R.string.pattern_star),
-        pl.tracelens.app.image.StarterPattern.Heart to stringResource(R.string.pattern_heart),
-        pl.tracelens.app.image.StarterPattern.Flower to stringResource(R.string.pattern_flower),
-        pl.tracelens.app.image.StarterPattern.Butterfly to stringResource(R.string.pattern_butterfly),
-    )
+    val context = LocalContext.current
+    val locale = LocalConfiguration.current.locales[0]
+    val patterns = remember { pl.tracelens.app.image.StarterPatterns.load(context) }
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.starter_patterns)) },
@@ -887,9 +885,10 @@ private fun StarterPatternsDialog(
                     modifier = Modifier.fillMaxWidth().height(420.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(patterns) { (pattern, name) ->
+                    items(patterns, key = { it.id }) { pattern ->
+                        val name = pl.tracelens.app.image.StarterPatterns.localizedName(pattern, locale)
                         val preview = remember(pattern) {
-                            pl.tracelens.app.image.StarterPatterns.create(pattern, 240)
+                            pl.tracelens.app.image.StarterPatterns.bitmap(context, pattern)
                         }
                         Card {
                             Row(
@@ -897,12 +896,14 @@ private fun StarterPatternsDialog(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
-                                Image(
-                                    preview.asImageBitmap(),
-                                    name,
-                                    Modifier.size(86.dp),
-                                    contentScale = ContentScale.Fit,
-                                )
+                                if (preview != null) {
+                                    Image(
+                                        preview.asImageBitmap(),
+                                        name,
+                                        Modifier.size(86.dp),
+                                        contentScale = ContentScale.Fit,
+                                    )
+                                }
                                 Text(name, Modifier.weight(1f))
                                 IconButton(onClick = { onAdd(pattern, name) }) {
                                     Icon(

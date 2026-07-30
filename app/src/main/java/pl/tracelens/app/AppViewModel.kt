@@ -21,7 +21,6 @@ import pl.tracelens.app.data.StorageSummary
 import pl.tracelens.app.data.LocalTransferServer
 import pl.tracelens.app.image.ImageProcessor
 import pl.tracelens.app.image.StarterPattern
-import pl.tracelens.app.image.StarterPatterns
 import java.util.UUID
 
 class AppViewModel(private val repository: AppRepository) : ViewModel() {
@@ -70,7 +69,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             busy = true
             runCatching {
                 withContext(Dispatchers.Default) {
-                    repository.importGeneratedImage(localizedName, StarterPatterns.create(pattern))
+                    repository.importStarterPattern(pattern, localizedName)
                 }
             }.onSuccess { image ->
                 images = (images + image).sortedImages()
