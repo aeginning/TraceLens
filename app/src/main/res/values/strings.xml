@@ -1,3 +1,28 @@
 <resources>
     <string name="app_name">TraceLens</string>
+    <string name="splash_description">TraceLens — digital tracing on your phone</string>
+    <string name="library_title">Image library</string>
+    <string name="projects_title">Projects</string>
+    <string name="settings_title">Settings</string>
+    <string name="nav_images">Images</string>
+    <string name="nav_projects">Projects</string>
+    <string name="nav_settings">Settings</string>
+    <string name="appearance">Appearance and accessibility</string>
+    <string name="theme">Theme</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="show_icon_hints">Show icon explanations</string>
+    <string name="show_tutorial_again">Show introduction again</string>
+    <string name="tutorial_welcome_title">Welcome to TraceLens</string>
+    <string name="tutorial_welcome_text">Turn your phone into a digital tracing guide. Add an image and place the phone above your drawing surface.</string>
+    <string name="tutorial_prepare_title">Prepare your image</string>
+    <string name="tutorial_prepare_text">Crop the image, remove its background and adjust the colors before creating a project.</string>
+    <string name="tutorial_draw_title">Trace with the camera</string>
+    <string name="tutorial_draw_text">Adjust the overlay, lock its position and trace while watching your progress through the camera.</string>
+    <string name="tutorial_projects_title">Save your progress</string>
+    <string name="tutorial_projects_text">Projects remember your setup. Take progress photos and transfer complete projects between phones.</string>
+    <string name="tutorial_next">Next</string>
+    <string name="tutorial_start">Start using TraceLens</string>
+    <string name="tutorial_skip">Skip</string>
 </resources>

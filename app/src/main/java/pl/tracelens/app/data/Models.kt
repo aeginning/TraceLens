@@ -35,6 +35,9 @@ data class LibraryImage(
 )
 
 data class AppSettings(
+    val themeMode: Int = 0,
+    val tutorialCompleted: Boolean = false,
+    val showIconHints: Boolean = true,
     val defaultOpacity: Float = 0.25f,
     val defaultGridEnabled: Boolean = false,
     val defaultGridDivisions: Int = 4,

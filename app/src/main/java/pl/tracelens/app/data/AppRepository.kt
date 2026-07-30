@@ -27,6 +27,9 @@ class AppRepository(private val context: Context) {
     private val preferences = context.getSharedPreferences("trace_lens_settings", Context.MODE_PRIVATE)
 
     fun loadSettings() = AppSettings(
+        themeMode = preferences.getInt("themeMode", 0).coerceIn(0, 2),
+        tutorialCompleted = preferences.getBoolean("tutorialCompleted", false),
+        showIconHints = preferences.getBoolean("showIconHints", true),
         defaultOpacity = preferences.getFloat("defaultOpacity", 0.25f).coerceIn(0f, 1f),
         defaultGridEnabled = preferences.getBoolean("defaultGridEnabled", false),
         defaultGridDivisions = preferences.getInt("defaultGridDivisions", 4).coerceIn(2, 12),
@@ -40,6 +43,9 @@ class AppRepository(private val context: Context) {
 
     fun saveSettings(settings: AppSettings) {
         preferences.edit()
+            .putInt("themeMode", settings.themeMode)
+            .putBoolean("tutorialCompleted", settings.tutorialCompleted)
+            .putBoolean("showIconHints", settings.showIconHints)
             .putFloat("defaultOpacity", settings.defaultOpacity)
             .putBoolean("defaultGridEnabled", settings.defaultGridEnabled)
             .putInt("defaultGridDivisions", settings.defaultGridDivisions)

@@ -1,0 +1,28 @@
+<resources>
+    <string name="app_name">TraceLens</string>
+    <string name="splash_description">TraceLens — cyfrowa kalka w Twoim telefonie</string>
+    <string name="library_title">Biblioteka obrazów</string>
+    <string name="projects_title">Projekty</string>
+    <string name="settings_title">Ustawienia</string>
+    <string name="nav_images">Obrazy</string>
+    <string name="nav_projects">Projekty</string>
+    <string name="nav_settings">Ustawienia</string>
+    <string name="appearance">Wygląd i dostępność</string>
+    <string name="theme">Motyw</string>
+    <string name="theme_system">Systemowy</string>
+    <string name="theme_light">Jasny</string>
+    <string name="theme_dark">Ciemny</string>
+    <string name="show_icon_hints">Pokazuj objaśnienia ikon</string>
+    <string name="show_tutorial_again">Pokaż samouczek ponownie</string>
+    <string name="tutorial_welcome_title">Witaj w TraceLens</string>
+    <string name="tutorial_welcome_text">Zmień telefon w cyfrową kalkę. Dodaj obraz i ustaw telefon nad powierzchnią, na której chcesz rysować.</string>
+    <string name="tutorial_prepare_title">Przygotuj obraz</string>
+    <string name="tutorial_prepare_text">Wykadruj obraz, usuń tło i dopasuj kolory przed utworzeniem projektu.</string>
+    <string name="tutorial_draw_title">Odrysowuj z aparatem</string>
+    <string name="tutorial_draw_text">Dopasuj nakładkę, zablokuj jej położenie i rysuj, obserwując postęp przez aparat.</string>
+    <string name="tutorial_projects_title">Zapisuj postęp</string>
+    <string name="tutorial_projects_text">Projekty zapamiętują ustawienia. Rób zdjęcia postępu i przenoś kompletne projekty między telefonami.</string>
+    <string name="tutorial_next">Dalej</string>
+    <string name="tutorial_start">Rozpocznij pracę</string>
+    <string name="tutorial_skip">Pomiń</string>
+</resources>

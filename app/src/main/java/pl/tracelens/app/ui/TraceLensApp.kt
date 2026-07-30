@@ -13,6 +13,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -91,6 +92,8 @@ import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -126,6 +129,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -136,6 +140,7 @@ import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.launch
 import pl.tracelens.app.AppViewModel
+import pl.tracelens.app.R
 import pl.tracelens.app.data.ImageFilters
 import pl.tracelens.app.data.AppSettings
 import pl.tracelens.app.data.EraserPoint
@@ -161,7 +166,12 @@ fun TraceLensApp(
     incomingIntent: Intent? = null,
     onIncomingIntentConsumed: () -> Unit = {},
 ) {
-    MaterialTheme {
+    val darkTheme = when (viewModel.appSettings.themeMode) {
+        1 -> false
+        2 -> true
+        else -> isSystemInDarkTheme()
+    }
+    MaterialTheme(colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()) {
         var screen: Screen by remember { mutableStateOf(Screen.Library) }
         var showLibrarySearch by remember { mutableStateOf(false) }
         var showLibraryFilters by remember { mutableStateOf(false) }
@@ -282,6 +292,15 @@ fun TraceLensApp(
                     contentAlignment = Alignment.Center,
                 ) { CircularProgressIndicator() }
             }
+            if (!viewModel.appSettings.tutorialCompleted) {
+                TutorialDialog(
+                    onComplete = {
+                        viewModel.updateSettings(
+                            viewModel.appSettings.copy(tutorialCompleted = true)
+                        )
+                    },
+                )
+            }
         }
     }
 }
@@ -303,9 +322,9 @@ private fun MainScaffold(
                 title = {
                     Text(
                         when (selectedTab) {
-                            0 -> "Biblioteka obrazów"
-                            1 -> "Projekty"
-                            else -> "Ustawienia"
+                            0 -> stringResource(R.string.library_title)
+                            1 -> stringResource(R.string.projects_title)
+                            else -> stringResource(R.string.settings_title)
                         }
                     )
                 },
@@ -330,19 +349,19 @@ private fun MainScaffold(
                     selected = selectedTab == 0,
                     onClick = onLibrary,
                     icon = { Icon(Icons.Default.Image, null) },
-                    label = { Text("Obrazy") },
+                    label = { Text(stringResource(R.string.nav_images)) },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 1,
                     onClick = onProjects,
                     icon = { Icon(Icons.Default.Folder, null) },
-                    label = { Text("Projekty") },
+                    label = { Text(stringResource(R.string.nav_projects)) },
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
                     onClick = onSettings,
                     icon = { Icon(Icons.Default.Settings, null) },
-                    label = { Text("Ustawienia") },
+                    label = { Text(stringResource(R.string.nav_settings)) },
                 )
             }
         },
@@ -381,6 +400,47 @@ private fun SettingsScreen(
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        item {
+            Text(stringResource(R.string.appearance), fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(8.dp))
+            Text(stringResource(R.string.theme), style = MaterialTheme.typography.bodySmall)
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item {
+                    FilterChip(
+                        selected = settings.themeMode == 0,
+                        onClick = { save(settings.copy(themeMode = 0)) },
+                        label = { Text(stringResource(R.string.theme_system)) },
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = settings.themeMode == 1,
+                        onClick = { save(settings.copy(themeMode = 1)) },
+                        label = { Text(stringResource(R.string.theme_light)) },
+                    )
+                }
+                item {
+                    FilterChip(
+                        selected = settings.themeMode == 2,
+                        onClick = { save(settings.copy(themeMode = 2)) },
+                        label = { Text(stringResource(R.string.theme_dark)) },
+                    )
+                }
+            }
+        }
+        item {
+            ToggleRow(stringResource(R.string.show_icon_hints), settings.showIconHints) {
+                save(settings.copy(showIconHints = it))
+            }
+        }
+        item {
+            FilledTonalButton(
+                onClick = { save(settings.copy(tutorialCompleted = false)) },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.show_tutorial_again))
+            }
+        }
         item {
             Text("Domyślne ustawienia nowych projektów", fontWeight = FontWeight.SemiBold)
             Text(
@@ -2199,4 +2259,68 @@ private fun EmptyState(
             modifier = Modifier.fillMaxWidth(),
         ) { Text(button) }
     }
+}
+
+@Composable
+private fun TutorialDialog(onComplete: () -> Unit) {
+    var page by remember { mutableStateOf(0) }
+    val titles = listOf(
+        R.string.tutorial_welcome_title,
+        R.string.tutorial_prepare_title,
+        R.string.tutorial_draw_title,
+        R.string.tutorial_projects_title,
+    )
+    val texts = listOf(
+        R.string.tutorial_welcome_text,
+        R.string.tutorial_prepare_text,
+        R.string.tutorial_draw_text,
+        R.string.tutorial_projects_text,
+    )
+    val icons = listOf(
+        Icons.Default.Star,
+        Icons.Default.AutoFixHigh,
+        Icons.Default.PhotoCamera,
+        Icons.Default.Folder,
+    )
+    AlertDialog(
+        onDismissRequest = {},
+        icon = { Icon(icons[page], null, Modifier.size(48.dp)) },
+        title = { Text(stringResource(titles[page])) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text(stringResource(texts[page]))
+                Row(
+                    Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    repeat(titles.size) { index ->
+                        Text(
+                            if (index == page) "●" else "○",
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                        )
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (page == titles.lastIndex) onComplete() else page++
+                },
+            ) {
+                Text(
+                    stringResource(
+                        if (page == titles.lastIndex) R.string.tutorial_start
+                        else R.string.tutorial_next
+                    )
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onComplete) {
+                Text(stringResource(R.string.tutorial_skip))
+            }
+        },
+    )
 }
