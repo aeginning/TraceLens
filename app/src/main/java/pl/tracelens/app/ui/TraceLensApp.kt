@@ -13,6 +13,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.annotation.StringRes
 import androidx.core.os.LocaleListCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -333,12 +334,12 @@ private fun MainScaffold(
                 actions = {
                     if (onSearch != null) {
                         IconButton(onClick = onSearch) {
-                            Icon(Icons.Default.Search, "Pokaż lub ukryj wyszukiwanie")
+                            Icon(Icons.Default.Search, stringResource(R.string.show_search))
                         }
                     }
                     if (onFilters != null) {
                         IconButton(onClick = onFilters) {
-                            Icon(Icons.Default.FilterList, "Pokaż lub ukryj filtry")
+                            Icon(Icons.Default.FilterList, stringResource(R.string.show_filters))
                         }
                     }
                 },
@@ -382,15 +383,18 @@ private fun SettingsScreen(
     val storage = remember(viewModel.images, viewModel.projects, storageRefresh) {
         viewModel.storageSummary()
     }
-    val cameras = remember {
+    val backCamera = stringResource(R.string.back_camera)
+    val frontCamera = stringResource(R.string.front_camera)
+    val otherCamera = stringResource(R.string.camera_number)
+    val cameras = remember(backCamera, frontCamera, otherCamera) {
         val manager = context.getSystemService(android.content.Context.CAMERA_SERVICE) as CameraManager
         manager.cameraIdList.mapIndexed { index, id ->
             val facing = manager.getCameraCharacteristics(id)
                 .get(CameraCharacteristics.LENS_FACING)
             val label = when (facing) {
-                CameraCharacteristics.LENS_FACING_BACK -> "Tylna ${index + 1}"
-                CameraCharacteristics.LENS_FACING_FRONT -> "Przednia ${index + 1}"
-                else -> "Kamera ${index + 1}"
+                CameraCharacteristics.LENS_FACING_BACK -> backCamera.format(index + 1)
+                CameraCharacteristics.LENS_FACING_FRONT -> frontCamera.format(index + 1)
+                else -> otherCamera.format(index + 1)
             }
             id to label
         }
@@ -484,27 +488,27 @@ private fun SettingsScreen(
             }
         }
         item {
-            Text("Domyślne ustawienia nowych projektów", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.default_project_settings), fontWeight = FontWeight.SemiBold)
             Text(
-                "Wartości będą stosowane przy tworzeniu projektu. Ustawienia widoczności działają od razu.",
+                stringResource(R.string.default_project_settings_info),
                 style = MaterialTheme.typography.bodySmall,
             )
         }
         item {
-            Text("Przezroczystość: ${(settings.defaultOpacity * 100).toInt()}%")
+            Text(stringResource(R.string.opacity_value, (settings.defaultOpacity * 100).toInt()))
             Slider(
                 value = settings.defaultOpacity,
                 onValueChange = { save(settings.copy(defaultOpacity = it)) },
             )
         }
         item {
-            ToggleRow("Siatka domyślnie włączona", settings.defaultGridEnabled) {
+            ToggleRow(stringResource(R.string.default_grid), settings.defaultGridEnabled) {
                 save(settings.copy(defaultGridEnabled = it))
             }
         }
         if (settings.defaultGridEnabled) {
             item {
-                Text("Pola siatki: ${settings.defaultGridDivisions} × ${settings.defaultGridDivisions}")
+                Text(stringResource(R.string.grid_cells, settings.defaultGridDivisions))
                 Slider(
                     value = settings.defaultGridDivisions.toFloat(),
                     onValueChange = {
@@ -516,28 +520,28 @@ private fun SettingsScreen(
             }
         }
         item {
-            ToggleRow("Miganie domyślnie włączone", settings.defaultBlinkEnabled) {
+            ToggleRow(stringResource(R.string.default_blink), settings.defaultBlinkEnabled) {
                 save(settings.copy(defaultBlinkEnabled = it))
             }
         }
         item {
-            ToggleRow("Timelapse domyślnie włączony", settings.defaultTimelapseEnabled) {
+            ToggleRow(stringResource(R.string.default_timelapse), settings.defaultTimelapseEnabled) {
                 save(settings.copy(defaultTimelapseEnabled = it))
             }
         }
         item {
-            ToggleRow("Latarka domyślnie włączona", settings.defaultTorchEnabled) {
+            ToggleRow(stringResource(R.string.default_torch), settings.defaultTorchEnabled) {
                 save(settings.copy(defaultTorchEnabled = it))
             }
         }
         item {
-            Text("Domyślny obiektyw", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.default_lens), fontWeight = FontWeight.SemiBold)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 item {
                     FilterChip(
                         selected = settings.defaultCameraId == null,
                         onClick = { save(settings.copy(defaultCameraId = null)) },
-                        label = { Text("Automatyczny") },
+                        label = { Text(stringResource(R.string.automatic)) },
                     )
                 }
                 items(cameras, key = { it.first }) { camera ->
@@ -550,15 +554,15 @@ private fun SettingsScreen(
             }
         }
         item {
-            Text("Informacje na ekranie rysowania", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.drawing_screen_information), fontWeight = FontWeight.SemiBold)
         }
         item {
-            ToggleRow("Pokazuj poziom telefonu", settings.showLevelIndicator) {
+            ToggleRow(stringResource(R.string.show_phone_level), settings.showLevelIndicator) {
                 save(settings.copy(showLevelIndicator = it))
             }
         }
         item {
-            ToggleRow("Ostrzegaj o poruszeniu telefonu lub statywu", settings.showMovementWarning) {
+            ToggleRow(stringResource(R.string.movement_warning), settings.showMovementWarning) {
                 save(settings.copy(showMovementWarning = it))
             }
         }
@@ -576,22 +580,25 @@ private fun SettingsScreen(
             ) {
                 Icon(Icons.Default.OpenInNew, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Polityka prywatności")
+                Text(stringResource(R.string.privacy_policy))
             }
         }
         item {
-            Text("Pamięć aplikacji", fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.app_storage), fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(6.dp))
-            Text("Łącznie: ${formatStorageBytes(storage.totalBytes)}")
+            Text(stringResource(R.string.storage_total, formatStorageBytes(storage.totalBytes)))
             Text(
-                "Obrazy: ${formatStorageBytes(storage.imagesBytes)} · " +
-                    "projekty: ${formatStorageBytes(storage.projectsBytes)} · " +
-                    "pamięć podręczna: ${formatStorageBytes(storage.cacheBytes)}",
+                stringResource(
+                    R.string.storage_details,
+                    formatStorageBytes(storage.imagesBytes),
+                    formatStorageBytes(storage.projectsBytes),
+                    formatStorageBytes(storage.cacheBytes),
+                ),
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "Bezpieczne czyszczenie usuwa wyłącznie pliki, które nie należą już do biblioteki ani projektów, oraz pamięć podręczną.",
+                stringResource(R.string.safe_cleanup_info),
                 style = MaterialTheme.typography.bodySmall,
             )
             Spacer(Modifier.height(8.dp))
@@ -604,7 +611,7 @@ private fun SettingsScreen(
             ) {
                 Icon(Icons.Default.CleaningServices, null)
                 Spacer(Modifier.width(8.dp))
-                Text("Wyczyść bezpiecznie")
+                Text(stringResource(R.string.safe_cleanup))
             }
         }
     }
@@ -617,11 +624,11 @@ private fun formatStorageBytes(bytes: Long): String = when {
     else -> "$bytes B"
 }
 
-private enum class LibrarySort(val label: String) {
-    Favorites("Ulubione"),
-    Name("Nazwa"),
-    Added("Data dodania"),
-    LastUsed("Ostatnio używane"),
+private enum class LibrarySort(@StringRes val labelRes: Int) {
+    Favorites(R.string.sort_favorites),
+    Name(R.string.sort_name),
+    Added(R.string.sort_added),
+    LastUsed(R.string.sort_last_used),
 }
 
 @Composable
@@ -665,9 +672,9 @@ private fun LibraryScreen(
     Box(modifier.fillMaxSize()) {
         if (viewModel.images.isEmpty()) {
             EmptyState(
-                title = "Dodaj pierwszy obraz",
-                detail = "Wybierz PNG lub JPG z pamięci telefonu.",
-                button = "Wybierz obraz",
+                title = stringResource(R.string.add_first_image),
+                detail = stringResource(R.string.choose_image_detail),
+                button = stringResource(R.string.choose_image),
                 onClick = { picker.launch(arrayOf("image/png", "image/jpeg")) },
             )
         } else {
@@ -685,7 +692,7 @@ private fun LibraryScreen(
                                 value = query,
                                 onValueChange = { query = it },
                                 modifier = Modifier.fillMaxWidth(),
-                                label = { Text("Szukaj obrazu") },
+                                label = { Text(stringResource(R.string.search_image)) },
                                 leadingIcon = { Icon(Icons.Default.Search, null) },
                                 singleLine = true,
                             )
@@ -696,12 +703,12 @@ private fun LibraryScreen(
                                     FilterChip(
                                         selected = selectedCollection == null,
                                         onClick = { selectedCollection = null },
-                                        label = { Text("Wszystkie") },
+                                        label = { Text(stringResource(R.string.all)) },
                                     )
                                 }
                                 item {
                                     IconButton(onClick = { showCreateCollection = true }) {
-                                        Icon(Icons.Default.Add, "Utwórz kolekcję")
+                                        Icon(Icons.Default.Add, stringResource(R.string.create_collection))
                                     }
                                 }
                                 items(collections, key = { it }) { collection ->
@@ -729,7 +736,7 @@ private fun LibraryScreen(
                                         FilterChip(
                                             selected = sort == option,
                                             onClick = { sort = option },
-                                            label = { Text(option.label) },
+                                            label = { Text(stringResource(option.labelRes)) },
                                         )
                                     }
                                 }
@@ -753,7 +760,7 @@ private fun LibraryScreen(
             FloatingActionButton(
                 onClick = { picker.launch(arrayOf("image/png", "image/jpeg")) },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-            ) { Icon(Icons.Default.Add, "Dodaj obraz") }
+            ) { Icon(Icons.Default.Add, stringResource(R.string.add_image)) }
         }
     }
     imageCollections?.let { image ->
@@ -800,13 +807,13 @@ private fun LibraryScreen(
         val linkedProjects = viewModel.projects.count { it.imageId == image.id }
         AlertDialog(
             onDismissRequest = { imageToDelete = null },
-            title = { Text("Usunąć obraz?") },
+            title = { Text(stringResource(R.string.delete_image_question)) },
             text = {
                 Text(
                     if (linkedProjects == 0) {
-                        "Obraz „${image.name}” zostanie trwale usunięty z biblioteki."
+                        stringResource(R.string.delete_image_detail, image.name)
                     } else {
-                        "Obraz „${image.name}” jest używany w projektach. Liczba powiązanych projektów: $linkedProjects. Usunięcie obrazu usunie również te projekty i ich zdjęcia robocze. Kopie zapisane w galerii telefonu pozostaną bez zmian."
+                        stringResource(R.string.delete_linked_image_detail, image.name, linkedProjects)
                     }
                 )
             },
@@ -814,10 +821,10 @@ private fun LibraryScreen(
                 Button(onClick = {
                     viewModel.deleteImage(image)
                     imageToDelete = null
-                }) { Text("Usuń obraz") }
+                }) { Text(stringResource(R.string.delete_image)) }
             },
             dismissButton = {
-                TextButton(onClick = { imageToDelete = null }) { Text("Anuluj") }
+                TextButton(onClick = { imageToDelete = null }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -852,7 +859,7 @@ private fun ImageCard(
                 IconButton(onClick = onFavorite, modifier = Modifier.align(Alignment.TopEnd)) {
                     Icon(
                         if (image.favorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        "Ulubione",
+                        stringResource(R.string.favorites),
                         tint = if (image.favorite) Color(0xFFFFB300) else MaterialTheme.colorScheme.onSurface,
                     )
                 }
@@ -871,19 +878,19 @@ private fun ImageCard(
                 ) {
                     CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 28.dp) {
                         IconButton(onClick = onRename, modifier = Modifier.size(28.dp)) {
-                            Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę", Modifier.size(18.dp))
+                            Icon(Icons.Default.DriveFileRenameOutline, stringResource(R.string.rename_image), Modifier.size(18.dp))
                         }
                         IconButton(onClick = onEdit, modifier = Modifier.size(28.dp)) {
-                            Icon(Icons.Default.Edit, "Edytuj obraz", Modifier.size(18.dp))
+                            Icon(Icons.Default.Edit, stringResource(R.string.edit_image), Modifier.size(18.dp))
                         }
                         IconButton(onClick = onCreateProject, modifier = Modifier.size(28.dp)) {
-                            Icon(Icons.Default.Add, "Utwórz projekt z tego obrazu", Modifier.size(18.dp))
+                            Icon(Icons.Default.Add, stringResource(R.string.create_project_from_image), Modifier.size(18.dp))
                         }
                         IconButton(onClick = onCollections, modifier = Modifier.size(28.dp)) {
-                            Icon(Icons.Default.Folder, "Kolekcje obrazu", Modifier.size(18.dp))
+                            Icon(Icons.Default.Folder, stringResource(R.string.image_collections), Modifier.size(18.dp))
                         }
                         IconButton(onClick = onDelete, modifier = Modifier.size(28.dp)) {
-                            Icon(Icons.Default.Delete, "Usuń obraz z biblioteki", Modifier.size(18.dp))
+                            Icon(Icons.Default.Delete, stringResource(R.string.remove_image_library), Modifier.size(18.dp))
                         }
                     }
                 }
@@ -903,7 +910,7 @@ private fun ImageCollectionsDialog(
     var newCollection by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Kolekcje obrazu") },
+        title = { Text(stringResource(R.string.image_collections)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(image.name, maxLines = 2, overflow = TextOverflow.Ellipsis)
@@ -927,7 +934,7 @@ private fun ImageCollectionsDialog(
                 TextField(
                     value = newCollection,
                     onValueChange = { newCollection = it },
-                    label = { Text("Nowa kolekcja") },
+                    label = { Text(stringResource(R.string.new_collection)) },
                     singleLine = true,
                     trailingIcon = {
                         IconButton(
@@ -938,14 +945,14 @@ private fun ImageCollectionsDialog(
                                     newCollection = ""
                                 }
                             },
-                        ) { Icon(Icons.Default.Add, "Dodaj kolekcję") }
+                        ) { Icon(Icons.Default.Add, stringResource(R.string.create_collection)) }
                     },
                 )
                 if (selected.isEmpty()) {
-                    Text("Obraz nie należy do żadnej kolekcji.", style = MaterialTheme.typography.bodySmall)
+                    Text(stringResource(R.string.image_no_collection), style = MaterialTheme.typography.bodySmall)
                 } else {
                     Text(
-                        "Wybrane: ${selected.sorted().joinToString()}",
+                        stringResource(R.string.selected_collections, selected.sorted().joinToString()),
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -955,9 +962,9 @@ private fun ImageCollectionsDialog(
             Button(onClick = {
                 val pending = newCollection.trim()
                 onSave((selected + pending.takeIf { it.isNotEmpty() }.orEmpty()).filter { it.isNotEmpty() })
-            }) { Text("Zapisz") }
+            }) { Text(stringResource(R.string.save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -969,12 +976,12 @@ private fun CreateCollectionDialog(
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nowa kolekcja") },
+        title = { Text(stringResource(R.string.new_collection)) },
         text = {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nazwa kolekcji") },
+                label = { Text(stringResource(R.string.collection_name)) },
                 singleLine = true,
             )
         },
@@ -982,9 +989,9 @@ private fun CreateCollectionDialog(
             Button(
                 onClick = { onCreate(name) },
                 enabled = name.isNotBlank(),
-            ) { Text("Utwórz") }
+            ) { Text(stringResource(R.string.create)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -1000,18 +1007,18 @@ private fun RenameImageDialog(
     var name by remember(image.id) { mutableStateOf(initialName) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Zmień nazwę obrazu") },
+        title = { Text(stringResource(R.string.rename_image)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 TextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nazwa w bibliotece") },
-                    placeholder = { Text("np. Słodki misio") },
+                    label = { Text(stringResource(R.string.library_name)) },
+                    placeholder = { Text(stringResource(R.string.name_example)) },
                     singleLine = true,
                 )
                 Text(
-                    "Nie musisz wpisywać rozszerzenia pliku.",
+                    stringResource(R.string.extension_info),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
@@ -1020,10 +1027,10 @@ private fun RenameImageDialog(
             Button(
                 onClick = { onRename(name) },
                 enabled = name.trim().isNotEmpty(),
-            ) { Text("Zapisz nazwę") }
+            ) { Text(stringResource(R.string.save_name)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Anuluj") }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
         },
     )
 }
@@ -1046,13 +1053,13 @@ private fun EditorScreen(
         snackbarHost = { SnackbarHost(editorSnackbar) },
         topBar = {
             TopAppBar(
-                title = { Text("Edytor obrazu") },
-                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, "Wróć") } },
+                title = { Text(stringResource(R.string.image_editor)) },
+                navigationIcon = { IconButton(onClick = onBack) { Icon(Icons.Default.ArrowBack, stringResource(R.string.back)) } },
                 actions = {
                     TextButton(
                         enabled = original != null,
                         onClick = { viewModel.updateFilters(image, filters) { onBack() } },
-                    ) { Text("Zapisz") }
+                    ) { Text(stringResource(R.string.save)) }
                 },
             )
         },
@@ -1081,7 +1088,7 @@ private fun EditorScreen(
                 ) {
                     Icon(Icons.Default.CleaningServices, null)
                     Spacer(Modifier.width(6.dp))
-                    Text(if (eraserMode) "Wyłącz gumkę" else "Gumka")
+                    Text(stringResource(if (eraserMode) R.string.disable_eraser else R.string.eraser))
                 }
                 Row(
                     modifier = Modifier.size(48.dp)
@@ -1101,7 +1108,7 @@ private fun EditorScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center,
                 ) {
-                    Icon(Icons.Default.Compare, "Przytrzymaj, aby zobaczyć oryginał")
+                    Icon(Icons.Default.Compare, stringResource(R.string.compare_original))
                 }
             }
             LazyColumn(
@@ -1111,7 +1118,7 @@ private fun EditorScreen(
             ) {
                 if (eraserMode) {
                     item {
-                        Text("Rozmiar gumki: ${"%.0f".format(eraserSize * 100)}%")
+                        Text(stringResource(R.string.eraser_size, (eraserSize * 100).toInt()))
                         Slider(
                             value = eraserSize,
                             onValueChange = { eraserSize = it },
@@ -1119,7 +1126,7 @@ private fun EditorScreen(
                         )
                         if (filters.eraserPoints.isNotEmpty()) {
                             TextButton(onClick = { filters = filters.copy(eraserPoints = emptyList()) }) {
-                                Text("Wyczyść ślady gumki (${filters.eraserPoints.size})")
+                                Text(stringResource(R.string.clear_eraser_marks, filters.eraserPoints.size))
                             }
                         }
                     }
@@ -1133,8 +1140,8 @@ private fun EditorScreen(
                     Icon(Icons.Default.Crop, null)
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        if (filters.isCropped()) "Zmień kadr obrazu"
-                        else "Wykadruj fragment obrazu"
+                        if (filters.isCropped()) stringResource(R.string.change_crop)
+                        else stringResource(R.string.crop_image)
                     )
                 }
             }
@@ -1146,29 +1153,29 @@ private fun EditorScreen(
                 ) {
                     EditorFilterButton(
                         icon = Icons.Default.MonochromePhotos,
-                        label = "Skala szarości",
+                        label = stringResource(R.string.grayscale),
                         selected = filters.grayscale,
                     ) { filters = filters.copy(grayscale = !filters.grayscale) }
                     EditorFilterButton(
                         icon = Icons.Default.AutoFixHigh,
-                        label = "Kontur / szkic",
+                        label = stringResource(R.string.outline_sketch),
                         selected = filters.contour,
                     ) { filters = filters.copy(contour = !filters.contour) }
                     EditorFilterButton(
                         icon = Icons.Default.InvertColors,
-                        label = "Odwróć kolory",
+                        label = stringResource(R.string.invert_colors),
                         selected = filters.invert,
                     ) { filters = filters.copy(invert = !filters.invert) }
                     EditorFilterButton(
                         icon = Icons.Default.CleaningServices,
-                        label = "Automatycznie usuń tło",
+                        label = stringResource(R.string.auto_remove_background),
                         selected = filters.autoRemoveBackground,
                     ) {
                         filters = filters.copy(autoRemoveBackground = !filters.autoRemoveBackground)
                     }
                     EditorFilterButton(
                         icon = Icons.Default.ColorLens,
-                        label = "Uprość liczbę kolorów",
+                        label = stringResource(R.string.simplify_colors),
                         selected = filters.simplifyLevels >= 2,
                     ) {
                         filters = filters.copy(
@@ -1180,7 +1187,7 @@ private fun EditorScreen(
             item {
                 val simplifyEnabled = filters.simplifyLevels >= 2
                 if (simplifyEnabled) {
-                    Text("Poziomy na kanał: ${filters.simplifyLevels}")
+                    Text(stringResource(R.string.levels_per_channel, filters.simplifyLevels))
                     Slider(
                         value = filters.simplifyLevels.toFloat(),
                         onValueChange = {
@@ -1192,7 +1199,7 @@ private fun EditorScreen(
                 }
             }
             item {
-                Text("Kontrast: ${"%.0f".format(filters.contrast * 100)}%")
+                Text(stringResource(R.string.contrast_value, (filters.contrast * 100).toInt()))
                 Slider(
                     value = filters.contrast,
                     onValueChange = { filters = filters.copy(contrast = it) },
@@ -1202,12 +1209,12 @@ private fun EditorScreen(
             item {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Column(Modifier.weight(1f)) {
-                        Text("Wybrany kolor do usunięcia")
+                        Text(stringResource(R.string.selected_remove_color))
                         Text(
                             if (filters.removeColor == null) {
-                                "Dotknij obrazu, aby wybrać kolor do usunięcia"
+                                stringResource(R.string.tap_select_remove_color)
                             } else {
-                                "Wybrano kolor — dotknij obrazu, aby go zmienić"
+                                stringResource(R.string.tap_change_remove_color)
                             },
                             style = MaterialTheme.typography.bodySmall,
                         )
@@ -1224,13 +1231,13 @@ private fun EditorScreen(
                     )
                     if (filters.removeColor != null) {
                         TextButton(onClick = { filters = filters.copy(removeColor = null) }) {
-                            Text("Usuń wybór")
+                            Text(stringResource(R.string.clear_selection))
                         }
                     }
                 }
             }
             item {
-                Text("Tolerancja koloru: ${"%.0f".format(filters.colorTolerance * 100)}%")
+                Text(stringResource(R.string.color_tolerance, (filters.colorTolerance * 100).toInt()))
                 Slider(
                     value = filters.colorTolerance,
                     onValueChange = { filters = filters.copy(colorTolerance = it) },
@@ -1255,7 +1262,7 @@ private fun EditorScreen(
                     ) {
                         Icon(Icons.Default.SaveAlt, null)
                         Spacer(Modifier.width(6.dp))
-                        Text("Eksportuj")
+                        Text(stringResource(R.string.export))
                     }
                     Button(
                         onClick = { viewModel.updateFilters(image, filters) { onBack() } },
@@ -1264,7 +1271,7 @@ private fun EditorScreen(
                     ) {
                         Icon(Icons.Default.CheckCircle, null)
                         Spacer(Modifier.width(6.dp))
-                        Text("Zapisz")
+                        Text(stringResource(R.string.save))
                     }
                 }
             }
@@ -1338,7 +1345,7 @@ private fun ColorPickImage(
     val preview = if (showOriginal) originalCrop else processed
     Image(
         preview.asImageBitmap(),
-        "Podgląd",
+        stringResource(R.string.preview),
         Modifier.fillMaxWidth().height(260.dp).padding(horizontal = 16.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
             .pointerInput(bitmap, filters, eraserMode, eraserSize) {
@@ -1436,17 +1443,17 @@ private fun CropImageDialog(
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Kadrowanie obrazu") },
+        title = { Text(stringResource(R.string.cropping)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Image(
                     preview.asImageBitmap(),
-                    "Podgląd kadru",
+                    stringResource(R.string.crop_preview),
                     Modifier.fillMaxWidth().height(260.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp)),
                     contentScale = ContentScale.Fit,
                 )
-                Text("Zakres poziomy")
+                Text(stringResource(R.string.horizontal_range))
                 RangeSlider(
                     value = horizontal,
                     onValueChange = {
@@ -1454,7 +1461,7 @@ private fun CropImageDialog(
                     },
                     valueRange = 0f..1f,
                 )
-                Text("Zakres pionowy")
+                Text(stringResource(R.string.vertical_range))
                 RangeSlider(
                     value = vertical,
                     onValueChange = {
@@ -1463,21 +1470,21 @@ private fun CropImageDialog(
                     valueRange = 0f..1f,
                 )
                 Text(
-                    "Przesuwaj oba końce suwaków. Podgląd automatycznie powiększa wybrany fragment.",
+                    stringResource(R.string.crop_preview_hint),
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
         },
         confirmButton = {
-            Button(onClick = { onApply(cropFilters) }) { Text("Zastosuj kadr") }
+            Button(onClick = { onApply(cropFilters) }) { Text(stringResource(R.string.apply_crop)) }
         },
         dismissButton = {
             Row {
                 TextButton(onClick = {
                     horizontal = 0f..1f
                     vertical = 0f..1f
-                }) { Text("Pełny obraz") }
-                TextButton(onClick = onDismiss) { Text("Anuluj") }
+                }) { Text(stringResource(R.string.full_image)) }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
             }
         },
     )
@@ -1528,16 +1535,16 @@ private fun ProjectsScreen(
     Box(modifier.fillMaxSize()) {
         if (viewModel.projects.isEmpty()) {
             EmptyState(
-                title = "Brak projektów",
+                title = stringResource(R.string.no_projects),
                 detail = if (viewModel.images.isEmpty()) {
-                    "Zaimportuj wcześniejszy projekt albo dodaj obraz w bibliotece."
+                    stringResource(R.string.empty_projects_no_images)
                 } else {
-                    "Zaimportuj wcześniejszy projekt albo utwórz nowy."
+                    stringResource(R.string.empty_projects)
                 },
-                button = "Nowy projekt",
+                button = stringResource(R.string.new_project),
                 enabled = viewModel.images.isNotEmpty(),
                 onClick = { createDialog = true },
-                secondaryButton = "Importuj projekt",
+                secondaryButton = stringResource(R.string.import_project),
                 onSecondaryClick = {
                     importLauncher.launch(
                         arrayOf(
@@ -1562,12 +1569,12 @@ private fun ProjectsScreen(
                         FilterChip(
                             selected = !showArchived,
                             onClick = { showArchived = false },
-                            label = { Text("Aktywne") },
+                            label = { Text(stringResource(R.string.active)) },
                         )
                         FilterChip(
                             selected = showArchived,
                             onClick = { showArchived = true },
-                            label = { Text("Archiwum") },
+                            label = { Text(stringResource(R.string.archive)) },
                         )
                         Spacer(Modifier.weight(1f))
                         IconButton(
@@ -1581,7 +1588,7 @@ private fun ProjectsScreen(
                                 )
                             },
                         ) {
-                            Icon(Icons.Default.FileUpload, "Importuj projekt")
+                            Icon(Icons.Default.FileUpload, stringResource(R.string.import_project))
                         }
                     }
                 }
@@ -1594,7 +1601,7 @@ private fun ProjectsScreen(
                             Icon(Icons.Default.PlayArrow, null)
                             Spacer(Modifier.width(8.dp))
                             Text(
-                                "Wznów ostatni projekt: ${lastActiveProject.name}",
+                                stringResource(R.string.resume_project, lastActiveProject.name),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
                             )
@@ -1604,7 +1611,9 @@ private fun ProjectsScreen(
                 if (visibleProjects.isEmpty()) {
                     item {
                         Text(
-                            if (showArchived) "Archiwum jest puste." else "Brak aktywnych projektów.",
+                            stringResource(
+                                if (showArchived) R.string.archive_empty else R.string.no_active_projects
+                            ),
                             modifier = Modifier.padding(vertical = 24.dp),
                         )
                     }
@@ -1636,11 +1645,11 @@ private fun ProjectsScreen(
                                         overflow = TextOverflow.Ellipsis,
                                     )
                                     Text(
-                                        "${project.progressPhotos.size} zdjęć postępu",
+                                        stringResource(R.string.progress_photos_count, project.progressPhotos.size),
                                         style = MaterialTheme.typography.bodySmall,
                                     )
                                 }
-                                Icon(Icons.Default.PlayArrow, "Otwórz")
+                                Icon(Icons.Default.PlayArrow, stringResource(R.string.open))
                             }
                             Spacer(Modifier.height(6.dp))
                             Row(
@@ -1650,14 +1659,14 @@ private fun ProjectsScreen(
                                 IconButton(
                                     onClick = { onGallery(project) },
                                     enabled = project.progressPhotos.isNotEmpty(),
-                                ) { Icon(Icons.Default.PhotoLibrary, "Otwórz zdjęcia postępu") }
+                                ) { Icon(Icons.Default.PhotoLibrary, stringResource(R.string.progress_photos_count, project.progressPhotos.size)) }
                                 IconButton(onClick = { projectToRename = project }) {
-                                    Icon(Icons.Default.DriveFileRenameOutline, "Zmień nazwę projektu")
+                                    Icon(Icons.Default.DriveFileRenameOutline, stringResource(R.string.rename_project))
                                 }
                                 IconButton(onClick = { viewModel.toggleProjectArchive(project) }) {
                                     Icon(
                                         if (project.archived) Icons.Default.Unarchive else Icons.Default.Archive,
-                                        if (project.archived) "Przywróć projekt" else "Archiwizuj projekt",
+                                        stringResource(if (project.archived) R.string.restore_project else R.string.archive_project),
                                     )
                                 }
                                 IconButton(
@@ -1665,7 +1674,7 @@ private fun ProjectsScreen(
                                         projectToExport = project
                                         exportLauncher.launch("${project.name}.tracelens")
                                     },
-                                ) { Icon(Icons.Default.FileDownload, "Eksportuj projekt") }
+                                ) { Icon(Icons.Default.FileDownload, stringResource(R.string.export_project)) }
                                 IconButton(
                                     onClick = {
                                         viewModel.prepareLocalTransfer(project) {
@@ -1673,9 +1682,9 @@ private fun ProjectsScreen(
                                             transferServer = it
                                         }
                                     },
-                                ) { Icon(Icons.Default.QrCode, "Przenieś przez kod QR") }
+                                ) { Icon(Icons.Default.QrCode, stringResource(R.string.transfer_qr)) }
                                 IconButton(onClick = { projectToDelete = project }) {
-                                    Icon(Icons.Default.Delete, "Usuń projekt")
+                                    Icon(Icons.Default.Delete, stringResource(R.string.delete_project))
                                 }
                             }
                         }
@@ -1685,7 +1694,7 @@ private fun ProjectsScreen(
             FloatingActionButton(
                 onClick = { createDialog = true },
                 modifier = Modifier.align(Alignment.BottomEnd).padding(20.dp),
-            ) { Icon(Icons.Default.Add, "Nowy projekt") }
+            ) { Icon(Icons.Default.Add, stringResource(R.string.new_project)) }
         }
     }
     projectToRename?.let { project ->
@@ -1711,20 +1720,20 @@ private fun ProjectsScreen(
     projectToDelete?.let { project ->
         AlertDialog(
             onDismissRequest = { projectToDelete = null },
-            title = { Text("Usunąć projekt?") },
+            title = { Text(stringResource(R.string.delete_project_question)) },
             text = {
                 Text(
-                    "Projekt „${project.name}” oraz wszystkie jego zdjęcia postępu zostaną trwale usunięte. Obraz w bibliotece pozostanie bez zmian."
+                    stringResource(R.string.delete_project_detail, project.name)
                 )
             },
             confirmButton = {
                 Button(onClick = {
                     viewModel.deleteProject(project)
                     projectToDelete = null
-                }) { Text("Usuń projekt") }
+                }) { Text(stringResource(R.string.delete_project)) }
             },
             dismissButton = {
-                TextButton(onClick = { projectToDelete = null }) { Text("Anuluj") }
+                TextButton(onClick = { projectToDelete = null }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -1751,16 +1760,16 @@ private fun LocalTransferDialog(server: LocalTransferServer, onDismiss: () -> Un
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Przenieś projekt") },
+        title = { Text(stringResource(R.string.transfer_project)) },
         text = {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Image(qr.asImageBitmap(), "Kod QR transferu", Modifier.fillMaxWidth())
+                Image(qr.asImageBitmap(), stringResource(R.string.transfer_qr), Modifier.fillMaxWidth())
                 Spacer(Modifier.height(16.dp))
-                Text("Zeskanuj kod drugim telefonem połączonym z tą samą siecią Wi‑Fi.")
-                Text("Nie zamykaj tego okna do zakończenia pobierania.", style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.transfer_scan))
+                Text(stringResource(R.string.transfer_keep_open), style = MaterialTheme.typography.bodySmall)
             }
         },
-        confirmButton = { Button(onClick = onDismiss) { Text("Zakończ") } },
+        confirmButton = { Button(onClick = onDismiss) { Text(stringResource(R.string.finish)) } },
     )
 }
 
@@ -1773,21 +1782,21 @@ private fun RenameProjectDialog(
     var name by remember(project.id) { mutableStateOf(project.name) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Zmień nazwę projektu") },
+        title = { Text(stringResource(R.string.rename_project)) },
         text = {
             TextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Nazwa projektu") },
+                label = { Text(stringResource(R.string.project_name)) },
                 singleLine = true,
             )
         },
         confirmButton = {
             Button(onClick = { onRename(name) }, enabled = name.trim().isNotEmpty()) {
-                Text("Zapisz")
+                Text(stringResource(R.string.save))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -1826,10 +1835,10 @@ private fun ProjectImageSelectorDialog(
         Surface(Modifier.fillMaxSize()) {
             Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
                 TopAppBar(
-                    title = { Text("Nowy projekt") },
+                    title = { Text(stringResource(R.string.new_project)) },
                     navigationIcon = {
                         IconButton(onClick = onDismiss) {
-                            Icon(Icons.Default.ArrowBack, "Anuluj")
+                            Icon(Icons.Default.ArrowBack, stringResource(R.string.cancel))
                         }
                     },
                 )
@@ -1841,14 +1850,14 @@ private fun ProjectImageSelectorDialog(
                         value = projectName,
                         onValueChange = { projectName = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Nazwa projektu") },
+                        label = { Text(stringResource(R.string.project_name)) },
                         singleLine = true,
                     )
                     TextField(
                         value = query,
                         onValueChange = { query = it },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text("Szukaj obrazu po nazwie") },
+                        label = { Text(stringResource(R.string.search_image_by_name)) },
                         leadingIcon = { Icon(Icons.Default.Search, null) },
                         singleLine = true,
                     )
@@ -1859,23 +1868,23 @@ private fun ProjectImageSelectorDialog(
                         FilterChip(
                             selected = filter == ProjectImageFilter.All,
                             onClick = { filter = ProjectImageFilter.All },
-                            label = { Text("Wszystkie") },
+                            label = { Text(stringResource(R.string.all)) },
                         )
                         FilterChip(
                             selected = filter == ProjectImageFilter.Favorites,
                             onClick = { filter = ProjectImageFilter.Favorites },
-                            label = { Text("Ulubione") },
+                            label = { Text(stringResource(R.string.favorites)) },
                         )
                         FilterChip(
                             selected = filter == ProjectImageFilter.Recent,
                             onClick = { filter = ProjectImageFilter.Recent },
-                            label = { Text("Ostatnie") },
+                            label = { Text(stringResource(R.string.recent)) },
                         )
                     }
                 }
                 if (visibleImages.isEmpty()) {
                     Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text("Brak obrazów pasujących do wyszukiwania.")
+                        Text(stringResource(R.string.no_matching_images))
                     }
                 } else {
                     LazyVerticalGrid(
@@ -1947,16 +1956,17 @@ private fun ProjectImageSelectorDialog(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            selected?.let { "Wybrano: ${it.name}" } ?: "Wybierz obraz",
+                            selected?.let { stringResource(R.string.selected_image, it.name) }
+                                ?: stringResource(R.string.choose_prepared_image),
                             Modifier.weight(1f),
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis,
                         )
-                        TextButton(onClick = onDismiss) { Text("Anuluj") }
+                        TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
                         Button(
                             onClick = { selected?.let { onCreate(projectName, it) } },
                             enabled = selected != null,
-                        ) { Text("Utwórz") }
+                        ) { Text(stringResource(R.string.create)) }
                     }
                 }
             }
@@ -1971,6 +1981,7 @@ private fun ProjectGalleryScreen(
     onBack: () -> Unit,
 ) {
     val context = LocalContext.current
+    val noPhotoAppMessage = stringResource(R.string.no_photo_app)
     var project by remember(initialProject.id) { mutableStateOf(initialProject) }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
     var photoToDelete by remember { mutableStateOf<String?>(null) }
@@ -1982,14 +1993,14 @@ private fun ProjectGalleryScreen(
                     Column {
                         Text(project.name)
                         Text(
-                            "${project.progressPhotos.size} zdjęć postępu",
+                            stringResource(R.string.gallery_title_count, project.progressPhotos.size),
                             style = MaterialTheme.typography.bodySmall,
                         )
                     }
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, "Wróć")
+                        Icon(Icons.Default.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -2004,7 +2015,7 @@ private fun ProjectGalleryScreen(
                         },
                         enabled = project.progressPhotos.isNotEmpty(),
                     ) {
-                        Icon(Icons.Default.Share, "Udostępnij całą galerię")
+                        Icon(Icons.Default.Share, stringResource(R.string.share_gallery))
                     }
                 },
             )
@@ -2012,9 +2023,9 @@ private fun ProjectGalleryScreen(
     ) { padding ->
         if (project.progressPhotos.isEmpty()) {
             EmptyState(
-                title = "Brak zdjęć postępu",
-                detail = "Wróć do projektu i wykonaj pierwsze zdjęcie.",
-                button = "Wróć",
+                title = stringResource(R.string.no_progress_photos),
+                detail = stringResource(R.string.no_progress_photos_detail),
+                button = stringResource(R.string.back),
                 onClick = onBack,
             )
         } else {
@@ -2040,14 +2051,14 @@ private fun ProjectGalleryScreen(
                                 if (bitmap != null) {
                                     Image(
                                         bitmap.asImageBitmap(),
-                                        "Zdjęcie postępu ${index + 1}",
+                                        stringResource(R.string.progress_photo_number, index + 1),
                                         Modifier.fillMaxSize(),
                                         contentScale = ContentScale.Crop,
                                     )
                                 }
                             }
                             Text(
-                                progressPhotoDate(fileName),
+                                progressPhotoDate(fileName, stringResource(R.string.progress_photo)),
                                 Modifier.padding(8.dp),
                                 style = MaterialTheme.typography.bodySmall,
                             )
@@ -2087,7 +2098,7 @@ private fun ProjectGalleryScreen(
                             if (bitmap != null) {
                                 Image(
                                     bitmap.asImageBitmap(),
-                                    "Zdjęcie ${page + 1} z ${photos.size}",
+                                    stringResource(R.string.photo_position, page + 1, photos.size),
                                     Modifier.fillMaxSize()
                                         .graphicsLayer(
                                             scaleX = zoom,
@@ -2110,7 +2121,7 @@ private fun ProjectGalleryScreen(
                             modifier = Modifier.align(Alignment.TopStart)
                                 .background(Color.Black.copy(alpha = 0.55f)),
                         ) {
-                            Icon(Icons.Default.ArrowBack, "Zamknij", tint = Color.White)
+                            Icon(Icons.Default.ArrowBack, stringResource(R.string.close), tint = Color.White)
                         }
                         Row(
                             Modifier.align(Alignment.BottomCenter)
@@ -2127,7 +2138,7 @@ private fun ProjectGalleryScreen(
                                 zoomByPhoto[fileName] =
                                     if ((zoomByPhoto[fileName] ?: 1f) > 1f) 1f else 2.5f
                             }) {
-                                Icon(Icons.Default.ZoomIn, "Powiększ lub pomniejsz", tint = Color.White)
+                                Icon(Icons.Default.ZoomIn, stringResource(R.string.zoom_photo), tint = Color.White)
                             }
                             IconButton(onClick = {
                                 val fileName = photos[pagerState.currentPage]
@@ -2139,12 +2150,12 @@ private fun ProjectGalleryScreen(
                                 runCatching { context.startActivity(intent) }.onFailure {
                                     android.widget.Toast.makeText(
                                         context,
-                                        "Nie znaleziono aplikacji do otwarcia zdjęcia.",
+                                        noPhotoAppMessage,
                                         android.widget.Toast.LENGTH_SHORT,
                                     ).show()
                                 }
                             }) {
-                                Icon(Icons.Default.OpenInNew, "Otwórz w galerii telefonu", tint = Color.White)
+                                Icon(Icons.Default.OpenInNew, stringResource(R.string.open_phone_gallery), tint = Color.White)
                             }
                             IconButton(onClick = {
                                 val fileName = photos[pagerState.currentPage]
@@ -2153,8 +2164,8 @@ private fun ProjectGalleryScreen(
                                 Icon(
                                     Icons.Default.Star,
                                     if (project.coverPhoto == photos[pagerState.currentPage]) {
-                                        "To jest okładka projektu"
-                                    } else "Ustaw jako okładkę projektu",
+                                        stringResource(R.string.project_cover_current)
+                                    } else stringResource(R.string.set_project_cover),
                                     tint = if (project.coverPhoto == photos[pagerState.currentPage]) {
                                         Color(0xFFFFD54F)
                                     } else Color.White,
@@ -2167,13 +2178,13 @@ private fun ProjectGalleryScreen(
                                     listOf(viewModel.progressPhotoUri(project.id, fileName)),
                                 )
                             }) {
-                                Icon(Icons.Default.Share, "Udostępnij zdjęcie", tint = Color.White)
+                                Icon(Icons.Default.Share, stringResource(R.string.share_photo), tint = Color.White)
                             }
                             IconButton(onClick = {
                                 photoToDelete = photos[pagerState.currentPage]
                                 selectedIndex = null
                             }) {
-                                Icon(Icons.Default.Delete, "Usuń zdjęcie", tint = Color.White)
+                                Icon(Icons.Default.Delete, stringResource(R.string.delete_photo), tint = Color.White)
                             }
                         }
                     }
@@ -2185,16 +2196,16 @@ private fun ProjectGalleryScreen(
     photoToDelete?.let { fileName ->
         AlertDialog(
             onDismissRequest = { photoToDelete = null },
-            title = { Text("Usunąć zdjęcie?") },
-            text = { Text("To zdjęcie zostanie trwale usunięte z projektu.") },
+            title = { Text(stringResource(R.string.delete_photo_question)) },
+            text = { Text(stringResource(R.string.delete_photo_detail)) },
             confirmButton = {
                 Button(onClick = {
                     project = viewModel.deleteProgressPhoto(project, fileName)
                     photoToDelete = null
-                }) { Text("Usuń zdjęcie") }
+                }) { Text(stringResource(R.string.delete_photo)) }
             },
             dismissButton = {
-                TextButton(onClick = { photoToDelete = null }) { Text("Anuluj") }
+                TextButton(onClick = { photoToDelete = null }) { Text(stringResource(R.string.cancel)) }
             },
         )
     }
@@ -2215,12 +2226,12 @@ private fun shareProjectPhotos(context: android.content.Context, uris: List<andr
     }.apply {
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
     }
-    context.startActivity(Intent.createChooser(intent, "Udostępnij zdjęcia projektu"))
+    context.startActivity(Intent.createChooser(intent, context.getString(R.string.share_project_photos)))
 }
 
-private fun progressPhotoDate(fileName: String): String {
+private fun progressPhotoDate(fileName: String, fallback: String): String {
     val timestamp = fileName.substringAfter("progress_", "").substringBefore('.').toLongOrNull()
-        ?: return "Zdjęcie postępu"
+        ?: return fallback
     return SimpleDateFormat("dd.MM.yyyy, HH:mm", Locale.getDefault()).format(Date(timestamp))
 }
 
@@ -2235,14 +2246,19 @@ private fun CreateProjectDialog(
     var selected by remember { mutableStateOf(fixedImage ?: images.firstOrNull()) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Nowy projekt") },
+        title = { Text(stringResource(R.string.new_project)) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                TextField(name, { name = it }, label = { Text("Nazwa projektu") }, singleLine = true)
+                TextField(
+                    name,
+                    { name = it },
+                    label = { Text(stringResource(R.string.project_name)) },
+                    singleLine = true,
+                )
                 if (fixedImage != null) {
-                    Text("Obraz: ${fixedImage.name}")
+                    Text(stringResource(R.string.image_label, fixedImage.name))
                 } else {
-                    Text("Wybierz przygotowany obraz")
+                    Text(stringResource(R.string.choose_prepared_image))
                     LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         items(images, key = { it.id }) { image ->
                             FilledTonalButton(
@@ -2256,10 +2272,10 @@ private fun CreateProjectDialog(
         },
         confirmButton = {
             Button(onClick = { selected?.let { onCreate(name, it) } }, enabled = selected != null) {
-                Text("Utwórz")
+                Text(stringResource(R.string.create))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text("Anuluj") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 

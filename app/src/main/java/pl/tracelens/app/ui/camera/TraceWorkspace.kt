@@ -110,12 +110,14 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 import pl.tracelens.app.AppViewModel
+import pl.tracelens.app.R
 import pl.tracelens.app.data.LibraryImage
 import pl.tracelens.app.data.TraceProject
 import java.io.File
@@ -136,8 +138,24 @@ fun TraceWorkspace(
 ) {
     val context = LocalContext.current
     val activity = context as Activity
+    val torchTooHotMessage = stringResource(R.string.torch_too_hot)
+    val lowStorageMessage = stringResource(R.string.low_storage)
+    val progressSavedGalleryMessage = stringResource(R.string.progress_saved_gallery)
+    val progressSavedNoGalleryMessage = stringResource(R.string.progress_saved_no_gallery)
+    val tripodSavedMessage = stringResource(R.string.tripod_saved)
+    val cameraUnlockedMessage = stringResource(R.string.camera_unlocked)
+    val cameraLockedMessage = stringResource(R.string.camera_locked)
+    val timelapseStoppedMessage = stringResource(R.string.timelapse_stopped)
+    val cameraLabels = (1..20).associateWith { index ->
+        Triple(
+            stringResource(R.string.front_camera, index),
+            stringResource(R.string.back_camera, index),
+            stringResource(R.string.camera_number, index),
+        )
+    }
     val appSettings = viewModel.appSettings
     var project by remember(initialProject.id) { mutableStateOf(initialProject) }
+    val timelapseStartedMessage = stringResource(R.string.timelapse_started, project.timelapseIntervalSeconds)
     var cameraPermission by remember {
         mutableStateOf(context.checkSelfPermission(Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
     }
@@ -210,7 +228,7 @@ fun TraceWorkspace(
         if (thermalStatus >= PowerManager.THERMAL_STATUS_SEVERE && torch) {
             camera?.cameraControl?.enableTorch(false)
             torch = false
-            Toast.makeText(context, "Latarka wyłączona: telefon jest zbyt gorący.", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, torchTooHotMessage, Toast.LENGTH_LONG).show()
         }
     }
     DisposableEffect(project.orientation) {
@@ -240,7 +258,7 @@ fun TraceWorkspace(
             timelapseEnabled = false
             Toast.makeText(
                 context,
-                "Za mało wolnego miejsca. Zwolnij pamięć przed wykonaniem zdjęcia.",
+                lowStorageMessage,
                 Toast.LENGTH_LONG,
             ).show()
             return
@@ -256,9 +274,9 @@ fun TraceWorkspace(
                 Toast.makeText(
                     context,
                     if (published) {
-                        "Zapisano etap pracy także w galerii telefonu."
+                        progressSavedGalleryMessage
                     } else {
-                        "Zapisano etap w projekcie, ale nie udało się dodać go do galerii telefonu."
+                        progressSavedNoGalleryMessage
                     },
                     Toast.LENGTH_LONG,
                 ).show()
@@ -279,7 +297,7 @@ fun TraceWorkspace(
                 tripodAlignMode = false
                 Toast.makeText(
                     context,
-                    "Zapisano położenie statywu dla tego projektu.",
+                    tripodSavedMessage,
                     Toast.LENGTH_LONG,
                 ).show()
             },
@@ -300,7 +318,7 @@ fun TraceWorkspace(
             activeCamera.cameraControl.cancelFocusAndMetering()
             applyCameraLocks(activeCamera, false)
             cameraParametersLocked = false
-            Toast.makeText(context, "Automatyka kamery odblokowana.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, cameraUnlockedMessage, Toast.LENGTH_SHORT).show()
         } else {
             val point = SurfaceOrientedMeteringPointFactory(1f, 1f).createPoint(.5f, .5f)
             val action = FocusMeteringAction.Builder(
@@ -310,7 +328,7 @@ fun TraceWorkspace(
             activeCamera.cameraControl.startFocusAndMetering(action)
             applyCameraLocks(activeCamera, true)
             cameraParametersLocked = true
-            Toast.makeText(context, "Zablokowano ostrość, ekspozycję i balans bieli.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, cameraLockedMessage, Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -322,7 +340,7 @@ fun TraceWorkspace(
                     IconButton(onClick = {
                         saveProject(project)
                         onBack()
-                    }) { Icon(Icons.Default.ArrowBack, "Wróć") }
+                    }) { Icon(Icons.Default.ArrowBack, stringResource(R.string.back)) }
                 },
             )
         },
@@ -332,6 +350,7 @@ fun TraceWorkspace(
                 if (cameraPermission) {
                     CameraPreview(
                         selectedCameraId = project.cameraId,
+                        cameraLabels = cameraLabels,
                         onCameraReady = { boundCamera, capture, options, actualId ->
                             camera = boundCamera
                             imageCapture = capture
@@ -346,7 +365,7 @@ fun TraceWorkspace(
                     Button(
                         onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) },
                         modifier = Modifier.align(Alignment.Center),
-                    ) { Text("Zezwól na dostęp do kamery") }
+                    ) { Text(stringResource(R.string.camera_permission)) }
                 }
 
                 if (overlay != null && overlayEnabled && !compareHeld && (!blinking || blinkVisible)) {
@@ -374,12 +393,12 @@ fun TraceWorkspace(
                 if (tripodAlignMode && tripodReference != null) {
                     Image(
                         tripodReference.asImageBitmap(),
-                        "Zdjęcie kontrolne ustawienia statywu",
+                        stringResource(R.string.tripod_reference),
                         modifier = Modifier.fillMaxSize().alpha(0.45f),
                         contentScale = ContentScale.Crop,
                     )
                     Text(
-                        "Dopasuj bieżący widok do półprzezroczystego zdjęcia",
+                        stringResource(R.string.tripod_reference_hint),
                         color = Color.White,
                         modifier = Modifier.align(Alignment.TopCenter)
                             .padding(8.dp).background(Color(0xBB000000)).padding(8.dp),
@@ -388,7 +407,7 @@ fun TraceWorkspace(
 
                 if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE) {
                     Text(
-                        "Telefon się nagrzewa",
+                        stringResource(R.string.phone_heating),
                         color = Color.White,
                         modifier = Modifier.align(Alignment.TopCenter)
                             .padding(8.dp).background(Color(0xCCB45309)).padding(8.dp),
@@ -400,7 +419,7 @@ fun TraceWorkspace(
                 ) {
                     if (appSettings.showLevelIndicator) {
                         Text(
-                            "Poziom: ${deviceTilt.horizontal.roundToInt()}° / ${deviceTilt.vertical.roundToInt()}°",
+                            stringResource(R.string.phone_level_value, deviceTilt.horizontal.roundToInt(), deviceTilt.vertical.roundToInt()),
                             color = Color.White,
                             modifier = Modifier.background(
                                 if (abs(deviceTilt.horizontal) <= 2f && abs(deviceTilt.vertical) <= 2f) {
@@ -411,7 +430,7 @@ fun TraceWorkspace(
                     }
                     if (appSettings.showMovementWarning && movementWarning) {
                         Text(
-                            "Telefon lub statyw został poruszony",
+                            stringResource(R.string.phone_moved),
                             color = Color.White,
                             modifier = Modifier.background(Color(0xCCD84315))
                                 .padding(horizontal = 8.dp, vertical = 5.dp),
@@ -429,7 +448,7 @@ fun TraceWorkspace(
                             onClick = ::takeProgressPhoto,
                             modifier = Modifier.size(56.dp),
                         ) {
-                            Icon(Icons.Default.PhotoCamera, "Zrób zdjęcie postępu")
+                            Icon(Icons.Default.PhotoCamera, stringResource(R.string.take_progress_photo))
                         }
                         Box(
                             modifier = Modifier
@@ -448,7 +467,7 @@ fun TraceWorkspace(
                         ) {
                             Icon(
                                 Icons.Default.VisibilityOff,
-                                "Przytrzymaj, aby ukryć nakładkę",
+                                stringResource(R.string.hold_hide_overlay),
                                 tint = MaterialTheme.colorScheme.onPrimary,
                             )
                         }
@@ -456,7 +475,7 @@ fun TraceWorkspace(
                             onClick = { showControls = true },
                             modifier = Modifier.size(56.dp),
                         ) {
-                            Icon(Icons.Default.Tune, "Pokaż sterowanie")
+                            Icon(Icons.Default.Tune, stringResource(R.string.show_controls))
                         }
                     }
                 }
@@ -474,7 +493,7 @@ fun TraceWorkspace(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            "Przezroczystość: ${(project.opacity * 100).roundToInt()}%",
+                            stringResource(R.string.opacity_value, (project.opacity * 100).roundToInt()),
                             modifier = Modifier.weight(1f),
                         )
                         FilledTonalButton(onClick = {
@@ -486,7 +505,7 @@ fun TraceWorkspace(
                         }) {
                             Icon(Icons.Default.VisibilityOff, null)
                             Spacer(Modifier.size(6.dp))
-                            Text("Tryb rysowania")
+                            Text(stringResource(R.string.drawing_mode))
                         }
                     }
                     Slider(
@@ -495,7 +514,7 @@ fun TraceWorkspace(
                         onValueChangeFinished = { saveProject(project) },
                     )
                     if (project.gridEnabled) {
-                        Text("Pola siatki: ${project.gridDivisions} × ${project.gridDivisions}")
+                        Text(stringResource(R.string.grid_cells, project.gridDivisions))
                         Slider(
                             value = project.gridDivisions.toFloat(),
                             onValueChange = {
@@ -507,7 +526,7 @@ fun TraceWorkspace(
                         )
                     }
                     if (blinking) {
-                        Text("Miganie nakładki: ${(project.blinkIntervalMs / 100f).roundToInt() / 10f} s")
+                        Text(stringResource(R.string.blink_interval, (project.blinkIntervalMs / 100f).roundToInt() / 10f))
                         Slider(
                             value = project.blinkIntervalMs.toFloat(),
                             onValueChange = { project = project.copy(blinkIntervalMs = it.toLong()) },
@@ -516,7 +535,7 @@ fun TraceWorkspace(
                         )
                     }
                     if (timelapseEnabled) {
-                        Text("Timelapse: zdjęcie co ${project.timelapseIntervalSeconds} s")
+                        Text(stringResource(R.string.timelapse_interval, project.timelapseIntervalSeconds))
                         Slider(
                             value = project.timelapseIntervalSeconds.toFloat(),
                             onValueChange = {
@@ -533,64 +552,64 @@ fun TraceWorkspace(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         WorkspaceButton(
-                            label = if (locked) "Odblokuj" else "Zablokuj",
+                            label = stringResource(if (locked) R.string.unlock else R.string.lock),
                             icon = if (locked) Icons.Default.Lock else Icons.Default.LockOpen,
                             onClick = {
                                 locked = !locked
                                 if (locked) saveProject(project)
                             },
                         )
-                        WorkspaceButton("Odbij X", Icons.Default.Flip) {
+                        WorkspaceButton(stringResource(R.string.flip_x), Icons.Default.Flip) {
                             saveProject(project.copy(mirrorX = !project.mirrorX))
                         }
-                        WorkspaceButton("Odbij Y", Icons.Default.FlipCameraAndroid) {
+                        WorkspaceButton(stringResource(R.string.flip_y), Icons.Default.FlipCameraAndroid) {
                             saveProject(project.copy(mirrorY = !project.mirrorY))
                         }
                         WorkspaceButton(
-                            if (project.gridEnabled) "Siatka: włączona" else "Siatka: wyłączona",
+                            stringResource(if (project.gridEnabled) R.string.grid_enabled else R.string.grid_disabled),
                             Icons.Default.GridOn,
                         ) {
                             saveProject(project.copy(gridEnabled = !project.gridEnabled))
                         }
                         WorkspaceButton(
-                            if (cameraParametersLocked) "Odblokuj kamerę" else "Zablokuj kamerę",
+                            stringResource(if (cameraParametersLocked) R.string.unlock_camera else R.string.lock_camera),
                             Icons.Default.CenterFocusStrong,
                             onClick = ::toggleCameraLock,
                         )
                         WorkspaceButton(
-                            if (overlayEnabled) "Widok: A+B" else "Widok: kamera",
+                            stringResource(if (overlayEnabled) R.string.view_combined else R.string.view_camera),
                             Icons.Default.Compare,
                         ) {
                             overlayEnabled = !overlayEnabled
                             blinking = false
                         }
                         WorkspaceButton(
-                            if (blinking) "Miganie: włączone" else "Miganie: wyłączone",
+                            stringResource(if (blinking) R.string.blinking_enabled else R.string.blinking_disabled),
                             Icons.Default.Timer,
                         ) {
                             blinking = !blinking
                             overlayEnabled = true
                         }
                         WorkspaceButton(
-                            if (timelapseEnabled) "Timelapse: włączony" else "Timelapse: wyłączony",
+                            stringResource(if (timelapseEnabled) R.string.timelapse_enabled else R.string.timelapse_disabled),
                             Icons.Default.Timer,
                         ) {
                             timelapseEnabled = !timelapseEnabled
                             Toast.makeText(
                                 context,
                                 if (timelapseEnabled) {
-                                    "Timelapse uruchomiony: co ${project.timelapseIntervalSeconds} s."
-                                } else "Timelapse zatrzymany.",
+                                    timelapseStartedMessage
+                                } else timelapseStoppedMessage,
                                 Toast.LENGTH_SHORT,
                             ).show()
                         }
                         WorkspaceButton(
                             if (project.tripodReferencePhoto == null) {
-                                "Zapisz statyw"
+                                stringResource(R.string.save_tripod)
                             } else if (tripodAlignMode) {
-                                "Ukryj wzorzec"
+                                stringResource(R.string.hide_reference)
                             } else {
-                                "Ustaw statyw"
+                                stringResource(R.string.align_tripod)
                             },
                             Icons.Default.ControlCamera,
                         ) {
@@ -601,13 +620,22 @@ fun TraceWorkspace(
                             }
                         }
                         WorkspaceButton(
-                            "Mieszanie ${blendModeLabel(project.overlayBlendMode)}",
+                            stringResource(
+                                R.string.blend_mode,
+                                stringResource(
+                                    when (project.overlayBlendMode) {
+                                        1 -> R.string.blend_multiply
+                                        2 -> R.string.blend_screen
+                                        else -> R.string.blend_normal
+                                    }
+                                )
+                            ),
                             Icons.Default.ScreenRotation,
                         ) {
                             saveProject(project.copy(overlayBlendMode = (project.overlayBlendMode + 1) % 3))
                         }
                         WorkspaceButton(
-                            if (torch) "Latarka: włączona" else "Latarka: wyłączona",
+                            stringResource(if (torch) R.string.torch_enabled else R.string.torch_disabled),
                             if (torch) Icons.Default.FlashOff else Icons.Default.FlashOn,
                         ) {
                             if (thermalStatus < PowerManager.THERMAL_STATUS_SEVERE) {
@@ -616,10 +644,10 @@ fun TraceWorkspace(
                                 torch = next
                             }
                         }
-                        WorkspaceButton("Pion", Icons.Default.ScreenLockPortrait) {
+                        WorkspaceButton(stringResource(R.string.portrait), Icons.Default.ScreenLockPortrait) {
                             saveProject(project.copy(orientation = 1))
                         }
-                        WorkspaceButton("Poziom", Icons.Default.ScreenLockLandscape) {
+                        WorkspaceButton(stringResource(R.string.landscape), Icons.Default.ScreenLockLandscape) {
                             saveProject(project.copy(orientation = 2))
                         }
                     }
@@ -632,12 +660,12 @@ fun TraceWorkspace(
                             Icon(Icons.Default.Cameraswitch, null)
                             Spacer(Modifier.size(6.dp))
                             Text(
-                                "Obiektyw: ${selectedCamera?.label ?: "domyślny"}",
+                                stringResource(R.string.lens_label, selectedCamera?.label ?: stringResource(R.string.default_lens_short)),
                                 modifier = Modifier.weight(1f),
                             )
                             Icon(
                                 if (showCameraPicker) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                if (showCameraPicker) "Zwiń" else "Rozwiń",
+                                stringResource(if (showCameraPicker) R.string.collapse else R.string.expand),
                             )
                         }
                     }
@@ -671,6 +699,7 @@ fun TraceWorkspace(
 @androidx.annotation.OptIn(androidx.camera.camera2.interop.ExperimentalCamera2Interop::class)
 private fun CameraPreview(
     selectedCameraId: String?,
+    cameraLabels: Map<Int, Triple<String, String, String>>,
     onCameraReady: (Camera, ImageCapture, List<CameraOption>, String) -> Unit,
 ) {
     val context = LocalContext.current
@@ -692,9 +721,9 @@ private fun CameraPreview(
                 val id = Camera2CameraInfo.from(info).cameraId
                 val facing = info.lensFacing
                 val label = when (facing) {
-                    CameraSelector.LENS_FACING_FRONT -> "Przednia ${index + 1}"
-                    CameraSelector.LENS_FACING_BACK -> "Tylna ${index + 1}"
-                    else -> "Kamera ${index + 1}"
+                    CameraSelector.LENS_FACING_FRONT -> cameraLabels[index + 1]?.first.orEmpty()
+                    CameraSelector.LENS_FACING_BACK -> cameraLabels[index + 1]?.second.orEmpty()
+                    else -> cameraLabels[index + 1]?.third.orEmpty()
                 }
                 CameraOption(id, label)
             }
@@ -734,7 +763,7 @@ private fun OverlayImage(
 ) {
     Image(
         bitmap.asImageBitmap(),
-        "Nakładka",
+        stringResource(R.string.overlay),
         contentScale = ContentScale.Fit,
         modifier = Modifier.fillMaxSize()
             .graphicsLayer {
@@ -826,12 +855,6 @@ private fun applyCameraLocks(camera: Camera, enabled: Boolean) {
     Camera2CameraControl.from(camera.cameraControl).setCaptureRequestOptions(options)
 }
 
-private fun blendModeLabel(mode: Int) = when (mode) {
-    1 -> "mnożenie"
-    2 -> "rozjaśnianie"
-    else -> "zwykłe"
-}
-
 private fun captureProgress(
     context: Context,
     capture: ImageCapture?,
@@ -840,7 +863,7 @@ private fun captureProgress(
     onFinished: () -> Unit = {},
 ) {
     if (capture == null) {
-        Toast.makeText(context, "Kamera nie jest jeszcze gotowa.", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.camera_not_ready), Toast.LENGTH_SHORT).show()
         onFinished()
         return
     }
@@ -854,7 +877,7 @@ private fun captureProgress(
                 onFinished()
             }
             override fun onError(exception: ImageCaptureException) {
-                Toast.makeText(context, "Nie udało się zapisać zdjęcia.", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, context.getString(R.string.photo_save_failed), Toast.LENGTH_LONG).show()
                 onFinished()
             }
         },

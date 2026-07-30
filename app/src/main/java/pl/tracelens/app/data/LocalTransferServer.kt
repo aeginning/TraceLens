@@ -7,7 +7,7 @@ import java.net.ServerSocket
 import java.util.UUID
 import kotlin.concurrent.thread
 
-class LocalTransferServer(private val archive: File) : AutoCloseable {
+class LocalTransferServer(private val archive: File, private val noWifiMessage: String) : AutoCloseable {
     private val token = UUID.randomUUID().toString().replace("-", "")
     private val server = ServerSocket(0)
     @Volatile private var running = true
@@ -52,5 +52,5 @@ class LocalTransferServer(private val archive: File) : AutoCloseable {
             .flatMap { it.inetAddresses.toList() }
             .filterIsInstance<Inet4Address>()
             .firstOrNull { !it.isLoopbackAddress && it.isSiteLocalAddress }
-            ?.hostAddress ?: error("Połącz telefon z siecią Wi‑Fi.")
+            ?.hostAddress ?: error(noWifiMessage)
 }

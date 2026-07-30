@@ -54,7 +54,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
                 images = (images + image).sortedImages()
                 repository.saveImages(images)
                 onComplete(image)
-            }.onFailure { message = it.message ?: "Nie udało się dodać obrazu." }
+            }.onFailure { message = it.message ?: repository.text(R.string.operation_failed) }
             busy = false
         }
     }
@@ -69,11 +69,11 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             .replace(Regex("\\s+"), " ")
             .trim()
         if (normalized.isBlank()) {
-            message = "Nazwa obrazu nie może być pusta."
+            message = repository.text(R.string.image_name_empty)
             return
         }
         updateImage(image.copy(name = normalized))
-        message = "Zmieniono nazwę obrazu."
+        message = repository.text(R.string.image_renamed)
     }
 
     fun deleteImage(image: LibraryImage) {
@@ -85,9 +85,9 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         images = images.filterNot { it.id == image.id }.sortedImages()
         repository.saveImages(images)
         message = if (linkedProjects.isEmpty()) {
-            "Obraz „${image.name}” został usunięty."
+            repository.text(R.string.image_deleted, image.name)
         } else {
-            "Usunięto obraz „${image.name}”. Usunięte powiązane projekty: ${linkedProjects.size}."
+            repository.text(R.string.image_deleted_projects, image.name, linkedProjects.size)
         }
     }
 
@@ -103,8 +103,8 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             }.onSuccess {
                 updateImage(it)
                 onComplete(it)
-                message = "Zapisano przetworzony obraz."
-            }.onFailure { message = it.message ?: "Nie udało się przetworzyć obrazu." }
+            message = repository.text(R.string.save)
+            }.onFailure { message = it.message ?: repository.text(R.string.operation_failed) }
             busy = false
         }
     }
@@ -123,7 +123,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         val defaults = appSettings
         val project = TraceProject(
             id = UUID.randomUUID().toString(),
-            name = name.ifBlank { "Nowy projekt" },
+            name = name.ifBlank { repository.text(R.string.new_project_default) },
             imageId = image.id,
             opacity = defaults.defaultOpacity,
             gridEnabled = defaults.defaultGridEnabled,
@@ -151,16 +151,16 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     fun renameProject(project: TraceProject, name: String) {
         val normalized = name.trim().replace(Regex("\\s+"), " ")
         if (normalized.isBlank()) {
-            message = "Nazwa projektu nie może być pusta."
+            message = repository.text(R.string.project_name_empty)
             return
         }
         updateProject(project.copy(name = normalized))
-        message = "Zmieniono nazwę projektu."
+        message = repository.text(R.string.project_renamed)
     }
 
     fun toggleProjectArchive(project: TraceProject) {
         updateProject(project.copy(archived = !project.archived))
-        message = if (project.archived) "Przywrócono projekt." else "Projekt przeniesiono do archiwum."
+        message = repository.text(if (project.archived) R.string.project_restored else R.string.project_archived)
     }
 
     fun updateImageCollections(image: LibraryImage, names: List<String>) {
@@ -173,22 +173,22 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             .distinctBy { it.lowercase() }
             .sortedBy { it.lowercase() }
         repository.saveCollectionNames(collectionNames)
-        message = "Zapisano kolekcje obrazu."
+        message = repository.text(R.string.image_collections_saved)
     }
 
     fun createCollection(name: String): Boolean {
         val normalized = name.trim().replace(Regex("\\s+"), " ")
         if (normalized.isBlank()) {
-            message = "Nazwa kolekcji nie może być pusta."
+            message = repository.text(R.string.collection_name_empty)
             return false
         }
         if (collectionNames.any { it.equals(normalized, ignoreCase = true) }) {
-            message = "Taka kolekcja już istnieje."
+            message = repository.text(R.string.collection_exists)
             return false
         }
         collectionNames = (collectionNames + normalized).sortedBy { it.lowercase() }
         repository.saveCollectionNames(collectionNames)
-        message = "Utworzono kolekcję „$normalized”."
+        message = repository.text(R.string.collection_created, normalized)
         return true
     }
 
@@ -203,9 +203,9 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     fun cleanupStorage() {
         val freed = repository.cleanupOrphanedFiles(images, projects)
         message = if (freed > 0) {
-            "Bezpieczne sprzątanie zakończone. Zwolniono ${formatBytes(freed)}."
+            repository.text(R.string.cleanup_done, formatBytes(freed))
         } else {
-            "Nie znaleziono zbędnych plików do usunięcia."
+            repository.text(R.string.cleanup_nothing)
         }
     }
 
@@ -213,12 +213,12 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
         repository.deleteProjectFiles(project.id)
         projects = projects.filterNot { it.id == project.id }
         repository.saveProjects(projects)
-        message = "Projekt „${project.name}” został usunięty."
+        message = repository.text(R.string.project_deleted, project.name)
     }
 
     fun exportProject(project: TraceProject, uri: Uri) {
         val image = imageForProject(project) ?: run {
-            message = "Nie znaleziono obrazu projektu."
+            message = repository.text(R.string.project_image_missing)
             return
         }
         viewModelScope.launch {
@@ -226,9 +226,9 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             runCatching {
                 withContext(Dispatchers.IO) { repository.exportProject(uri, project, image) }
             }.onSuccess {
-                message = "Projekt „${project.name}” został wyeksportowany."
+                message = repository.text(R.string.project_exported, project.name)
             }.onFailure {
-                message = it.message ?: "Nie udało się wyeksportować projektu."
+                message = it.message ?: repository.text(R.string.operation_failed)
             }
             busy = false
         }
@@ -236,7 +236,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
 
     fun shareProject(project: TraceProject, onReady: (Uri) -> Unit) {
         val image = imageForProject(project) ?: run {
-            message = "Nie znaleziono obrazu projektu."
+            message = repository.text(R.string.project_image_missing)
             return
         }
         viewModelScope.launch {
@@ -246,7 +246,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
                     repository.createShareableProjectArchive(project, image)
                 }
             }.onSuccess(onReady).onFailure {
-                message = it.message ?: "Nie udało się przygotować projektu do udostępnienia."
+                message = it.message ?: repository.text(R.string.operation_failed)
             }
             busy = false
         }
@@ -259,7 +259,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             runCatching {
                 withContext(Dispatchers.IO) { repository.createLocalTransfer(project, image) }
             }.onSuccess(onReady).onFailure {
-                message = it.message ?: "Nie udało się uruchomić transferu lokalnego."
+                message = it.message ?: repository.text(R.string.operation_failed)
             }
             busy = false
         }
@@ -279,10 +279,10 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
                 repository.saveImages(images)
                 repository.saveProjects(projects)
                 repository.saveCollectionNames(collectionNames)
-                message = "Zaimportowano projekt „${imported.project.name}”."
+                message = repository.text(R.string.project_imported, imported.project.name)
                 onComplete(imported.project)
             }.onFailure {
-                message = it.message ?: "Nie udało się zaimportować projektu."
+                message = it.message ?: repository.text(R.string.operation_failed)
             }
             busy = false
         }
@@ -302,21 +302,21 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             coverPhoto = if (project.coverPhoto == fileName) remaining.lastOrNull() else project.coverPhoto,
         )
         updateProject(updated)
-        message = "Zdjęcie postępu zostało usunięte."
+        message = repository.text(R.string.progress_photo_deleted)
         return updated
     }
 
     fun setProjectCover(project: TraceProject, fileName: String): TraceProject {
         val updated = project.copy(coverPhoto = fileName)
         updateProject(updated)
-        message = "Ustawiono zdjęcie okładkowe projektu."
+        message = repository.text(R.string.project_cover_set)
         return updated
     }
 
     fun setTripodReference(project: TraceProject, fileName: String): TraceProject {
         val updated = project.copy(tripodReferencePhoto = fileName)
         updateProject(updated)
-        message = "Zapisano zdjęcie kontrolne ustawienia statywu."
+        message = repository.text(R.string.tripod_reference_saved)
         return updated
     }
 
@@ -350,9 +350,9 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
                 }
             }
             onComplete(if (result.isSuccess) {
-                "Zapisano przygotowany obraz w galerii: Pictures/TraceLens/Obrazy."
+                repository.text(R.string.prepared_image_exported)
             } else {
-                "Nie udało się wyeksportować obrazu: ${result.exceptionOrNull()?.message ?: "nieznany błąd"}."
+                result.exceptionOrNull()?.message ?: repository.text(R.string.operation_failed)
             })
         }
     }

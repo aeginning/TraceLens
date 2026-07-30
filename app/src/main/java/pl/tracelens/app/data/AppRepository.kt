@@ -10,6 +10,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import androidx.exifinterface.media.ExifInterface
 import androidx.core.content.FileProvider
+import pl.tracelens.app.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
@@ -20,6 +21,7 @@ import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
 
 class AppRepository(private val context: Context) {
+    fun text(id: Int, vararg args: Any): String = context.getString(id, *args)
     private val imagesDir = File(context.filesDir, "images").apply { mkdirs() }
     private val projectsDir = File(context.filesDir, "projects").apply { mkdirs() }
     private val metadataFile = File(context.filesDir, "library.json")
@@ -118,13 +120,13 @@ class AppRepository(private val context: Context) {
 
     fun importImage(uri: Uri): LibraryImage {
         val id = UUID.randomUUID().toString()
-        val displayName = queryDisplayName(uri) ?: "Obraz ${id.take(6)}"
+        val displayName = queryDisplayName(uri) ?: text(R.string.default_image_name, id.take(6))
         val extension = displayName.substringAfterLast('.', "png").lowercase()
             .takeIf { it in setOf("png", "jpg", "jpeg") } ?: "png"
         val fileName = "$id.$extension"
         val output = File(imagesDir, fileName)
         context.contentResolver.openInputStream(uri).use { input ->
-            requireNotNull(input) { "Nie można otworzyć obrazu." }
+            requireNotNull(input) { text(R.string.cannot_open_image) }
             output.outputStream().use(input::copyTo)
         }
         return LibraryImage(id, displayName, fileName)
@@ -225,7 +227,7 @@ class AppRepository(private val context: Context) {
         return try {
             resolver.openOutputStream(uri)?.use { output ->
                 source.inputStream().use { input -> input.copyTo(output) }
-            } ?: error("Nie można otworzyć pliku w galerii")
+            } ?: error(text(R.string.cannot_open_gallery_file))
             values.clear()
             values.put(MediaStore.Images.Media.IS_PENDING, 0)
             resolver.update(uri, values, null, null)
@@ -246,15 +248,15 @@ class AppRepository(private val context: Context) {
         }
         val resolver = context.contentResolver
         val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values)
-            ?: error("System nie pozwolił utworzyć pliku w galerii")
+            ?: error(text(R.string.cannot_create_gallery_file))
         try {
             resolver.openOutputStream(uri)?.use { output ->
                 check(bitmap.compress(Bitmap.CompressFormat.PNG, 100, output))
-            } ?: error("Nie można otworzyć pliku w galerii")
+            } ?: error(text(R.string.cannot_open_gallery_file))
             values.clear()
             values.put(MediaStore.Images.Media.IS_PENDING, 0)
             check(resolver.update(uri, values, null, null) > 0) {
-                "Nie udało się zakończyć zapisu pliku w galerii"
+                text(R.string.cannot_finish_gallery_save)
             }
         } catch (error: Exception) {
             resolver.delete(uri, null, null)
@@ -269,7 +271,7 @@ class AppRepository(private val context: Context) {
 
     fun exportProject(uri: Uri, project: TraceProject, image: LibraryImage) {
         val output = context.contentResolver.openOutputStream(uri)
-            ?: error("Nie można otworzyć pliku docelowego.")
+            ?: error(text(R.string.cannot_open_destination))
         ZipOutputStream(output.buffered()).use { zip ->
             val manifest = JSONObject().apply {
                 put("format", "TraceLensProject")
@@ -333,21 +335,21 @@ class AppRepository(private val context: Context) {
             File(context.cacheDir, "project-archives"),
             "${project.name.toSafeFolderName()}.tracelens",
         )
-        return LocalTransferServer(file)
+        return LocalTransferServer(file, text(R.string.connect_wifi))
     }
 
     fun importProject(uri: Uri): ImportedProject {
         val temporary = File(context.cacheDir, "project-import-${UUID.randomUUID()}").apply { mkdirs() }
         try {
             val input = context.contentResolver.openInputStream(uri)
-                ?: error("Nie można otworzyć archiwum.")
+                ?: error(text(R.string.cannot_open_archive))
             var extractedBytes = 0L
             ZipInputStream(input.buffered()).use { zip ->
                 var entry = zip.nextEntry
                 while (entry != null) {
                     val target = File(temporary, entry.name)
                     val rootPath = temporary.canonicalPath + File.separator
-                    require(target.canonicalPath.startsWith(rootPath)) { "Archiwum zawiera nieprawidłową ścieżkę." }
+                    require(target.canonicalPath.startsWith(rootPath)) { text(R.string.invalid_archive_path) }
                     if (entry.isDirectory) {
                         target.mkdirs()
                     } else {
@@ -359,7 +361,7 @@ class AppRepository(private val context: Context) {
                                 if (read > 0) {
                                     extractedBytes += read
                                     require(extractedBytes <= 500L * 1024L * 1024L) {
-                                        "Archiwum przekracza limit 500 MB."
+                                        text(R.string.archive_too_large)
                                     }
                                     output.write(buffer, 0, read)
                                 }
@@ -372,15 +374,15 @@ class AppRepository(private val context: Context) {
                 }
             }
             val manifestFile = File(temporary, "manifest.json")
-            require(manifestFile.isFile) { "Brak manifestu projektu." }
+            require(manifestFile.isFile) { text(R.string.archive_missing_manifest) }
             val manifest = JSONObject(manifestFile.readText())
             require(manifest.optString("format") == "TraceLensProject") { "To nie jest archiwum TraceLens." }
-            require(manifest.optInt("formatVersion") == 1) { "Nieobsługiwana wersja archiwum." }
+            require(manifest.optInt("formatVersion") == 1) { text(R.string.unsupported_archive) }
 
             val sourceImage = manifest.getJSONObject("image").toLibraryImage()
             val sourceProject = manifest.getJSONObject("project").toTraceProject()
             val originalSource = File(temporary, "image/original")
-            require(originalSource.isFile) { "Archiwum nie zawiera obrazu źródłowego." }
+            require(originalSource.isFile) { text(R.string.archive_missing_source) }
 
             val newImageId = UUID.randomUUID().toString()
             val extension = sourceImage.originalFileName.substringAfterLast('.', "png")
