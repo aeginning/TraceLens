@@ -19,8 +19,8 @@ android {
         applicationId = "pl.tracelens.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.12"
+        versionCode = 35
+        versionName = "1.12.1"
     }
 
     signingConfigs {

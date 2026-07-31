@@ -67,6 +67,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
@@ -75,6 +76,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -100,11 +103,18 @@ private data class HelpChapter(
 )
 
 @Composable
-internal fun HelpScreen(modifier: Modifier = Modifier) {
+internal fun HelpScreen(
+    modifier: Modifier = Modifier,
+    showSearch: Boolean = false,
+) {
     val chapters = helpChapters()
     var selectedChapter by remember { mutableIntStateOf(0) }
     var query by remember { mutableStateOf("") }
     var enlargedImage by remember { mutableStateOf<Int?>(null) }
+    val searchFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(showSearch) {
+        if (showSearch) searchFocusRequester.requestFocus() else query = ""
+    }
     val normalizedQuery = query.trim().lowercase()
     val matches = if (normalizedQuery.isBlank()) emptyList() else chapters.mapIndexedNotNull { index, chapter ->
         val matchingItems = chapter.items.filter {
@@ -116,14 +126,18 @@ internal fun HelpScreen(modifier: Modifier = Modifier) {
     }
 
     Column(modifier.fillMaxSize()) {
-        OutlinedTextField(
-            value = query,
-            onValueChange = { query = it },
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
-            leadingIcon = { Icon(Icons.Default.Search, null) },
-            placeholder = { Text(stringResource(R.string.help_search_hint)) },
-            singleLine = true,
-        )
+        if (showSearch) {
+            OutlinedTextField(
+                value = query,
+                onValueChange = { query = it },
+                modifier = Modifier.fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .focusRequester(searchFocusRequester),
+                leadingIcon = { Icon(Icons.Default.Search, null) },
+                placeholder = { Text(stringResource(R.string.help_search_hint)) },
+                singleLine = true,
+            )
+        }
         if (normalizedQuery.isBlank()) {
             LazyRow(
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 12.dp),

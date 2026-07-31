@@ -188,6 +188,7 @@ fun TraceLensApp(
         var screen: Screen by remember { mutableStateOf(Screen.Library) }
         var showLibrarySearch by remember { mutableStateOf(false) }
         var showLibraryFilters by remember { mutableStateOf(false) }
+        var showHelpSearch by remember { mutableStateOf(false) }
         val snackbar = remember { SnackbarHostState() }
         val message = viewModel.message
         LaunchedEffect(message) {
@@ -265,8 +266,12 @@ fun TraceLensApp(
                     onProjects = { screen = Screen.Projects },
                     onHelp = { screen = Screen.Help },
                     onSettings = { screen = Screen.Settings },
+                    onSearch = { showHelpSearch = !showHelpSearch },
                 ) { padding ->
-                    HelpScreen(Modifier.padding(padding))
+                    HelpScreen(
+                        modifier = Modifier.padding(padding),
+                        showSearch = showHelpSearch,
+                    )
                 }
                 Screen.Settings -> MainScaffold(
                     selectedTab = 3,
