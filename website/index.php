@@ -147,39 +147,57 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
       <div class="screenshot-grid">
         <figure>
           <button class="screenshot-button" data-image="screenshots/biblioteka-obrazow.jpeg" data-title="Biblioteka obrazów">
-            <img src="screenshots/biblioteka-obrazow.jpeg" alt="Biblioteka obrazów TraceLens z zapisanym obrazem misia" loading="lazy">
+            <img src="screenshots/biblioteka-obrazow.jpeg" alt="Biblioteka obrazów TraceLens z wzorami zwierząt" loading="lazy">
           </button>
-          <figcaption><b>Biblioteka obrazów</b><span>Dodawaj, opisuj i przygotowuj wzory.</span></figcaption>
-        </figure>
-        <figure>
-          <button class="screenshot-button" data-image="screenshots/edytor-obrazu.jpeg" data-title="Edytor obrazu">
-            <img src="screenshots/edytor-obrazu.jpeg" alt="Edytor obrazu TraceLens z narzędziem kadrowania i filtrami" loading="lazy">
-          </button>
-          <figcaption><b>Edytor obrazu</b><span>Kadruj, twórz kontury i usuwaj tło.</span></figcaption>
+          <figcaption><b>Biblioteka obrazów</b><span>Wyszukuj, grupuj i przygotowuj własne wzory.</span></figcaption>
         </figure>
         <figure>
           <button class="screenshot-button" data-image="screenshots/projekty.jpeg" data-title="Lista projektów">
-            <img src="screenshots/projekty.jpeg" alt="Lista projektów TraceLens z projektem Misio" loading="lazy">
+            <img src="screenshots/projekty.jpeg" alt="Lista aktywnych projektów TraceLens" loading="lazy">
           </button>
-          <figcaption><b>Lista projektów</b><span>Wracaj do pracy z zapisanymi ustawieniami.</span></figcaption>
+          <figcaption><b>Projekty</b><span>Wznawiaj pracę, archiwizuj i przenoś projekty.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/projekt-ustawienia.jpeg" data-title="Ustawienia projektu">
-            <img src="screenshots/projekt-ustawienia.jpeg" alt="Projekt TraceLens z widocznymi ustawieniami przezroczystości i aparatu" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/ustawienia.jpeg" data-title="Ustawienia aplikacji">
+            <img src="screenshots/ustawienia.jpeg" alt="Ustawienia domyślne nowych projektów TraceLens" loading="lazy">
           </button>
-          <figcaption><b>Ustawienia projektu</b><span>Dopasuj przezroczystość, odbicie i obiektyw.</span></figcaption>
+          <figcaption><b>Ustawienia domyślne</b><span>Dopasuj siatkę, kamerę i zachowanie nowych projektów.</span></figcaption>
+        </figure>
+        <figure>
+          <button class="screenshot-button" data-image="screenshots/pakiet-wzorow.jpeg" data-title="Pakiet wzorów offline">
+            <img src="screenshots/pakiet-wzorow.jpeg" alt="Galeria prostych wzorów dostępnych offline w TraceLens" loading="lazy">
+          </button>
+          <figcaption><b>72 wzory offline</b><span>Wybieraj gotowe motywy bez szukania ich w internecie.</span></figcaption>
+        </figure>
+        <figure>
+          <button class="screenshot-button" data-image="screenshots/podglad-wzoru.jpeg" data-title="Podgląd wzoru">
+            <img src="screenshots/podglad-wzoru.jpeg" alt="Pełnoekranowy podgląd wzoru ptaka z informacją o autorze" loading="lazy">
+          </button>
+          <figcaption><b>Podgląd i licencja</b><span>Sprawdź wzór, autora i od razu utwórz projekt.</span></figcaption>
+        </figure>
+        <figure>
+          <button class="screenshot-button" data-image="screenshots/transfer-qr.jpeg" data-title="Przenoszenie projektu">
+            <img src="screenshots/transfer-qr.jpeg" alt="Przenoszenie projektu TraceLens na drugi telefon kodem QR" loading="lazy">
+          </button>
+          <figcaption><b>Transfer kodem QR</b><span>Przenoś projekty bez konta i zewnętrznej chmury.</span></figcaption>
         </figure>
         <figure>
           <button class="screenshot-button" data-image="screenshots/tryb-rysowania.jpeg" data-title="Tryb rysowania">
-            <img src="screenshots/tryb-rysowania.jpeg" alt="Pełnoekranowy tryb rysowania TraceLens z nakładką misia" loading="lazy">
+            <img src="screenshots/tryb-rysowania.jpeg" alt="Tryb rysowania TraceLens z siatką i nakładką chomika" loading="lazy">
           </button>
-          <figcaption><b>Tryb rysowania</b><span>Maksimum miejsca na aparat i nakładkę.</span></figcaption>
+          <figcaption><b>Tryb rysowania</b><span>Ustaw wzór na obrazie z kamery i reguluj przezroczystość.</span></figcaption>
+        </figure>
+        <figure>
+          <button class="screenshot-button" data-image="screenshots/sterowanie-rysowaniem.jpeg" data-title="Sterowanie rysowaniem">
+            <img src="screenshots/sterowanie-rysowaniem.jpeg" alt="Panel sterowania aktywnym projektem TraceLens" loading="lazy">
+          </button>
+          <figcaption><b>Sterowanie projektem</b><span>Odbijaj wzór, blokuj kamerę i kontroluj timelapse.</span></figcaption>
         </figure>
         <figure>
           <button class="screenshot-button" data-image="screenshots/galeria-postepu.jpeg" data-title="Galeria postępu">
-            <img src="screenshots/galeria-postepu.jpeg" alt="Galeria zdjęć postępu projektu Misio" loading="lazy">
+            <img src="screenshots/galeria-postepu.jpeg" alt="Galeria trzech zdjęć postępu projektu Chomiś" loading="lazy">
           </button>
-          <figcaption><b>Galeria postępu</b><span>Porównuj kolejne etapy swojej pracy.</span></figcaption>
+          <figcaption><b>Galeria postępu</b><span>Dokumentuj etapy i twórz materiały do udostępnienia.</span></figcaption>
         </figure>
       </div>
     </section>
