@@ -294,4 +294,5 @@
     <string name="thermal_normal">temperature normal</string>
     <string name="thermal_warm">phone warm</string>
     <string name="thermal_severe">phone too hot</string>
+    <string name="show_device_monitor">Show battery and temperature</string>
 </resources>

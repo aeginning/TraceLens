@@ -463,7 +463,7 @@ fun TraceWorkspace(
                     )
                 }
 
-                if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE) {
+                if (appSettings.showDeviceMonitor && thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE) {
                     Text(
                         stringResource(R.string.phone_heating),
                         color = Color.White,
@@ -495,70 +495,71 @@ fun TraceWorkspace(
                         )
                     }
                 }
-                Text(
-                    stringResource(
-                        R.string.device_monitor,
-                        batteryStatus.percent,
-                        stringResource(if (batteryStatus.charging) R.string.battery_charging else R.string.battery_discharging),
-                        thermalLabel(thermalStatus),
-                    ),
-                    color = Color.White,
-                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).background(
-                        if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE || batteryStatus.percent <= 15) Color(0xCCB45309)
-                        else Color(0xAA000000)
-                    ).padding(horizontal = 8.dp, vertical = 5.dp),
-                )
+                if (appSettings.showDeviceMonitor) {
+                    Text(
+                        stringResource(
+                            R.string.device_monitor,
+                            batteryStatus.percent,
+                            stringResource(if (batteryStatus.charging) R.string.battery_charging else R.string.battery_discharging),
+                            thermalLabel(thermalStatus),
+                        ),
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).background(
+                            if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE || batteryStatus.percent <= 15) Color(0xCCB45309)
+                            else Color(0xAA000000)
+                        ).padding(horizontal = 8.dp, vertical = 5.dp),
+                    )
+                }
                 if (!showControls) {
-                    Row(
+                    Column(
                         Modifier.align(Alignment.BottomCenter)
                             .fillMaxWidth()
                             .padding(12.dp),
-                        horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
                     ) {
-                        FilledIconButton(
-                            onClick = ::takeProgressPhoto,
-                            modifier = Modifier.size(56.dp),
+                        Slider(
+                            value = project.opacity,
+                            onValueChange = { project = project.copy(opacity = it) },
+                            onValueChangeFinished = { saveProject(project) },
+                            modifier = Modifier.fillMaxWidth().alpha(0.62f),
+                        )
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(18.dp, Alignment.CenterHorizontally),
                         ) {
-                            Icon(Icons.Default.PhotoCamera, stringResource(R.string.take_progress_photo))
-                        }
-                        Box(
-                            modifier = Modifier
-                                .size(56.dp)
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary)
-                                .pointerInput(Unit) {
-                                    awaitEachGesture {
-                                        awaitFirstDown(requireUnconsumed = false)
-                                        compareHeld = true
-                                        waitForUpOrCancellation()
-                                        compareHeld = false
-                                    }
+                            FilledIconButton(onClick = ::takeProgressPhoto, modifier = Modifier.size(56.dp)) {
+                                Icon(Icons.Default.PhotoCamera, stringResource(R.string.take_progress_photo))
+                            }
+                            Box(
+                                modifier = Modifier.size(56.dp).clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary)
+                                    .pointerInput(Unit) {
+                                        awaitEachGesture {
+                                            awaitFirstDown(requireUnconsumed = false)
+                                            compareHeld = true
+                                            waitForUpOrCancellation()
+                                            compareHeld = false
+                                        }
+                                    },
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(Icons.Default.VisibilityOff, stringResource(R.string.hold_hide_overlay), tint = MaterialTheme.colorScheme.onPrimary)
+                            }
+                            FilledIconButton(onClick = { showControls = true }, modifier = Modifier.size(56.dp)) {
+                                Icon(Icons.Default.Tune, stringResource(R.string.show_controls))
+                            }
+                            FilledIconButton(
+                                onClick = {
+                                    locked = !locked
+                                    if (locked) saveProject(project)
                                 },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Icon(
-                                Icons.Default.VisibilityOff,
-                                stringResource(R.string.hold_hide_overlay),
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                            )
-                        }
-                        FilledIconButton(
-                            onClick = { showControls = true },
-                            modifier = Modifier.size(56.dp),
-                        ) {
-                            Icon(Icons.Default.Tune, stringResource(R.string.show_controls))
-                        }
-                        FilledIconButton(
-                            onClick = {
-                                locked = !locked
-                                if (locked) saveProject(project)
-                            },
-                            modifier = Modifier.size(56.dp),
-                        ) {
-                            Icon(
-                                if (locked) Icons.Default.Lock else Icons.Default.LockOpen,
-                                stringResource(if (locked) R.string.unlock else R.string.lock),
-                            )
+                                modifier = Modifier.size(56.dp),
+                            ) {
+                                Icon(
+                                    if (locked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                    stringResource(if (locked) R.string.unlock else R.string.lock),
+                                )
+                            }
                         }
                     }
                 }
@@ -575,25 +576,14 @@ fun TraceWorkspace(
                         .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            stringResource(R.string.opacity_value, (project.opacity * 100).roundToInt()),
-                            modifier = Modifier.weight(1f),
-                        )
+                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Spacer(Modifier.weight(1f))
                         FilledTonalButton(onClick = { showControls = false }) {
                             Icon(Icons.Default.VisibilityOff, null)
                             Spacer(Modifier.size(6.dp))
                             Text(stringResource(R.string.drawing_mode))
                         }
                     }
-                    Slider(
-                        value = project.opacity,
-                        onValueChange = { project = project.copy(opacity = it) },
-                        onValueChangeFinished = { saveProject(project) },
-                    )
                     WorkspaceButton(
                         stringResource(if (project.gridEnabled) R.string.grid_enabled else R.string.grid_disabled),
                         Icons.Default.GridOn,

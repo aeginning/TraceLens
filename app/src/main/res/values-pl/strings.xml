@@ -296,4 +296,5 @@
     <string name="thermal_normal">temperatura prawidłowa</string>
     <string name="thermal_warm">telefon ciepły</string>
     <string name="thermal_severe">telefon przegrzany</string>
+    <string name="show_device_monitor">Pokazuj baterię i temperaturę</string>
 </resources>

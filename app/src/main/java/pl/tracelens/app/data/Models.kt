@@ -53,6 +53,7 @@ data class AppSettings(
     val defaultCameraId: String? = null,
     val showLevelIndicator: Boolean = true,
     val showMovementWarning: Boolean = true,
+    val showDeviceMonitor: Boolean = false,
 )
 
 data class TraceProject(

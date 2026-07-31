@@ -46,6 +46,7 @@ class AppRepository(private val context: Context) {
         defaultCameraId = preferences.getString("defaultCameraId", null),
         showLevelIndicator = preferences.getBoolean("showLevelIndicator", true),
         showMovementWarning = preferences.getBoolean("showMovementWarning", true),
+        showDeviceMonitor = preferences.getBoolean("showDeviceMonitor", false),
     )
 
     fun saveSettings(settings: AppSettings) {
@@ -63,6 +64,7 @@ class AppRepository(private val context: Context) {
             .putString("defaultCameraId", settings.defaultCameraId)
             .putBoolean("showLevelIndicator", settings.showLevelIndicator)
             .putBoolean("showMovementWarning", settings.showMovementWarning)
+            .putBoolean("showDeviceMonitor", settings.showDeviceMonitor)
             .apply()
     }
 

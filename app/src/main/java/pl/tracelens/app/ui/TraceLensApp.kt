@@ -606,6 +606,11 @@ private fun SettingsScreen(
             }
         }
         item {
+            ToggleRow(stringResource(R.string.show_device_monitor), settings.showDeviceMonitor) {
+                save(settings.copy(showDeviceMonitor = it))
+            }
+        }
+        item {
             FilledTonalButton(
                 onClick = {
                     context.startActivity(
