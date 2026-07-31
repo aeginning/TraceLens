@@ -29,11 +29,11 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Kamera, kartka i pozycjonowanie
 
-- [ ] **Automatyczne wykrywanie kartki** — rozpoznawanie krawędzi oraz proponowanie czterech rogów.
-- [ ] **Automatyczna korekcja perspektywy** — dopasowanie nakładki do wykrytej płaszczyzny.
-- [ ] **Stabilizacja nakładki** — utrzymywanie grafiki na kartce po niewielkim poruszeniu telefonu.
-- [ ] **Markery stabilizacyjne** — drukowane znaczniki w rogach kartki dla dokładniejszego śledzenia.
-- [ ] **Kalibracja rzeczywistego rozmiaru** — ustawienie grafiki w centymetrach.
+- [X] **Automatyczne wykrywanie kartki** — rozpoznawanie krawędzi oraz proponowanie czterech rogów.
+- [X] **Automatyczna korekcja perspektywy** — dopasowanie nakładki do wykrytej płaszczyzny.
+- [X] **Stabilizacja nakładki** — utrzymywanie grafiki na kartce po niewielkim poruszeniu telefonu.
+- [X] **Markery stabilizacyjne** — drukowane znaczniki w rogach kartki dla dokładniejszego śledzenia.
+- [X] **Kalibracja rzeczywistego rozmiaru** — ustawienie grafiki w centymetrach.
 - [ ] **Ręczna kompensacja ekspozycji**.
 - [ ] **Zoom cyfrowy kamery** niezależny od skali nakładki.
 - [ ] **Zamrożenie klatki z kamery** podczas precyzyjnego ustawiania grafiki.
@@ -100,11 +100,11 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Zdjęcia postępu i prezentacja pracy
 
-- [ ] **Film z procesu rysowania** generowany ze zdjęć timelapse.
-- [ ] **Porównanie referencji z ukończoną pracą**.
-- [ ] **Zestawienie „przed i po”** jako jeden obraz.
-- [ ] **Opis zdjęcia postępu** — krótka notatka do etapu.
-- [ ] **Eksport osi czasu projektu** — zdjęcia, daty i notatki w jednym raporcie.
+- [X] **Film z procesu rysowania** generowany ze zdjęć timelapse.
+- [X] **Porównanie referencji z ukończoną pracą**.
+- [X] **Zestawienie „przed i po”** jako jeden obraz.
+- [X] **Opis zdjęcia postępu** — krótka notatka do etapu.
+- [X] **Eksport osi czasu projektu** — zdjęcia, daty i notatki w jednym raporcie.
 
 **Uwagi:**
 
@@ -225,9 +225,19 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 
 ## Proponowany podział kolejnych etapów
 
-Poniższa roadmapa jest propozycją uporządkowania pozostałego backlogu. Nie oznacza jeszcze wyboru funkcji do realizacji.
+Wersja 1.11 została wybrana do realizacji. Dalsze wydania pozostają propozycją uporządkowania backlogu.
 
-### Wersja 1.11 — bezpieczniejsza edycja obrazów
+### Wersja 1.11 — prezentacja i udostępnianie ukończonej pracy
+
+- Film generowany ze zdjęć timelapse.
+- Porównanie referencji z ukończoną pracą.
+- Zestawienie „przed i po” gotowe do udostępnienia.
+- Notatki do zdjęć postępu.
+- Eksport osi czasu projektu jako czytelnego materiału podsumowującego pracę.
+
+**Cel:** wzmocnienie społecznościowej strony TraceLens — użytkownik może atrakcyjnie zaprezentować proces, rezultat i postęp oraz łatwo podzielić się nimi poza aplikacją.
+
+### Wersja 1.12 — bezpieczniejsza edycja obrazów
 
 - Cofnij/Ponów w edytorze.
 - Pędzel przywracający usunięte fragmenty.
@@ -237,7 +247,7 @@ Poniższa roadmapa jest propozycją uporządkowania pozostałego backlogu. Nie o
 
 **Cel:** użytkownik może eksperymentować z obróbką bez ryzyka utraty dobrze przygotowanego obrazu.
 
-### Wersja 1.12 — organizacja projektów i pełna kopia danych
+### Wersja 1.13 — organizacja projektów i pełna kopia danych
 
 - Duplikowanie projektu.
 - Wyszukiwanie i sortowanie projektów.
@@ -246,16 +256,6 @@ Poniższa roadmapa jest propozycją uporządkowania pozostałego backlogu. Nie o
 - Automatyczne testy migracji danych.
 
 **Cel:** zabezpieczenie pracy użytkownika i wygodna obsługa większej liczby projektów.
-
-### Wersja 1.13 — prezentacja ukończonej pracy
-
-- Film generowany ze zdjęć timelapse.
-- Porównanie referencji z ukończoną pracą.
-- Zestawienie „przed i po”.
-- Notatki do zdjęć postępu.
-- Eksport osi czasu projektu.
-
-**Cel:** zamiana zapisanych etapów w materiał, który można łatwo zachować lub udostępnić.
 
 ### Wersja 1.14 — dodatkowe narzędzia kamery
 
@@ -279,13 +279,13 @@ Społecznościowy katalog pozostaje w backlogu, ale nie został jeszcze oznaczon
 
 ### Dalszy etap — inteligentne pozycjonowanie 2.0
 
-Funkcje rozpoznawania kartki nie zostały zaznaczone do najbliższej realizacji i pozostają kierunkiem długoterminowym:
+Funkcje rozpoznawania kartki są zaznaczone do realizacji, ale pozostają osobnym, technicznie wymagającym etapem po wydaniu społecznościowym 1.11:
 
 - wykrywanie kartki,
 - korekcja perspektywy,
 - stabilizacja nakładki,
 - opcjonalne markery stabilizacyjne.
 
-**Najbliższy proponowany numer wersji:** `1.11`
+**Najbliższy wybrany numer wersji:** `1.11`
 
 **Proponowana kolejność:** `1.11` → `1.12` → `1.13` → `1.14`
