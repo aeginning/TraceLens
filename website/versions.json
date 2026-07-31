@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.10",
+    "title": "Precyzyjniejsze rysowanie",
+    "description": "Ręczny punkt ostrości, konfigurowalna siatka, podział pracy na fragmenty i wygodniejszy panel sterowania. Przezroczystość można regulować bezpośrednio podczas rysowania, a opcjonalny monitor kontroluje baterię i temperaturę telefonu.",
+    "apk": "TraceLens-1.10.apk",
+    "date": "2026-07-31"
+  },
+  {
     "version": "1.9",
     "title": "Edytor i 72 wzory offline",
     "description": "Dokładniejsze przygotowanie obrazów, automatyczne prostowanie i czyszczenie tła oraz osobna galeria 72 legalnie opisanych wzorów w 16 kategoriach. Zawiera wszystkie rozszerzenia serii 1.9.x, w tym wersję 1.9.4.",
