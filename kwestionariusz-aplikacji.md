@@ -311,7 +311,18 @@ Jeżeli projekt nie ma wystarczającej liczby zdjęć, niedostępne generatory i
 - Zmiana orientacji zdjęć jest respektowana na podstawie metadanych i istniejącej normalizacji galerii projektu.
 - Usunięcie projektu nie usuwa filmu wcześniej wyeksportowanego do publicznej galerii telefonu.
 
-### Wersja 1.12 — bezpieczniejsza edycja obrazów
+### Wersja 1.12 — centrum instrukcji
+
+- [X] Osobna zakładka „Instrukcja” pomiędzy Projektami a Ustawieniami.
+- [X] Rozdziały: biblioteka, edytor, wzory, projekty, rysowanie, galeria postępu i udostępnianie.
+- [X] Wyjaśnienie każdej ikony i mniej oczywistych pojęć, w tym mieszania, blokady kamery, ręcznej ostrości i blokady gestów.
+- [X] Wyszukiwanie treści instrukcji i szybkie przechodzenie do rozdziałów.
+- [X] Pełna treść po polsku i angielsku.
+- [ ] Podmiana 12 zielonych makiet na docelowe zrzuty według `docs/instrukcja-aplikacji/README.md`.
+
+**Cel:** użytkownik rozumie cały przepływ pracy i każdą funkcję bez opuszczania aplikacji.
+
+### Wersja 1.13 — bezpieczniejsza edycja obrazów
 
 - Cofnij/Ponów w edytorze.
 - Pędzel przywracający usunięte fragmenty.
@@ -321,7 +332,7 @@ Jeżeli projekt nie ma wystarczającej liczby zdjęć, niedostępne generatory i
 
 **Cel:** użytkownik może eksperymentować z obróbką bez ryzyka utraty dobrze przygotowanego obrazu.
 
-### Wersja 1.13 — organizacja projektów i pełna kopia danych
+### Wersja 1.14 — organizacja projektów i pełna kopia danych
 
 - Duplikowanie projektu.
 - Wyszukiwanie i sortowanie projektów.
@@ -331,7 +342,7 @@ Jeżeli projekt nie ma wystarczającej liczby zdjęć, niedostępne generatory i
 
 **Cel:** zabezpieczenie pracy użytkownika i wygodna obsługa większej liczby projektów.
 
-### Wersja 1.14 — dodatkowe narzędzia kamery
+### Wersja 1.15 — dodatkowe narzędzia kamery
 
 - Ręczna kompensacja ekspozycji.
 - Zoom cyfrowy kamery niezależny od nakładki.
@@ -360,6 +371,6 @@ Funkcje rozpoznawania kartki są zaznaczone do realizacji, ale pozostają osobny
 - stabilizacja nakładki,
 - opcjonalne markery stabilizacyjne.
 
-**Najbliższy wybrany numer wersji:** `1.11`
+**Najbliższy wybrany numer wersji:** `1.12`
 
-**Proponowana kolejność:** `1.11` → `1.12` → `1.13` → `1.14`
+**Proponowana kolejność:** `1.12` → `1.13` → `1.14` → `1.15`

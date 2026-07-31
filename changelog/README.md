@@ -13,6 +13,7 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [1.12](1.12.md) — przygotowanie pełnego centrum instrukcji
 - [1.11](1.11.md) — timelapse, kolaże oraz materiały referencja–efekt
 - [1.10](1.10.md) — punkt ostrości, personalizacja siatki, fragmenty pracy i monitor urządzenia
 - [1.9](1.9.md) — dokładniejszy edytor i pakiet wzorów offline
