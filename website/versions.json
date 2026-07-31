@@ -1,5 +1,12 @@
 [
   {
+    "version": "1.11",
+    "title": "Pokaż efekty swojej pracy",
+    "description": "Twórz pionowe filmy timelapse, kolaże postępu oraz zestawienia obrazu referencyjnego z ukończoną pracą. Gotowe materiały z brandingiem TraceLens zapiszesz w galerii i udostępnisz na Instagramie, TikToku lub w dowolnej aplikacji.",
+    "apk": "TraceLens-1.11.2.apk",
+    "date": "2026-07-31"
+  },
+  {
     "version": "1.10",
     "title": "Precyzyjniejsze rysowanie",
     "description": "Ręczny punkt ostrości, konfigurowalna siatka, podział pracy na fragmenty i wygodniejszy panel sterowania. Przezroczystość można regulować bezpośrednio podczas rysowania, a opcjonalny monitor kontroluje baterię i temperaturę telefonu.",

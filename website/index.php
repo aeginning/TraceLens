@@ -117,6 +117,12 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
           <h3>Biblioteka i projekty</h3>
           <p>Zachowuj przygotowane obrazy, oznaczaj ulubione i wracaj do projektów z zapisanymi ustawieniami kamery oraz nakładki.</p>
         </article>
+        <article class="feature">
+          <span class="feature-number">06</span>
+          <div class="feature-icon gallery-icon" aria-hidden="true"></div>
+          <h3>Materiały do udostępnienia</h3>
+          <p>Generuj pionowe timelapse’y, kolaże i porównania efektów, a potem publikuj je w mediach społecznościowych.</p>
+        </article>
       </div>
     </section>
 
