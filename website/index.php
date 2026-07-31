@@ -16,7 +16,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <meta property="og:url" content="https://tracelens.kasztelan.me/">
   <meta property="og:image" content="https://tracelens.kasztelan.me/og.png">
   <title>TraceLens <?= e($current['version']) ?> — cyfrowa kalka w Twoim telefonie</title>
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=1.12.2">
 </head>
 <body>
   <header class="nav">
@@ -111,6 +111,10 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
           <h3>Galeria postępu</h3>
           <p>Rób zdjęcia kolejnych etapów, porównuj je i przeglądaj w pełnoekranowej galerii projektu.</p>
         </article>
+        <figure class="feature-pattern feature-pattern-dog" aria-label="Przykładowy wzór psa dostępny w aplikacji">
+          <span>Wzory dostępne offline</span>
+          <img src="screenshots/wzor-pies.png" alt="Prosty wzór psa do odrysowania" loading="lazy">
+        </figure>
         <article class="feature feature-wide">
           <span class="feature-number">05</span>
           <div class="feature-icon library-icon" aria-hidden="true"></div>
@@ -129,6 +133,10 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
           <h3>Instrukcja całej aplikacji</h3>
           <p>Wbudowany przewodnik pokazuje każdy etap pracy, objaśnia wszystkie ikony i pozwala wyszukać mniej oczywiste funkcje, takie jak mieszanie, ręczna ostrość czy blokada kamery.</p>
         </article>
+        <figure class="feature-pattern feature-pattern-cat" aria-label="Przykładowy wzór kota dostępny w aplikacji">
+          <span>Znajdź swój następny rysunek</span>
+          <img src="screenshots/wzor-kot.png" alt="Prosty wzór kota do odrysowania" loading="lazy">
+        </figure>
       </div>
     </section>
 

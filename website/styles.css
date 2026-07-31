@@ -114,6 +114,12 @@ h1 em { color: var(--green); font-style: normal; }
 .feature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
 .feature { position:relative; min-height:300px; padding:29px; overflow:hidden; background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); }
 .feature-wide { grid-column:span 2; }
+.feature-pattern { position:relative; min-width:0; min-height:300px; margin:0; overflow:hidden; display:flex; align-items:flex-end; justify-content:center; background:linear-gradient(145deg,#f0e8ff 0%,#dccbf8 100%); border:1px solid rgba(112,77,183,.22); border-radius:var(--radius); }
+.feature-pattern::before { content:""; position:absolute; width:210px; height:210px; left:-70px; top:-85px; background:rgba(209,93,173,.2); border-radius:50%; }
+.feature-pattern::after { content:""; position:absolute; width:150px; height:150px; right:-55px; bottom:-55px; background:rgba(112,77,183,.18); border-radius:50%; }
+.feature-pattern span { position:absolute; z-index:2; left:22px; top:20px; padding:7px 10px; color:#4c2d82; background:rgba(255,255,255,.72); border:1px solid rgba(112,77,183,.16); border-radius:999px; font-size:11px; font-weight:850; letter-spacing:.04em; text-transform:uppercase; }
+.feature-pattern img { position:relative; z-index:1; width:88%; min-width:0; max-width:100%; height:88%; max-height:270px; object-fit:contain; object-position:center bottom; filter:drop-shadow(0 18px 22px rgba(76,45,130,.16)); }
+.feature-pattern-cat { background:linear-gradient(145deg,#f7eaf5 0%,#e6d5f8 100%); }
 .feature-number { position:absolute; right:24px; top:20px; color:#a8b2ae; font-size:12px; font-weight:800; }
 .feature h3 { margin:24px 0 10px; font-size:21px; letter-spacing:-.025em; }
 .feature p { color:var(--muted); }
@@ -186,6 +192,7 @@ footer .brand { color:var(--ink); }
   .trust-strip { grid-template-columns:1fr; margin-top:16px; }
   .trust-strip div { border-right:0; border-bottom:1px solid rgba(255,255,255,.13); }
   .feature-grid { grid-template-columns:1fr; }
+  .feature-pattern { min-height:260px; }
   .screenshot-grid { grid-template-columns:1fr 1fr; gap:10px; }
   .screenshot-grid figure { padding:7px; border-radius:17px; }
   .screenshot-button { height:330px; border-radius:12px; }
