@@ -618,6 +618,13 @@ private fun TraceProject.toJson() = JSONObject().apply {
     put("opacity", opacity.toDouble())
     put("gridEnabled", gridEnabled)
     put("gridDivisions", gridDivisions)
+    put("gridColor", gridColor)
+    put("gridOpacity", gridOpacity.toDouble())
+    put("overlayTintColor", overlayTintColor)
+    put("workSectionsEnabled", workSectionsEnabled)
+    put("workSectionDivisions", workSectionDivisions)
+    put("activeWorkSection", activeWorkSection)
+    put("inactiveSectionOpacity", inactiveSectionOpacity.toDouble())
     put("overlayBlendMode", overlayBlendMode)
     put("blinkIntervalMs", blinkIntervalMs)
     put("timelapseIntervalSeconds", timelapseIntervalSeconds)
@@ -646,6 +653,13 @@ private fun JSONObject.toTraceProject(): TraceProject {
         opacity = optDouble("opacity", 0.25).toFloat(),
         gridEnabled = optBoolean("gridEnabled"),
         gridDivisions = optInt("gridDivisions", 4).coerceIn(2, 12),
+        gridColor = optLong("gridColor", 0xFFFFFFFF),
+        gridOpacity = optDouble("gridOpacity", 0.67).toFloat().coerceIn(0.1f, 1f),
+        overlayTintColor = if (has("overlayTintColor") && !isNull("overlayTintColor")) optLong("overlayTintColor") else null,
+        workSectionsEnabled = optBoolean("workSectionsEnabled"),
+        workSectionDivisions = optInt("workSectionDivisions", 2).coerceIn(2, 6),
+        activeWorkSection = optInt("activeWorkSection", 0).coerceAtLeast(0),
+        inactiveSectionOpacity = optDouble("inactiveSectionOpacity", 0.55).toFloat().coerceIn(0.15f, 0.85f),
         overlayBlendMode = optInt("overlayBlendMode").coerceIn(0, 2),
         blinkIntervalMs = optLong("blinkIntervalMs", 800L).coerceIn(250L, 2_000L),
         timelapseIntervalSeconds = optInt("timelapseIntervalSeconds", 30).coerceIn(5, 3600),

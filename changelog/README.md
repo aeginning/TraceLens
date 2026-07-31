@@ -13,6 +13,9 @@ Każda wydana wersja aplikacji ma w tym katalogu własny plik Markdown. Nazwa pl
 
 ## Wersje
 
+- [1.10](1.10.md) — punkt ostrości, personalizacja siatki, fragmenty pracy i monitor urządzenia
+- [1.9](1.9.md) — dokładniejszy edytor i pakiet wzorów offline
+- [1.8](1.8.md) — samouczek, motywy oraz pełna lokalizacja polska i angielska
 - [1.7](1.7.md) — import, archiwa projektów i lokalny transfer QR
 - [1.6.1](1.6.1.md) — kompaktowa biblioteka, rozwijane wyszukiwanie i szybkie tworzenie kolekcji
 - [1.6](1.6.md) — wyszukiwanie, kolekcje, archiwum projektów i bezpieczne sprzątanie

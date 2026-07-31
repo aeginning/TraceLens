@@ -314,6 +314,6 @@ Funkcje rozpoznawania kartki nie zostały zaznaczone do najbliższej realizacji 
 - stabilizacja nakładki,
 - opcjonalne markery stabilizacyjne.
 
-**Planowany numer wersji:** `1.8`
+**Planowany numer wersji:** `1.11`
 
 **Kolejność realizacji:** `1.8` → `1.9` → `1.10` → `1.11`

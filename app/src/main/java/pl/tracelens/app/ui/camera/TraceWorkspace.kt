@@ -7,6 +7,8 @@ package pl.tracelens.app.ui.camera
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.ActivityInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
@@ -16,6 +18,7 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.hardware.camera2.CaptureRequest
 import android.os.PowerManager
+import android.os.BatteryManager
 import android.os.StatFs
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -39,6 +42,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
@@ -77,6 +81,9 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.filled.ControlCamera
+import androidx.compose.material.icons.filled.NavigateBefore
+import androidx.compose.material.icons.filled.NavigateNext
+import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilledTonalButton
@@ -104,9 +111,11 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -128,6 +137,11 @@ import kotlin.math.sqrt
 
 private data class CameraOption(val id: String, val label: String)
 private data class DeviceTilt(val horizontal: Float = 0f, val vertical: Float = 0f)
+private data class BatteryStatus(val percent: Int = 0, val charging: Boolean = false)
+
+private val workspaceColors = listOf(
+    0xFFFFFFFF, 0xFFE0C8FF, 0xFFFF5252, 0xFFFFD740, 0xFF69F0AE, 0xFF40C4FF, 0xFF000000,
+)
 
 @Composable
 fun TraceWorkspace(
@@ -173,6 +187,8 @@ fun TraceWorkspace(
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameras by remember { mutableStateOf<List<CameraOption>>(emptyList()) }
     var thermalStatus by remember { mutableIntStateOf(PowerManager.THERMAL_STATUS_NONE) }
+    val batteryStatus = rememberBatteryStatus()
+    var focusPoint by remember { mutableStateOf<Offset?>(null) }
     var showControls by remember { mutableStateOf(true) }
     var showCameraPicker by remember { mutableStateOf(false) }
     var overlayEnabled by remember { mutableStateOf(true) }
@@ -332,6 +348,31 @@ fun TraceWorkspace(
         }
     }
 
+    fun focusCamera(point: Offset, width: Float, height: Float) {
+        val activeCamera = camera ?: return
+        if (width <= 0f || height <= 0f) return
+        if (cameraParametersLocked) {
+            activeCamera.cameraControl.cancelFocusAndMetering()
+            applyCameraLocks(activeCamera, false)
+            cameraParametersLocked = false
+        }
+        val meteringPoint = SurfaceOrientedMeteringPointFactory(width, height)
+            .createPoint(point.x.coerceIn(0f, width), point.y.coerceIn(0f, height))
+        val action = FocusMeteringAction.Builder(
+            meteringPoint,
+            FocusMeteringAction.FLAG_AF or FocusMeteringAction.FLAG_AE,
+        ).build()
+        activeCamera.cameraControl.startFocusAndMetering(action)
+        focusPoint = point
+    }
+
+    LaunchedEffect(focusPoint) {
+        if (focusPoint != null) {
+            delay(1_200)
+            focusPoint = null
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -368,7 +409,8 @@ fun TraceWorkspace(
                     ) { Text(stringResource(R.string.camera_permission)) }
                 }
 
-                if (overlay != null && overlayEnabled && !compareHeld && (!blinking || blinkVisible)) {
+                val overlayVisible = overlay != null && overlayEnabled && !compareHeld && (!blinking || blinkVisible)
+                if (overlayVisible) {
                     OverlayImage(
                         bitmap = overlay,
                         project = project,
@@ -382,13 +424,36 @@ fun TraceWorkspace(
                             )
                         },
                         onTransformEnd = { saveProject(project) },
+                        onFocusTap = { point, width, height -> focusCamera(point, width, height) },
+                    )
+                } else if (locked) {
+                    Box(
+                        Modifier.fillMaxSize().pointerInput(camera) {
+                            detectTapGestures { focusCamera(it, size.width.toFloat(), size.height.toFloat()) }
+                        }
                     )
                 }
                 if (project.gridEnabled) {
                     DrawingGrid(
                         divisions = project.gridDivisions,
+                        color = Color(project.gridColor),
+                        opacity = project.gridOpacity,
                         modifier = Modifier.fillMaxSize(),
                     )
+                }
+                if (project.workSectionsEnabled) {
+                    WorkSectionMask(
+                        divisions = project.workSectionDivisions,
+                        activeSection = project.activeWorkSection,
+                        opacity = project.inactiveSectionOpacity,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                }
+                focusPoint?.let { point ->
+                    Canvas(Modifier.fillMaxSize()) {
+                        drawCircle(Color(0xFFE0C8FF), 34f, point, style = androidx.compose.ui.graphics.drawscope.Stroke(4f))
+                        drawCircle(Color.White, 28f, point, style = androidx.compose.ui.graphics.drawscope.Stroke(2f))
+                    }
                 }
                 if (tripodAlignMode && tripodReference != null) {
                     Image(
@@ -437,6 +502,19 @@ fun TraceWorkspace(
                         )
                     }
                 }
+                Text(
+                    stringResource(
+                        R.string.device_monitor,
+                        batteryStatus.percent,
+                        stringResource(if (batteryStatus.charging) R.string.battery_charging else R.string.battery_discharging),
+                        thermalLabel(thermalStatus),
+                    ),
+                    color = Color.White,
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).background(
+                        if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE || batteryStatus.percent <= 15) Color(0xCCB45309)
+                        else Color(0xAA000000)
+                    ).padding(horizontal = 8.dp, vertical = 5.dp),
+                )
                 if (!showControls) {
                     Row(
                         Modifier.align(Alignment.BottomCenter)
@@ -533,6 +611,71 @@ fun TraceWorkspace(
                             onValueChangeFinished = { saveProject(project) },
                             valueRange = 2f..12f,
                             steps = 9,
+                        )
+                        Text(stringResource(R.string.grid_color))
+                        ColorPalette(
+                            selected = project.gridColor,
+                            allowOriginal = false,
+                            onSelected = { saveProject(project.copy(gridColor = it ?: 0xFFFFFFFF)) },
+                        )
+                        Text(stringResource(R.string.grid_opacity, (project.gridOpacity * 100).roundToInt()))
+                        Slider(
+                            value = project.gridOpacity,
+                            onValueChange = { project = project.copy(gridOpacity = it) },
+                            onValueChangeFinished = { saveProject(project) },
+                            valueRange = 0.1f..1f,
+                        )
+                    }
+                    Text(stringResource(R.string.overlay_color))
+                    ColorPalette(
+                        selected = project.overlayTintColor,
+                        allowOriginal = true,
+                        onSelected = { saveProject(project.copy(overlayTintColor = it)) },
+                    )
+                    WorkspaceButton(
+                        stringResource(if (project.workSectionsEnabled) R.string.sections_enabled else R.string.sections_disabled),
+                        Icons.Default.ViewModule,
+                    ) {
+                        saveProject(project.copy(workSectionsEnabled = !project.workSectionsEnabled))
+                    }
+                    if (project.workSectionsEnabled) {
+                        Text(stringResource(R.string.sections_grid, project.workSectionDivisions, project.workSectionDivisions))
+                        Slider(
+                            value = project.workSectionDivisions.toFloat(),
+                            onValueChange = {
+                                val value = it.roundToInt().coerceIn(2, 6)
+                                project = project.copy(
+                                    workSectionDivisions = value,
+                                    activeWorkSection = project.activeWorkSection.coerceAtMost(value * value - 1),
+                                )
+                            },
+                            onValueChangeFinished = { saveProject(project) },
+                            valueRange = 2f..6f,
+                            steps = 3,
+                        )
+                        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                            IconButton(onClick = {
+                                saveProject(project.copy(activeWorkSection = (project.activeWorkSection - 1).coerceAtLeast(0)))
+                            }) { Icon(Icons.Default.NavigateBefore, stringResource(R.string.previous_section)) }
+                            Text(
+                                stringResource(
+                                    R.string.active_section,
+                                    project.activeWorkSection + 1,
+                                    project.workSectionDivisions * project.workSectionDivisions,
+                                ),
+                                modifier = Modifier.align(Alignment.CenterVertically),
+                            )
+                            IconButton(onClick = {
+                                val max = project.workSectionDivisions * project.workSectionDivisions - 1
+                                saveProject(project.copy(activeWorkSection = (project.activeWorkSection + 1).coerceAtMost(max)))
+                            }) { Icon(Icons.Default.NavigateNext, stringResource(R.string.next_section)) }
+                        }
+                        Text(stringResource(R.string.inactive_area_opacity, (project.inactiveSectionOpacity * 100).roundToInt()))
+                        Slider(
+                            value = project.inactiveSectionOpacity,
+                            onValueChange = { project = project.copy(inactiveSectionOpacity = it) },
+                            onValueChangeFinished = { saveProject(project) },
+                            valueRange = 0.15f..0.85f,
                         )
                     }
                     if (blinking) {
@@ -770,11 +913,13 @@ private fun OverlayImage(
     locked: Boolean,
     onTransform: (Float, Float, Float, Float) -> Unit,
     onTransformEnd: () -> Unit,
+    onFocusTap: (Offset, Float, Float) -> Unit,
 ) {
     Image(
         bitmap.asImageBitmap(),
         stringResource(R.string.overlay),
         contentScale = ContentScale.Fit,
+        colorFilter = project.overlayTintColor?.let { ColorFilter.tint(Color(it), BlendMode.SrcIn) },
         modifier = Modifier.fillMaxSize()
             .graphicsLayer {
                 translationX = project.offsetX
@@ -790,7 +935,9 @@ private fun OverlayImage(
                 }
             }
             .pointerInput(locked) {
-                if (!locked) {
+                if (locked) {
+                    detectTapGestures { onFocusTap(it, size.width.toFloat(), size.height.toFloat()) }
+                } else {
                     detectTransformGestures(
                         onGesture = { _, pan, zoom, rotation ->
                             onTransform(pan.x, pan.y, zoom, rotation)
@@ -818,19 +965,121 @@ private fun WorkspaceButton(
 }
 
 @Composable
-private fun DrawingGrid(divisions: Int, modifier: Modifier = Modifier) {
+private fun DrawingGrid(
+    divisions: Int,
+    color: Color,
+    opacity: Float,
+    modifier: Modifier = Modifier,
+) {
     Canvas(modifier) {
         val count = divisions.coerceIn(2, 12)
+        val lineColor = color.copy(alpha = opacity.coerceIn(0.1f, 1f))
         for (index in 1 until count) {
             val x = size.width * index / count
             val y = size.height * index / count
-            drawLine(Color(0xAAFFFFFF), start = androidx.compose.ui.geometry.Offset(x, 0f), end = androidx.compose.ui.geometry.Offset(x, size.height), strokeWidth = 1.5f)
-            drawLine(Color(0xAAFFFFFF), start = androidx.compose.ui.geometry.Offset(0f, y), end = androidx.compose.ui.geometry.Offset(size.width, y), strokeWidth = 1.5f)
+            drawLine(lineColor, start = Offset(x, 0f), end = Offset(x, size.height), strokeWidth = 1.5f)
+            drawLine(lineColor, start = Offset(0f, y), end = Offset(size.width, y), strokeWidth = 1.5f)
         }
-        drawLine(Color(0xFFE0C8FF), start = androidx.compose.ui.geometry.Offset(size.width / 2f, 0f), end = androidx.compose.ui.geometry.Offset(size.width / 2f, size.height), strokeWidth = 3f)
-        drawLine(Color(0xFFE0C8FF), start = androidx.compose.ui.geometry.Offset(0f, size.height / 2f), end = androidx.compose.ui.geometry.Offset(size.width, size.height / 2f), strokeWidth = 3f)
+        drawLine(lineColor, start = Offset(size.width / 2f, 0f), end = Offset(size.width / 2f, size.height), strokeWidth = 3f)
+        drawLine(lineColor, start = Offset(0f, size.height / 2f), end = Offset(size.width, size.height / 2f), strokeWidth = 3f)
     }
 }
+
+@Composable
+private fun ColorPalette(
+    selected: Long?,
+    allowOriginal: Boolean,
+    onSelected: (Long?) -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        if (allowOriginal) {
+            FilledTonalButton(onClick = { onSelected(null) }) {
+                Text(stringResource(R.string.original_color))
+            }
+        }
+        workspaceColors.forEach { value ->
+            Box(
+                Modifier.size(38.dp).clip(CircleShape)
+                    .background(Color(value))
+                    .pointerInput(value) { detectTapGestures { onSelected(value) } },
+                contentAlignment = Alignment.Center,
+            ) {
+                if (selected == value) {
+                    Canvas(Modifier.fillMaxSize()) {
+                        drawCircle(
+                            if (value == 0xFF000000) Color.White else Color.Black,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(4f),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun WorkSectionMask(
+    divisions: Int,
+    activeSection: Int,
+    opacity: Float,
+    modifier: Modifier = Modifier,
+) {
+    Canvas(modifier) {
+        val count = divisions.coerceIn(2, 6)
+        val safeActive = activeSection.coerceIn(0, count * count - 1)
+        val cellWidth = size.width / count
+        val cellHeight = size.height / count
+        for (index in 0 until count * count) {
+            val row = index / count
+            val column = index % count
+            val topLeft = Offset(column * cellWidth, row * cellHeight)
+            if (index != safeActive) {
+                drawRect(Color.Black.copy(alpha = opacity), topLeft, androidx.compose.ui.geometry.Size(cellWidth, cellHeight))
+            } else {
+                drawRect(
+                    Color(0xFFE0C8FF), topLeft, androidx.compose.ui.geometry.Size(cellWidth, cellHeight),
+                    style = androidx.compose.ui.graphics.drawscope.Stroke(4f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun rememberBatteryStatus(): BatteryStatus {
+    val context = LocalContext.current
+    var status by remember { mutableStateOf(BatteryStatus()) }
+    DisposableEffect(context) {
+        val filter = IntentFilter(Intent.ACTION_BATTERY_CHANGED)
+        val receiver = object : android.content.BroadcastReceiver() {
+            override fun onReceive(receiverContext: Context?, intent: Intent?) {
+                if (intent == null) return
+                val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
+                val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
+                val state = intent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)
+                status = BatteryStatus(
+                    percent = level * 100 / scale,
+                    charging = state == BatteryManager.BATTERY_STATUS_CHARGING || state == BatteryManager.BATTERY_STATUS_FULL,
+                )
+            }
+        }
+        context.registerReceiver(receiver, filter)
+        onDispose { context.unregisterReceiver(receiver) }
+    }
+    return status
+}
+
+@Composable
+private fun thermalLabel(status: Int): String = stringResource(
+    when {
+        status >= PowerManager.THERMAL_STATUS_SEVERE -> R.string.thermal_severe
+        status >= PowerManager.THERMAL_STATUS_MODERATE -> R.string.thermal_warm
+        else -> R.string.thermal_normal
+    }
+)
 
 @Composable
 private fun rememberDeviceTilt(): DeviceTilt {

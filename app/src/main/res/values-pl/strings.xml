@@ -281,4 +281,21 @@
         <item quantity="many">%1$d wzorów offline</item>
         <item quantity="other">%1$d wzoru offline</item>
     </plurals>
+    <string name="grid_color">Kolor siatki</string>
+    <string name="grid_opacity">Przezroczystość siatki: %1$d%%</string>
+    <string name="overlay_color">Kolor nakładki</string>
+    <string name="original_color">Oryginalny</string>
+    <string name="sections_enabled">Fragmenty pracy: włączone</string>
+    <string name="sections_disabled">Fragmenty pracy: wyłączone</string>
+    <string name="sections_grid">Podział fragmentów: %1$d × %2$d</string>
+    <string name="active_section">Fragment %1$d z %2$d</string>
+    <string name="previous_section">Poprzedni fragment</string>
+    <string name="next_section">Następny fragment</string>
+    <string name="inactive_area_opacity">Przyciemnienie reszty: %1$d%%</string>
+    <string name="device_monitor">Bateria %1$d%% (%2$s) · %3$s</string>
+    <string name="battery_charging">ładowanie</string>
+    <string name="battery_discharging">z baterii</string>
+    <string name="thermal_normal">temperatura prawidłowa</string>
+    <string name="thermal_warm">telefon ciepły</string>
+    <string name="thermal_severe">telefon przegrzany</string>
 </resources>

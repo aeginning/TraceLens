@@ -279,4 +279,21 @@
         <item quantity="one">%1$d offline pattern</item>
         <item quantity="other">%1$d offline patterns</item>
     </plurals>
+    <string name="grid_color">Grid color</string>
+    <string name="grid_opacity">Grid opacity: %1$d%%</string>
+    <string name="overlay_color">Overlay color</string>
+    <string name="original_color">Original</string>
+    <string name="sections_enabled">Work sections: on</string>
+    <string name="sections_disabled">Work sections: off</string>
+    <string name="sections_grid">Section layout: %1$d × %2$d</string>
+    <string name="active_section">Section %1$d of %2$d</string>
+    <string name="previous_section">Previous section</string>
+    <string name="next_section">Next section</string>
+    <string name="inactive_area_opacity">Inactive area dimming: %1$d%%</string>
+    <string name="device_monitor">Battery %1$d%% (%2$s) · %3$s</string>
+    <string name="battery_charging">charging</string>
+    <string name="battery_discharging">battery</string>
+    <string name="thermal_normal">temperature normal</string>
+    <string name="thermal_warm">phone warm</string>
+    <string name="thermal_severe">phone too hot</string>
 </resources>
