@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -57,6 +58,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -208,20 +210,36 @@ internal fun SocialExportDialog(
                         Image(preview.asImageBitmap(), null, Modifier.fillMaxWidth().height(360.dp), contentScale = ContentScale.Fit)
                     }
                     Text(stringResource(R.string.social_export_saved_gallery))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        TextButton(onClick = { SocialExports.share(context, uri, mime, "com.instagram.android") }) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                    ) {
+                        FilledTonalButton(onClick = { SocialExports.share(context, uri, mime, "com.instagram.android") }) {
+                            Icon(painterResource(R.drawable.ic_instagram), null, Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
                             Text("Instagram")
                         }
-                        TextButton(onClick = { SocialExports.share(context, uri, mime, "com.zhiliaoapp.musically") }) {
+                        FilledTonalButton(onClick = { SocialExports.share(context, uri, mime, "com.zhiliaoapp.musically") }) {
+                            Icon(painterResource(R.drawable.ic_tiktok), null, Modifier.size(20.dp))
+                            Spacer(Modifier.width(8.dp))
                             Text("TikTok")
                         }
                     }
+                    Button(
+                        onClick = { SocialExports.share(context, uri, mime) },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.share_photo))
+                    }
+                    TextButton(
+                        onClick = { result = null },
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                    ) {
+                        Text(stringResource(R.string.close))
+                    }
                 }
             },
-            confirmButton = {
-                Button(onClick = { SocialExports.share(context, uri, mime) }) { Text(stringResource(R.string.share_photo)) }
-            },
-            dismissButton = { TextButton(onClick = { result = null }) { Text(stringResource(R.string.close)) } },
+            confirmButton = {},
         )
     }
     errorMessage?.let { message ->
