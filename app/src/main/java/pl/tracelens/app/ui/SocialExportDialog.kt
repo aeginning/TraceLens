@@ -210,20 +210,21 @@ internal fun SocialExportDialog(
                         Image(preview.asImageBitmap(), null, Modifier.fillMaxWidth().height(360.dp), contentScale = ContentScale.Fit)
                     }
                     Text(stringResource(R.string.social_export_saved_gallery))
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterHorizontally),
+                    FilledTonalButton(
+                        onClick = { SocialExports.share(context, uri, mime, "com.instagram.android") },
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
-                        FilledTonalButton(onClick = { SocialExports.share(context, uri, mime, "com.instagram.android") }) {
-                            Icon(painterResource(R.drawable.ic_instagram), null, Modifier.size(20.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("Instagram")
-                        }
-                        FilledTonalButton(onClick = { SocialExports.share(context, uri, mime, "com.zhiliaoapp.musically") }) {
-                            Icon(painterResource(R.drawable.ic_tiktok), null, Modifier.size(20.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text("TikTok")
-                        }
+                        Icon(painterResource(R.drawable.ic_instagram), null, Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("Instagram")
+                    }
+                    FilledTonalButton(
+                        onClick = { SocialExports.share(context, uri, mime, "com.zhiliaoapp.musically") },
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Icon(painterResource(R.drawable.ic_tiktok), null, Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text("TikTok")
                     }
                     Button(
                         onClick = { SocialExports.share(context, uri, mime) },
@@ -233,7 +234,7 @@ internal fun SocialExportDialog(
                     }
                     TextButton(
                         onClick = { result = null },
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(stringResource(R.string.close))
                     }
