@@ -63,7 +63,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.CenterFocusStrong
-import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.FlashOff
@@ -186,7 +185,6 @@ fun TraceWorkspace(
     var focusPoint by remember { mutableStateOf<Offset?>(null) }
     var showControls by remember { mutableStateOf(true) }
     var showCameraPicker by remember { mutableStateOf(false) }
-    var overlayEnabled by remember { mutableStateOf(true) }
     var compareHeld by remember { mutableStateOf(false) }
     var blinking by remember(initialProject.id) { mutableStateOf(appSettings.defaultBlinkEnabled) }
     var blinkVisible by remember { mutableStateOf(true) }
@@ -404,7 +402,7 @@ fun TraceWorkspace(
                     ) { Text(stringResource(R.string.camera_permission)) }
                 }
 
-                val overlayVisible = overlay != null && overlayEnabled && !compareHeld && (!blinking || blinkVisible)
+                val overlayVisible = overlay != null && !compareHeld && (!blinking || blinkVisible)
                 if (overlayVisible) {
                     OverlayImage(
                         bitmap = overlay,
@@ -706,11 +704,14 @@ fun TraceWorkspace(
                         firstLabel = stringResource(if (cameraParametersLocked) R.string.unlock_camera else R.string.lock_camera),
                         firstIcon = Icons.Default.CenterFocusStrong,
                         firstAction = ::toggleCameraLock,
-                        secondLabel = stringResource(if (overlayEnabled) R.string.view_combined else R.string.view_camera),
-                        secondIcon = Icons.Default.Compare,
+                        secondLabel = stringResource(if (torch) R.string.torch_enabled else R.string.torch_disabled),
+                        secondIcon = if (torch) Icons.Default.FlashOff else Icons.Default.FlashOn,
                         secondAction = {
-                            overlayEnabled = !overlayEnabled
-                            blinking = false
+                            if (thermalStatus < PowerManager.THERMAL_STATUS_SEVERE) {
+                                val next = !torch
+                                camera?.cameraControl?.enableTorch(next)
+                                torch = next
+                            }
                         },
                     )
                     WorkspaceButtonPair(
@@ -718,7 +719,6 @@ fun TraceWorkspace(
                         firstIcon = Icons.Default.Timer,
                         firstAction = {
                             blinking = !blinking
-                            overlayEnabled = true
                         },
                         secondLabel = stringResource(if (timelapseEnabled) R.string.timelapse_enabled else R.string.timelapse_disabled),
                         secondIcon = Icons.Default.Timer,
@@ -764,17 +764,6 @@ fun TraceWorkspace(
                             saveProject(project.copy(overlayBlendMode = (project.overlayBlendMode + 1) % 3))
                         },
                     )
-                    WorkspaceButton(
-                        stringResource(if (torch) R.string.torch_enabled else R.string.torch_disabled),
-                        if (torch) Icons.Default.FlashOff else Icons.Default.FlashOn,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                            if (thermalStatus < PowerManager.THERMAL_STATUS_SEVERE) {
-                                val next = !torch
-                                camera?.cameraControl?.enableTorch(next)
-                                torch = next
-                            }
-                    }
                     WorkspaceButtonPair(
                         firstLabel = stringResource(R.string.portrait),
                         firstIcon = Icons.Default.ScreenLockPortrait,
@@ -960,8 +949,8 @@ private fun WorkspaceButtonPair(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        WorkspaceButton(firstLabel, firstIcon, Modifier.weight(1f), firstAction)
-        WorkspaceButton(secondLabel, secondIcon, Modifier.weight(1f), secondAction)
+        WorkspaceButton(firstLabel, firstIcon, Modifier.weight(1f).height(64.dp), firstAction)
+        WorkspaceButton(secondLabel, secondIcon, Modifier.weight(1f).height(64.dp), secondAction)
     }
 }
 
