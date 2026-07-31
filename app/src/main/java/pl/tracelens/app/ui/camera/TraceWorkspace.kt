@@ -477,6 +477,18 @@ fun TraceWorkspace(
                         ) {
                             Icon(Icons.Default.Tune, stringResource(R.string.show_controls))
                         }
+                        FilledIconButton(
+                            onClick = {
+                                locked = !locked
+                                if (locked) saveProject(project)
+                            },
+                            modifier = Modifier.size(56.dp),
+                        ) {
+                            Icon(
+                                if (locked) Icons.Default.Lock else Icons.Default.LockOpen,
+                                stringResource(if (locked) R.string.unlock else R.string.lock),
+                            )
+                        }
                     }
                 }
             }
