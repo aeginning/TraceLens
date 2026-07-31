@@ -496,13 +496,7 @@ fun TraceWorkspace(
                             stringResource(R.string.opacity_value, (project.opacity * 100).roundToInt()),
                             modifier = Modifier.weight(1f),
                         )
-                        FilledTonalButton(onClick = {
-                            if (!locked) {
-                                locked = true
-                                saveProject(project)
-                            }
-                            showControls = false
-                        }) {
+                        FilledTonalButton(onClick = { showControls = false }) {
                             Icon(Icons.Default.VisibilityOff, null)
                             Spacer(Modifier.size(6.dp))
                             Text(stringResource(R.string.drawing_mode))
