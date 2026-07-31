@@ -1,5 +1,19 @@
 [
   {
+    "version": "1.9",
+    "title": "Edytor i 72 wzory offline",
+    "description": "Dokładniejsze przygotowanie obrazów, automatyczne prostowanie i czyszczenie tła oraz osobna galeria 72 legalnie opisanych wzorów w 16 kategoriach. Zawiera wszystkie rozszerzenia serii 1.9.x, w tym wersję 1.9.4.",
+    "apk": "TraceLens-1.9.4.apk",
+    "date": "2026-07-31"
+  },
+  {
+    "version": "1.8",
+    "title": "Polski i angielski interfejs",
+    "description": "Pełna lokalizacja PL/EN, ręczny wybór języka, samouczek pierwszego uruchomienia, podpowiedzi oraz wybór jasnego, ciemnego lub systemowego motywu.",
+    "apk": "TraceLens-1.8.apk",
+    "date": "2026-07-30"
+  },
+  {
     "version": "1.7",
     "title": "Przenoszenie projektów",
     "description": "Import obrazów przez systemowe udostępnianie, kompletne archiwa projektów, bezpieczny import oraz lokalny transfer kodem QR. Zawiera także czytelniejsze karty projektów i zwijane filtry biblioteki.",
