@@ -237,6 +237,47 @@ Wersja 1.11 została wybrana do realizacji. Dalsze wydania pozostają propozycj�
 
 **Cel:** wzmocnienie społecznościowej strony TraceLens — użytkownik może atrakcyjnie zaprezentować proces, rezultat i postęp oraz łatwo podzielić się nimi poza aplikacją.
 
+#### Generator filmu timelapse
+
+- Przycisk **Generuj timelapse** znajduje się w galerii zdjęć konkretnego projektu.
+- Źródłem filmu są zdjęcia postępu uporządkowane chronologicznie według daty wykonania.
+- Format wynikowy: MP4, kodek H.264/AVC, pionowe proporcje 9:16, rozdzielczość 1080 × 1920 i 30 FPS.
+- Zdjęcia są dopasowywane do kadru bez deformowania proporcji; niewypełniony obszar otrzymuje neutralne tło.
+- Domyślny czas pojedynczego ujęcia wynosi 0,2 sekundy.
+- Użytkownik może ustawić czas ujęcia w zakresie od 0,1 do 3 sekund.
+- Ekran konfiguracji pokazuje przewidywany czas trwania filmu przed rozpoczęciem generowania.
+- Film powinien mieć co najmniej 1 sekundę. Przy bardzo małej liczbie zdjęć ostatnia klatka może zostać odpowiednio wydłużona.
+- Dla możliwie szerokiej zgodności społecznościowej aplikacja ostrzega po przekroczeniu 90 sekund i pozwala skrócić czas ujęcia.
+- Generowanie odbywa się lokalnie, bez przesyłania zdjęć lub filmu na serwer.
+- Podczas kodowania aplikacja pokazuje postęp, umożliwia anulowanie i nie pozwala uruchomić drugiego eksportu równocześnie.
+
+#### Ramka i podpis filmu
+
+- W dolnej części filmu znajduje się dyskretna belka identyfikacyjna umieszczona w bezpiecznej strefie interfejsów Reels i TikToka.
+- Po lewej stronie belki znajduje się logotyp oraz skrócona nazwa **TraceLens**.
+- Po prawej stronie znajduje się nazwa projektu.
+- Nazwa projektu jest jednowierszowa, ma ustalony maksymalny obszar i jest inteligentnie skracana wielokropkiem.
+- W podglądzie przed eksportem użytkownik widzi dokładnie tę samą ramkę, która trafi do filmu.
+- Branding wykorzystuje wyłącznie własne logo TraceLens i nie dodaje znaków TikToka ani Instagrama.
+
+#### Zapis i udostępnianie
+
+- Gotowy film jest zapisywany przez `MediaStore` w galerii telefonu, w folderze TraceLens nazwanym według projektu.
+- Po eksporcie dostępne są akcje **Udostępnij**, **Instagram** i **TikTok**.
+- Udostępnianie używa bezpiecznego URI oraz typu MIME `video/mp4`.
+- Przycisk ogólny otwiera systemowy arkusz udostępniania Androida.
+- Przyciski Instagram i TikTok próbują otworzyć zainstalowaną aplikację bezpośrednio z przekazanym filmem; jeżeli aplikacja nie jest dostępna albo odrzuci żądanie, następuje powrót do systemowego arkusza udostępniania.
+- TraceLens nie publikuje materiału automatycznie. Użytkownik zawsze zatwierdza opis, konto, odbiorców i publikację w aplikacji społecznościowej.
+- Integracja przez oficjalny TikTok Share Kit pozostaje opcją późniejszą, ponieważ wymaga rejestracji aplikacji, klucza klienta i obsługi odpowiedzi SDK.
+
+#### Ograniczenia i przypadki brzegowe
+
+- Generator wymaga co najmniej jednego zdjęcia postępu.
+- Uszkodzone lub niedostępne zdjęcie jest pomijane, a użytkownik otrzymuje podsumowanie pominiętych klatek.
+- Przy braku miejsca w pamięci eksport jest zatrzymywany z czytelnym komunikatem.
+- Zmiana orientacji zdjęć jest respektowana na podstawie metadanych i istniejącej normalizacji galerii projektu.
+- Usunięcie projektu nie usuwa filmu wcześniej wyeksportowanego do publicznej galerii telefonu.
+
 ### Wersja 1.12 — bezpieczniejsza edycja obrazów
 
 - Cofnij/Ponów w edytorze.
