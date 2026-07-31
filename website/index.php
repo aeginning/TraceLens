@@ -1,10 +1,27 @@
 <?php
+$requestedLanguage = $_GET['lang'] ?? null;
+if (in_array($requestedLanguage, ['pl', 'en'], true)) {
+  setcookie('tracelens_lang', $requestedLanguage, [
+    'expires' => time() + 31536000,
+    'path' => '/',
+    'secure' => true,
+    'httponly' => false,
+    'samesite' => 'Lax',
+  ]);
+}
+$language = in_array($requestedLanguage, ['pl', 'en'], true)
+  ? $requestedLanguage
+  : (($_COOKIE['tracelens_lang'] ?? 'pl') === 'en' ? 'en' : 'pl');
+$englishTranslations = require __DIR__ . '/translations-en.php';
+if ($language === 'en') {
+  ob_start(static fn(string $html): string => strtr($html, $englishTranslations));
+}
 $versions = json_decode(file_get_contents(__DIR__ . '/versions.json'), true);
 $current = $versions[0];
 function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
-<html lang="pl">
+<html lang="<?= e($language) ?>">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,8 +32,11 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://tracelens.kasztelan.me/">
   <meta property="og:image" content="https://tracelens.kasztelan.me/og.png">
+  <link rel="alternate" hreflang="pl" href="https://tracelens.kasztelan.me/?lang=pl">
+  <link rel="alternate" hreflang="en" href="https://tracelens.kasztelan.me/?lang=en">
+  <link rel="alternate" hreflang="x-default" href="https://tracelens.kasztelan.me/">
   <title>TraceLens <?= e($current['version']) ?> — cyfrowa kalka w Twoim telefonie</title>
-  <link rel="stylesheet" href="styles.css?v=1.12.2">
+  <link rel="stylesheet" href="styles.css?v=1.12.3">
 </head>
 <body>
   <header class="nav">
@@ -30,6 +50,10 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
       <a href="#galeria">Galeria</a>
       <a href="#wersje">Wersje</a>
     </nav>
+    <div class="language-switch" aria-label="Wybór języka">
+      <a href="?lang=pl#start" lang="pl"<?= $language === 'pl' ? ' class="active" aria-current="page"' : '' ?>>PL</a>
+      <a href="?lang=en#start" lang="en"<?= $language === 'en' ? ' class="active" aria-current="page"' : '' ?>>EN</a>
+    </div>
     <a class="nav-download" href="<?= e($current['apk']) ?>" download>Pobierz APK</a>
   </header>
 

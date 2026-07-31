@@ -26,7 +26,7 @@ foreach ($key in $required) {
 $baseUrl = "ftp://$($config.FTP_HOST):$($config.FTP_PORT)$($config.FTP_REMOTE_PATH.TrimEnd('/'))/"
 $credentials = "$($config.FTP_USER):$($config.FTP_PASSWORD)"
 $siteDirectory = Join-Path $projectRoot "website"
-$files = "index.php", "privacy.php", "styles.css", "app.js", "versions.json", "og.png", ".htaccess"
+$files = "index.php", "privacy.php", "translations-en.php", "styles.css", "app.js", "versions.json", "og.png", ".htaccess"
 
 foreach ($fileName in $files) {
     $localPath = Join-Path $siteDirectory $fileName

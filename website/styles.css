@@ -44,6 +44,10 @@ a { color: inherit; text-decoration: none; }
 .brand-mark span { position:absolute; width:4px; height:4px; background:var(--ink); border-radius:50%; inset:11px; }
 .nav nav { display: flex; gap: 28px; margin-left: auto; font-size: 14px; font-weight: 650; color: #40514c; }
 .nav nav a:hover { color: var(--green); }
+.language-switch { display:flex; flex:0 0 auto; gap:3px; padding:3px; background:#eee7fa; border:1px solid rgba(112,77,183,.16); border-radius:10px; }
+.language-switch a { display:grid; place-items:center; min-width:33px; height:30px; color:#604b76; border-radius:7px; font-size:12px; font-weight:850; }
+.language-switch a:hover { color:var(--green-dark); }
+.language-switch a.active { color:white; background:var(--green); box-shadow:0 4px 12px rgba(112,77,183,.22); }
 .nav-download { padding: 10px 17px; color: white; background: var(--green-dark); border-radius: 12px; font-size: 14px; font-weight: 750; }
 
 .hero {
@@ -185,6 +189,7 @@ footer .brand { color:var(--ink); }
 @media (max-width: 620px) {
   .nav { width:calc(100% - 20px); margin-top:10px; }
   .nav-download { padding:9px 12px; }
+  .language-switch { margin-left:auto; }
   .hero { width:calc(100% - 20px); margin-top:14px; padding:38px 22px 0; border-radius:26px; }
   h1 { font-size:50px; }
   .button { width:100%; }
