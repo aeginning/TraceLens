@@ -9,9 +9,13 @@
 - Zachowaj nazwy plików z folderu `app/src/main/res/drawable-nodpi`.
 - Przed wykonaniem zrzutów ustaw język aplikacji na polski. Angielska instrukcja użyje tych samych ekranów, ale wszystkie objaśnienia będzie miała po angielsku.
 
-Po przygotowaniu zrzutów zastąp odpowiadające im zielone makiety w folderze:
+Docelowe zrzuty zostały dostarczone i osadzone w aplikacji. Materiały źródłowe są zachowane w folderze:
 
-`app/src/main/res/drawable-nodpi`
+`docs/instrukcja-aplikacji/zrzuty-zrodlowe`
+
+Zielone makiety referencyjne przeniesiono do:
+
+`docs/instrukcja-aplikacji/makiety-zielone`
 
 ## Lista potrzebnych ekranów
 

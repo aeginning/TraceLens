@@ -87,6 +87,7 @@ import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -164,6 +165,7 @@ import pl.tracelens.app.ui.camera.TraceWorkspace
 private sealed interface Screen {
     data object Library : Screen
     data object Projects : Screen
+    data object Help : Screen
     data object Settings : Screen
     data object Patterns : Screen
     data class Editor(val imageId: String) : Screen
@@ -220,6 +222,7 @@ fun TraceLensApp(
                     snackbar = snackbar,
                     onLibrary = { screen = Screen.Library },
                     onProjects = { screen = Screen.Projects },
+                    onHelp = { screen = Screen.Help },
                     onSettings = { screen = Screen.Settings },
                     onSearch = { showLibrarySearch = !showLibrarySearch },
                     onFilters = { showLibraryFilters = !showLibraryFilters },
@@ -242,6 +245,7 @@ fun TraceLensApp(
                     snackbar = snackbar,
                     onLibrary = { screen = Screen.Library },
                     onProjects = { screen = Screen.Projects },
+                    onHelp = { screen = Screen.Help },
                     onSettings = { screen = Screen.Settings },
                 ) { padding ->
                     ProjectsScreen(
@@ -254,11 +258,22 @@ fun TraceLensApp(
                         onGallery = { screen = Screen.Gallery(it.id, false) },
                     )
                 }
-                Screen.Settings -> MainScaffold(
+                Screen.Help -> MainScaffold(
                     selectedTab = 2,
                     snackbar = snackbar,
                     onLibrary = { screen = Screen.Library },
                     onProjects = { screen = Screen.Projects },
+                    onHelp = { screen = Screen.Help },
+                    onSettings = { screen = Screen.Settings },
+                ) { padding ->
+                    HelpScreen(Modifier.padding(padding))
+                }
+                Screen.Settings -> MainScaffold(
+                    selectedTab = 3,
+                    snackbar = snackbar,
+                    onLibrary = { screen = Screen.Library },
+                    onProjects = { screen = Screen.Projects },
+                    onHelp = { screen = Screen.Help },
                     onSettings = { screen = Screen.Settings },
                 ) { padding ->
                     SettingsScreen(
@@ -331,6 +346,7 @@ private fun MainScaffold(
     snackbar: SnackbarHostState,
     onLibrary: () -> Unit,
     onProjects: () -> Unit,
+    onHelp: () -> Unit,
     onSettings: () -> Unit,
     onSearch: (() -> Unit)? = null,
     onFilters: (() -> Unit)? = null,
@@ -344,6 +360,7 @@ private fun MainScaffold(
                         when (selectedTab) {
                             0 -> stringResource(R.string.library_title)
                             1 -> stringResource(R.string.projects_title)
+                            2 -> stringResource(R.string.help_title)
                             else -> stringResource(R.string.settings_title)
                         }
                     )
@@ -379,6 +396,12 @@ private fun MainScaffold(
                 )
                 NavigationBarItem(
                     selected = selectedTab == 2,
+                    onClick = onHelp,
+                    icon = { Icon(Icons.Default.MenuBook, null) },
+                    label = { Text(stringResource(R.string.nav_help)) },
+                )
+                NavigationBarItem(
+                    selected = selectedTab == 3,
                     onClick = onSettings,
                     icon = { Icon(Icons.Default.Settings, null) },
                     label = { Text(stringResource(R.string.nav_settings)) },

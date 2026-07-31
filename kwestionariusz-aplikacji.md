@@ -318,7 +318,7 @@ Jeżeli projekt nie ma wystarczającej liczby zdjęć, niedostępne generatory i
 - [X] Wyjaśnienie każdej ikony i mniej oczywistych pojęć, w tym mieszania, blokady kamery, ręcznej ostrości i blokady gestów.
 - [X] Wyszukiwanie treści instrukcji i szybkie przechodzenie do rozdziałów.
 - [X] Pełna treść po polsku i angielsku.
-- [ ] Podmiana 12 zielonych makiet na docelowe zrzuty według `docs/instrukcja-aplikacji/README.md`.
+- [X] Podmiana 12 zielonych makiet na docelowe zrzuty według `docs/instrukcja-aplikacji/README.md`.
 
 **Cel:** użytkownik rozumie cały przepływ pracy i każdą funkcję bez opuszczania aplikacji.
 
