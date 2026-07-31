@@ -19,8 +19,8 @@ android {
         applicationId = "pl.tracelens.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 30
-        versionName = "1.10"
+        versionCode = 31
+        versionName = "1.11"
     }
 
     signingConfigs {
@@ -85,6 +85,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.10.0")
     implementation("androidx.exifinterface:exifinterface:1.4.2")
     implementation("com.google.zxing:core:3.5.4")
+    implementation("androidx.media3:media3-transformer:1.10.1")
+    implementation("androidx.media3:media3-effect:1.10.1")
 
     val cameraX = "1.6.1"
     implementation("androidx.camera:camera-core:$cameraX")

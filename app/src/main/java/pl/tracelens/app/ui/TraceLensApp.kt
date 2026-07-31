@@ -86,6 +86,7 @@ import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.QrCode
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Movie
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -2338,6 +2339,7 @@ private fun ProjectGalleryScreen(
     var project by remember(initialProject.id) { mutableStateOf(initialProject) }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
     var photoToDelete by remember { mutableStateOf<String?>(null) }
+    var showSocialExport by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -2357,6 +2359,12 @@ private fun ProjectGalleryScreen(
                     }
                 },
                 actions = {
+                    IconButton(
+                        onClick = { showSocialExport = true },
+                        enabled = project.progressPhotos.isNotEmpty(),
+                    ) {
+                        Icon(Icons.Default.Movie, stringResource(R.string.create_share_material))
+                    }
                     IconButton(
                         onClick = {
                             shareProjectPhotos(
@@ -2560,6 +2568,13 @@ private fun ProjectGalleryScreen(
             dismissButton = {
                 TextButton(onClick = { photoToDelete = null }) { Text(stringResource(R.string.cancel)) }
             },
+        )
+    }
+    if (showSocialExport) {
+        SocialExportDialog(
+            viewModel = viewModel,
+            project = project,
+            onDismiss = { showSocialExport = false },
         )
     }
 }
