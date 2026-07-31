@@ -345,8 +345,8 @@ fun TraceWorkspace(
             )
         },
     ) { padding ->
-        Column(Modifier.fillMaxSize().padding(padding)) {
-            Box(Modifier.weight(1f).fillMaxWidth().background(Color.Black)) {
+        Box(Modifier.fillMaxSize().padding(padding)) {
+            Box(Modifier.fillMaxSize().background(Color.Black)) {
                 if (cameraPermission) {
                     CameraPreview(
                         selectedCameraId = project.cameraId,
@@ -493,7 +493,11 @@ fun TraceWorkspace(
                 }
             }
 
-            if (showControls) Card(Modifier.fillMaxWidth().navigationBarsPadding()) {
+            if (showControls) Card(
+                Modifier.align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+            ) {
                 Column(
                     Modifier.heightIn(max = 380.dp)
                         .verticalScroll(rememberScrollState())
