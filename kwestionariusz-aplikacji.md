@@ -270,6 +270,43 @@ Wersja 1.11 została wybrana do realizacji. Dalsze wydania pozostają propozycj�
 - TraceLens nie publikuje materiału automatycznie. Użytkownik zawsze zatwierdza opis, konto, odbiorców i publikację w aplikacji społecznościowej.
 - Integracja przez oficjalny TikTok Share Kit pozostaje opcją późniejszą, ponieważ wymaga rejestracji aplikacji, klucza klienta i obsługi odpowiedzi SDK.
 
+#### Kolaż postępu
+
+- W galerii projektu znajduje się akcja **Utwórz kolaż postępu**.
+- Użytkownik najpierw wybiera liczbę pól: 2, 4, 6 albo 8.
+- Aplikacja pokazuje wyłącznie układy, dla których projekt zawiera wystarczającą liczbę zdjęć postępu. Przykładowo przy czterech zdjęciach dostępne są tylko układy 2 i 4.
+- Po wskazaniu układu użytkownik wybiera z galerii dokładnie tyle zdjęć, ile pól zawiera kolaż.
+- Wybrane zdjęcia są wyraźnie numerowane, a użytkownik może zmienić ich kolejność przed wygenerowaniem obrazu.
+- Przycisk generowania pozostaje nieaktywny do chwili wybrania wymaganej liczby zdjęć.
+- Domyślna kolejność odpowiada chronologii wykonania zdjęć, ale można ją zmienić ręcznie.
+- Układ dwóch zdjęć prezentuje je obok siebie. Większe zestawy są rozmieszczane w czytelnej, możliwie symetrycznej siatce.
+- Zdjęcia nie są deformowane. Aplikacja dopasowuje je do pól przez kadrowanie albo pozostawienie neutralnego marginesu.
+- Kolaż zawiera dyskretny logotyp i nazwę TraceLens oraz skróconą nazwę projektu.
+- Przed zapisaniem użytkownik widzi pełny podgląd wyniku.
+- Gotowy obraz można zapisać w galerii, udostępnić przez system Android albo przekazać do Instagrama i innych zgodnych aplikacji.
+
+#### Referencja i efekt „przed/po”
+
+- W galerii projektu znajduje się osobna akcja **Referencja i efekt**.
+- Lewa część zestawienia przedstawia przygotowany obraz referencyjny używany w projekcie.
+- Prawa część przedstawia zdjęcie efektu wybrane przez użytkownika z galerii postępu.
+- Domyślnie proponowane jest ostatnie chronologicznie zdjęcie, ale użytkownik może wskazać dowolną klatkę.
+- Obie części są podpisane lokalizowanymi etykietami **Referencja/Efekt** albo **Przed/Po**.
+- Użytkownik może wybrać wariant poziomy do publikacji w aktualnościach albo pionowy 9:16 do Stories.
+- Grafika zachowuje proporcje obu obrazów, wykorzystuje neutralne tło i nie rozciąga zawartości.
+- Na gotowym zestawieniu znajduje się branding TraceLens oraz skrócona wielokropkiem nazwa projektu.
+- Wynik można zapisać do galerii i udostępnić tym samym mechanizmem co kolaż i film timelapse.
+
+#### Wspólny przebieg generatorów społecznościowych
+
+1. Użytkownik wybiera rodzaj materiału: film timelapse, kolaż postępu albo referencja i efekt.
+2. Wybiera zdjęcia oraz właściwy układ.
+3. Otrzymuje podgląd z brandingiem i nazwą projektu.
+4. Generuje materiał lokalnie na urządzeniu.
+5. Zapisuje go w galerii albo uruchamia systemowe udostępnianie.
+
+Jeżeli projekt nie ma wystarczającej liczby zdjęć, niedostępne generatory i układy wyświetlają krótkie wyjaśnienie zamiast pozwalać rozpocząć niepełny eksport.
+
 #### Ograniczenia i przypadki brzegowe
 
 - Generator wymaga co najmniej jednego zdjęcia postępu.
