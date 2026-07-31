@@ -274,6 +274,7 @@
     <string name="add_to_library">Dodaj do biblioteki</string>
     <string name="create_project_from_pattern">Utwórz projekt</string>
     <string name="pattern_added">Dodano wzór „%1$s” do biblioteki.</string>
+    <string name="pattern_already_in_library">Wzór „%1$s” jest już w Twojej bibliotece.</string>
     <plurals name="patterns_count_plural">
         <item quantity="one">%1$d wzór offline</item>
         <item quantity="few">%1$d wzory offline</item>

@@ -63,10 +63,18 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
     fun addStarterPattern(
         pattern: StarterPattern,
         localizedName: String,
-        onComplete: (LibraryImage) -> Unit = {},
+        onComplete: (LibraryImage, Boolean) -> Unit = { _, _ -> },
     ) {
         viewModelScope.launch {
             busy = true
+            val existing = withContext(Dispatchers.Default) {
+                repository.findMatchingStarterPattern(pattern, images)
+            }
+            if (existing != null) {
+                onComplete(existing, false)
+                busy = false
+                return@launch
+            }
             runCatching {
                 withContext(Dispatchers.Default) {
                     repository.importStarterPattern(pattern, localizedName)
@@ -74,8 +82,7 @@ class AppViewModel(private val repository: AppRepository) : ViewModel() {
             }.onSuccess { image ->
                 images = (images + image).sortedImages()
                 repository.saveImages(images)
-                message = repository.text(R.string.pattern_added, localizedName)
-                onComplete(image)
+                onComplete(image, true)
             }.onFailure { message = it.message ?: repository.text(R.string.operation_failed) }
             busy = false
         }

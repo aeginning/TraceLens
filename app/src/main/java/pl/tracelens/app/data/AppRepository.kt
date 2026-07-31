@@ -147,7 +147,20 @@ class AppRepository(private val context: Context) {
         val bitmap = requireNotNull(StarterPatterns.bitmap(context, pattern)) {
             text(R.string.cannot_open_image)
         }
-        return importGeneratedImage(name, bitmap)
+        return importGeneratedImage(name, bitmap).copy(sourcePatternId = pattern.id)
+    }
+
+    fun findMatchingStarterPattern(
+        pattern: StarterPattern,
+        images: List<LibraryImage>,
+    ): LibraryImage? {
+        val patternBitmap = StarterPatterns.bitmap(context, pattern) ?: return null
+        val preferred = images.filter { it.sourcePatternId == pattern.id }
+        val legacy = images.filter { it.sourcePatternId == null }
+        return (preferred + legacy).firstOrNull { image ->
+            val currentBitmap = loadBitmap(image) ?: return@firstOrNull false
+            currentBitmap.sameAs(patternBitmap)
+        }
     }
 
     fun imageFile(image: LibraryImage, processed: Boolean = true): File {
@@ -474,6 +487,7 @@ private fun LibraryImage.toJson() = JSONObject().apply {
     put("id", id)
     put("name", name)
     put("originalFileName", originalFileName)
+    put("sourcePatternId", sourcePatternId)
     put("processedFileName", processedFileName)
     put("favorite", favorite)
     put("collectionNames", JSONArray(collectionNames))
@@ -514,6 +528,8 @@ private fun JSONObject.toLibraryImage(): LibraryImage {
         id = getString("id"),
         name = getString("name"),
         originalFileName = getString("originalFileName"),
+        sourcePatternId = optString("sourcePatternId")
+            .takeIf { it.isNotBlank() && it != "null" },
         processedFileName = optString("processedFileName").takeIf { it.isNotBlank() && it != "null" },
         favorite = optBoolean("favorite"),
         collectionNames = buildList {

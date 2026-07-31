@@ -875,6 +875,8 @@ private fun StarterPatternsGalleryScreen(
     val patterns = remember { pl.tracelens.app.image.StarterPatterns.load(context) }
     var selectedIndex by remember { mutableStateOf<Int?>(null) }
     var imageForProject by remember { mutableStateOf<LibraryImage?>(null) }
+    val patternSnackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -997,6 +999,11 @@ private fun StarterPatternsGalleryScreen(
                                 tint = Color.White,
                             )
                         }
+                        SnackbarHost(
+                            hostState = patternSnackbar,
+                            modifier = Modifier.align(Alignment.TopCenter)
+                                .padding(top = 56.dp),
+                        )
                         Column(
                             Modifier.align(Alignment.BottomCenter)
                                 .fillMaxWidth()
@@ -1008,6 +1015,11 @@ private fun StarterPatternsGalleryScreen(
                             val pattern = patterns[pagerState.currentPage]
                             val name = pl.tracelens.app.image.StarterPatterns
                                 .localizedName(pattern, locale)
+                            val addedMessage = stringResource(R.string.pattern_added, name)
+                            val duplicateMessage = stringResource(
+                                R.string.pattern_already_in_library,
+                                name,
+                            )
                             Text(name, color = Color.White, style = MaterialTheme.typography.titleLarge)
                             Text(
                                 stringResource(
@@ -1027,7 +1039,15 @@ private fun StarterPatternsGalleryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                             ) {
                                 FilledTonalButton(
-                                    onClick = { viewModel.addStarterPattern(pattern, name) },
+                                    onClick = {
+                                        viewModel.addStarterPattern(pattern, name) { _, added ->
+                                            scope.launch {
+                                                patternSnackbar.showSnackbar(
+                                                    if (added) addedMessage else duplicateMessage
+                                                )
+                                            }
+                                        }
+                                    },
                                     modifier = Modifier.weight(1f),
                                 ) {
                                     Icon(Icons.Default.PhotoLibrary, null)
@@ -1036,8 +1056,8 @@ private fun StarterPatternsGalleryScreen(
                                 }
                                 Button(
                                     onClick = {
-                                        viewModel.addStarterPattern(pattern, name) {
-                                            imageForProject = it
+                                        viewModel.addStarterPattern(pattern, name) { image, _ ->
+                                            imageForProject = image
                                             selectedIndex = null
                                         }
                                     },

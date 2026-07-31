@@ -274,6 +274,7 @@
     <string name="add_to_library">Add to library</string>
     <string name="create_project_from_pattern">Create project</string>
     <string name="pattern_added">Pattern “%1$s” added to the library.</string>
+    <string name="pattern_already_in_library">Pattern “%1$s” is already in your library.</string>
     <plurals name="patterns_count_plural">
         <item quantity="one">%1$d offline pattern</item>
         <item quantity="other">%1$d offline patterns</item>
