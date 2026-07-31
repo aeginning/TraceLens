@@ -155,9 +155,9 @@ class AppRepository(private val context: Context) {
         images: List<LibraryImage>,
     ): LibraryImage? {
         val patternBitmap = StarterPatterns.bitmap(context, pattern) ?: return null
-        val preferred = images.filter { it.sourcePatternId == pattern.id }
-        val legacy = images.filter { it.sourcePatternId == null }
-        return (preferred + legacy).firstOrNull { image ->
+        return images.asSequence()
+            .filter { it.sourcePatternId == pattern.id }
+            .firstOrNull { image ->
             val currentBitmap = loadBitmap(image) ?: return@firstOrNull false
             currentBitmap.sameAs(patternBitmap)
         }
