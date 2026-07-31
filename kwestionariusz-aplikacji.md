@@ -148,7 +148,7 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 - [X] **Sprawdzanie dostępności aktualizacji** z Google Play lub strony TraceLens.
 - [ ] **Testy na różnych rozdzielczościach i urządzeniach**.
-- [ ] **Test długiej pracy** — kamera, ekran, timelapse i latarka przez kilkadziesiąt minut.
+- [X] **Test długiej pracy** — kamera, ekran, timelapse i latarka przez kilkadziesiąt minut.
 - [ ] **Automatyczne testy migracji danych** pomiędzy kolejnymi wersjami.
 - [ ] **Automatyczne testy najważniejszych ekranów**.
 - [X] **Raport awarii przechowywany lokalnie** i eksportowany wyłącznie na żądanie.
