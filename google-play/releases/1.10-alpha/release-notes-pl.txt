@@ -1,0 +1,1 @@
+Dodano ręczny punkt ostrości, konfigurowalną siatkę i podział pracy na fragmenty. Uporządkowano panel sterowania, a regulacja przezroczystości jest teraz dostępna bezpośrednio w trybie rysowania. Opcjonalny monitor baterii i temperatury pomaga kontrolować telefon podczas dłuższej pracy.

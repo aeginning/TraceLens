@@ -1,0 +1,1 @@
+Added tap-to-focus, a configurable grid, and work sections with inactive-area dimming. The drawing controls are now better organized, and opacity can be adjusted directly in drawing mode. An optional battery and temperature monitor helps during longer sessions.
