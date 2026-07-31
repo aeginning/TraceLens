@@ -103,8 +103,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [X] **Film z procesu rysowania** generowany ze zdjęć timelapse.
 - [X] **Porównanie referencji z ukończoną pracą**.
 - [X] **Zestawienie „przed i po”** jako jeden obraz.
-- [X] **Opis zdjęcia postępu** — krótka notatka do etapu.
-- [X] **Eksport osi czasu projektu** — zdjęcia, daty i notatki w jednym raporcie.
 
 **Uwagi:**
 
@@ -232,8 +230,6 @@ Wersja 1.11 została wybrana do realizacji. Dalsze wydania pozostają propozycj�
 - Film generowany ze zdjęć timelapse.
 - Porównanie referencji z ukończoną pracą.
 - Zestawienie „przed i po” gotowe do udostępnienia.
-- Notatki do zdjęć postępu.
-- Eksport osi czasu projektu jako czytelnego materiału podsumowującego pracę.
 
 **Cel:** wzmocnienie społecznościowej strony TraceLens — użytkownik może atrakcyjnie zaprezentować proces, rezultat i postęp oraz łatwo podzielić się nimi poza aplikacją.
 
