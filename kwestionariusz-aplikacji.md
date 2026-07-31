@@ -1,6 +1,6 @@
 # Kierunki rozwoju TraceLens
 
-Dokument zawiera wyłącznie pomysły i funkcje, które nie zostały jeszcze zrealizowane po wydaniu **TraceLens 1.5**.
+Dokument zawiera wyłącznie pomysły i funkcje, które nie zostały jeszcze zrealizowane po przygotowaniu **TraceLens 1.10**.
 
 Gotowe elementy aplikacji są opisane w [README](README.md), a historia wdrożeń znajduje się w katalogu [changelog](changelog/README.md).
 
@@ -17,12 +17,8 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Najważniejsze kandydatury do kolejnego wydania
 
-- [ ] **Wyszukiwarka biblioteki** — wyszukiwanie przygotowanych obrazów po nazwie.
-- [X] **Zmiana nazwy projektu**.
 - [ ] **Cofnij/Ponów w edytorze** — historia operacji bez utraty oryginału.
 - [ ] **Pędzel przywracający** — odzyskiwanie fragmentów usuniętych gumką lub filtrem tła.
-- [X] **Eksport i import projektu** — jedno archiwum zawierające obraz, ustawienia i zdjęcia postępu.
-- [X] **Samouczek pierwszego uruchomienia**.
 - [ ] **Testy na większej liczbie telefonów** — różni producenci, aparaty i proporcje ekranów.
 
 **Uwagi i wybór priorytetu:**
@@ -38,7 +34,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Stabilizacja nakładki** — utrzymywanie grafiki na kartce po niewielkim poruszeniu telefonu.
 - [ ] **Markery stabilizacyjne** — drukowane znaczniki w rogach kartki dla dokładniejszego śledzenia.
 - [ ] **Kalibracja rzeczywistego rozmiaru** — ustawienie grafiki w centymetrach.
-- [X] **Ręczny punkt ostrości** — dotknięcie miejsca, na którym kamera ma ustawić ostrość.
 - [ ] **Ręczna kompensacja ekspozycji**.
 - [ ] **Zoom cyfrowy kamery** niezależny od skali nakładki.
 - [ ] **Zamrożenie klatki z kamery** podczas precyzyjnego ustawiania grafiki.
@@ -52,12 +47,8 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Narzędzia wspomagające odrysowywanie
 
-- [X] **Zmiana koloru i przezroczystości siatki**.
-- [X] **Zmiana koloru konturu nakładki**.
 - [ ] **Szybkie wartości przezroczystości** — np. 10%, 25%, 50% i 75%.
-- [X] **Podział pracy na fragmenty** — przyciemnianie obszarów poza aktualnie rysowaną częścią.
 - [ ] **Lupa** — powiększenie fragmentu wskazanego palcem.
-- [ ] **Ochrona przed przypadkowym dotknięciem** — czasowa blokada wszystkich kontrolek.
 - [ ] **Profile pracy** — np. ołówek, farby, ściana, mała kartka i duży format.
 
 **Uwagi:**
@@ -73,8 +64,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Presety filtrów** — zapis i ponowne użycie zestawu ustawień.
 - [ ] **Obsługa SVG** z zachowaniem jakości skalowania.
 - [ ] **Obsługa WebP**.
-- [X] **Automatyczne prostowanie i obracanie obrazu**.
-- [X] **Usuwanie drobnych artefaktów tła** — czyszczenie pojedynczych pikseli i małych wysp.
 - [ ] **Podgląd na szachownicy** — czytelniejsze przedstawienie przezroczystych obszarów.
 
 **Uwagi:**
@@ -89,8 +78,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Lista ostatnio używanych obrazów**.
 - [ ] **Wykrywanie duplikatów podczas importu**.
 - [ ] **Zaznaczanie wielu obrazów** i operacje zbiorcze.
-- [X] **Udostępnianie obrazu do TraceLens z innej aplikacji**.
-- [X] **Wbudowany pakiet startowy** — kilka prostych, legalnych wzorów dostępnych bez internetu.
 
 **Uwagi:**
 
@@ -103,8 +90,7 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 - [ ] **Duplikowanie projektu** z zachowaniem konfiguracji.
 - [ ] **Wyszukiwanie i sortowanie projektów**.
 - [ ] **Kopia całej biblioteki i wszystkich projektów**.
-- [ ] **Przenoszenie danych na drugi telefon bez konta i chmury**.
-- [ ] **Eksport paczki diagnostycznej** bez prywatnych zdjęć.
+- [ ] **Przenoszenie kompletnej kopii danych na drugi telefon** bez konta i chmury.
 
 **Uwagi:**
 
@@ -128,15 +114,10 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Wygoda i dostępność
 
-- [X] **Samouczek pierwszego uruchomienia**.
-- [X] **Opcjonalne podpowiedzi tekstowe przy ikonach**.
 - [ ] **Regulacja jasności ekranu w aplikacji**.
 - [ ] **Tryb oszczędzania energii**.
-- [X] **Rozbudowany monitor temperatury i baterii**.
 - [ ] **Sygnał haptyczny** po zablokowaniu nakładki lub wykonaniu zdjęcia.
-- [X] **Własny wybór motywu** — jasny, ciemny lub systemowy.
 - [ ] **Alternatywny rozmiar kontrolek i tekstu**.
-- [X] **Język angielski**.
 
 **Uwagi:**
 
@@ -146,16 +127,11 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 
 ## Dystrybucja i jakość
 
-- [X] **Sprawdzanie dostępności aktualizacji** z Google Play lub strony TraceLens.
 - [ ] **Testy na różnych rozdzielczościach i urządzeniach**.
-- [X] **Test długiej pracy** — kamera, ekran, timelapse i latarka przez kilkadziesiąt minut.
 - [ ] **Automatyczne testy migracji danych** pomiędzy kolejnymi wersjami.
 - [ ] **Automatyczne testy najważniejszych ekranów**.
-- [X] **Raport awarii przechowywany lokalnie** i eksportowany wyłącznie na żądanie.
 
 **Uwagi:**
-
-- Konto deweloperskie Google Play jest w trakcie zakładania.
 
 ---
 
@@ -164,7 +140,6 @@ Wstaw `X` pomiędzy nawiasy przy funkcjach wybranych do kolejnego wydania:
 ### Wariant bez kosztów i bez klucza API
 
 - [ ] **Otwórz wyszukiwanie w przeglądarce** — aplikacja uruchamia przygotowane zapytanie, np. „prosty ptak kontur SVG”.
-- [ ] **Udostępnij znaleziony obraz do TraceLens** — użytkownik korzysta z systemowej funkcji „Udostępnij”, a TraceLens importuje otrzymany plik.
 - [ ] **Instrukcja pobierania legalnych obrazów** — krótka podpowiedź o licencji, autorze i prawie do wykorzystania.
 - [ ] **Skróty do zaufanych katalogów otwartych zasobów** zamiast integrowania płatnej wyszukiwarki.
 
@@ -236,7 +211,7 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 
 ---
 
-## Dodatkowe pomysły po wersji 1.5
+## Dodatkowe pomysły po wersji 1.10
 
 - [ ] **Ocena łatwości odrysowania** — prosta, średnia lub szczegółowa.
 - [ ] **Automatyczna ocena złożoności obrazu** na podstawie liczby krawędzi i kolorów.
@@ -250,50 +225,47 @@ Na pierwszym etapie nowe obrazy byłyby dodawane administracyjnie na serwerze. O
 
 ## Proponowany podział kolejnych etapów
 
-Poniższa roadmapa obejmuje wyłącznie funkcje oznaczone wyżej przez użytkownika jako wybrane. Powtórzone wymagania zostały scalone w pojedyncze zadania.
+Poniższa roadmapa jest propozycją uporządkowania pozostałego backlogu. Nie oznacza jeszcze wyboru funkcji do realizacji.
 
-### Wersja 1.8 — pierwsze uruchomienie, dostępność i języki
+### Wersja 1.11 — bezpieczniejsza edycja obrazów
 
-- Samouczek pierwszego uruchomienia.
-- Opcjonalne podpowiedzi tekstowe przy ikonach.
-- Wybór motywu: jasny, ciemny lub systemowy.
-- Język angielski.
+- Cofnij/Ponów w edytorze.
+- Pędzel przywracający usunięte fragmenty.
+- Podgląd przezroczystości na szachownicy.
+- Automatyczna kopia oryginału przed operacją destrukcyjną.
+- Opcjonalnie: presety filtrów oraz obsługa WebP.
 
-**Dlaczego razem:** dodanie języka angielskiego wymaga przeniesienia tekstów interfejsu do zasobów tłumaczeń. To dobry moment, aby ujednolicić komunikaty, podpowiedzi i treść samouczka.
+**Cel:** użytkownik może eksperymentować z obróbką bez ryzyka utraty dobrze przygotowanego obrazu.
 
-**Najważniejsza decyzja przed implementacją:** czy język ma być zawsze zgodny z systemem, czy użytkownik może wybrać go ręcznie w ustawieniach.
+### Wersja 1.12 — organizacja projektów i pełna kopia danych
 
-### Wersja 1.9 — dokładniejszy edytor i pakiet startowy
+- Duplikowanie projektu.
+- Wyszukiwanie i sortowanie projektów.
+- Kopia całej biblioteki, projektów i ustawień.
+- Odtwarzanie kopii oraz przenoszenie kompletu danych na drugi telefon.
+- Automatyczne testy migracji danych.
 
-- Automatyczne prostowanie i obracanie importowanego obrazu.
-- Usuwanie drobnych artefaktów tła, pojedynczych pikseli i małych wysp.
-- Wbudowany pakiet prostych, legalnych wzorów dostępnych offline.
+**Cel:** zabezpieczenie pracy użytkownika i wygodna obsługa większej liczby projektów.
 
-**Dlaczego razem:** wydanie skupia się na doprowadzeniu obrazu do stanu gotowego do odrysowania przed utworzeniem projektu.
+### Wersja 1.13 — prezentacja ukończonej pracy
 
-**Wymaganie prawne:** każdy wzór w pakiecie startowym musi mieć udokumentowane źródło i licencję pozwalającą na dystrybucję z aplikacją.
+- Film generowany ze zdjęć timelapse.
+- Porównanie referencji z ukończoną pracą.
+- Zestawienie „przed i po”.
+- Notatki do zdjęć postępu.
+- Eksport osi czasu projektu.
 
-### Wersja 1.10 — precyzja podczas rysowania
+**Cel:** zamiana zapisanych etapów w materiał, który można łatwo zachować lub udostępnić.
 
-- Ręczny punkt ostrości wybierany dotknięciem podglądu.
-- Zmiana koloru i przezroczystości siatki.
-- Zmiana koloru konturu nakładki.
-- Podział pracy na fragmenty i przyciemnianie nieaktywnego obszaru.
-- Rozbudowany monitor temperatury i poziomu baterii.
+### Wersja 1.14 — dodatkowe narzędzia kamery
 
-**Dlaczego razem:** wszystkie funkcje działają bezpośrednio na ekranie aparatu i powinny zostać przetestowane wspólnie podczas dłuższej sesji rysowania.
+- Ręczna kompensacja ekspozycji.
+- Zoom cyfrowy kamery niezależny od nakładki.
+- Zamrożenie klatki podczas ustawiania.
+- Kalibracja rzeczywistego rozmiaru grafiki.
+- Migawka bez nakładki i z nakładką.
 
-**Ryzyko:** zmiany gestów na podglądzie nie mogą kolidować ze skalowaniem, obracaniem nakładki ani blokadą jej położenia.
-
-### Wersja 1.11 — aktualizacje i diagnostyka
-
-- Sprawdzanie dostępności aktualizacji z Google Play lub strony TraceLens.
-- Lokalny raport awarii przechowywany na urządzeniu.
-- Eksport raportu wyłącznie po świadomej decyzji użytkownika.
-
-**Dlaczego razem:** wydanie skupia się na utrzymaniu aplikacji po szerszej publikacji i diagnozowaniu problemów bez automatycznej telemetrii.
-
-**Założenie prywatności:** aplikacja nie wysyła raportów samodzielnie. Użytkownik przegląda zakres danych i uruchamia systemowe udostępnianie.
+**Cel:** większa kontrola nad podglądem bez wchodzenia jeszcze w kosztowną stabilizację obrazu.
 
 ### Dalszy etap — katalog wzorów
 
@@ -314,6 +286,6 @@ Funkcje rozpoznawania kartki nie zostały zaznaczone do najbliższej realizacji 
 - stabilizacja nakładki,
 - opcjonalne markery stabilizacyjne.
 
-**Planowany numer wersji:** `1.11`
+**Najbliższy proponowany numer wersji:** `1.11`
 
-**Kolejność realizacji:** `1.8` → `1.9` → `1.10` → `1.11`
+**Proponowana kolejność:** `1.11` → `1.12` → `1.13` → `1.14`
