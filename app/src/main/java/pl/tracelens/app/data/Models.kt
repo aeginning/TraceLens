@@ -29,6 +29,8 @@ data class LibraryImage(
     val name: String,
     val originalFileName: String,
     val sourcePatternId: String? = null,
+    val sourceContentSha256: String? = null,
+    val contentSha256: String? = null,
     val processedFileName: String? = null,
     val favorite: Boolean = false,
     val collectionNames: List<String> = emptyList(),

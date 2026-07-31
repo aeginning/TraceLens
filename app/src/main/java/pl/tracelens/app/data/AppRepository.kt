@@ -17,6 +17,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
+import java.nio.ByteBuffer
+import java.security.MessageDigest
 import java.util.UUID
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
@@ -131,7 +133,9 @@ class AppRepository(private val context: Context) {
             requireNotNull(input) { text(R.string.cannot_open_image) }
             output.outputStream().use(input::copyTo)
         }
-        return LibraryImage(id, displayName, fileName)
+        val image = LibraryImage(id, displayName, fileName)
+        val hash = loadBitmap(image, processed = false)?.let(::bitmapSha256)
+        return image.copy(sourceContentSha256 = hash, contentSha256 = hash)
     }
 
     fun importGeneratedImage(name: String, bitmap: Bitmap): LibraryImage {
@@ -140,7 +144,14 @@ class AppRepository(private val context: Context) {
         FileOutputStream(File(imagesDir, fileName)).use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
-        return LibraryImage(id = id, name = name, originalFileName = fileName)
+        val hash = bitmapSha256(bitmap)
+        return LibraryImage(
+            id = id,
+            name = name,
+            originalFileName = fileName,
+            sourceContentSha256 = hash,
+            contentSha256 = hash,
+        )
     }
 
     fun importStarterPattern(pattern: StarterPattern, name: String): LibraryImage {
@@ -155,12 +166,10 @@ class AppRepository(private val context: Context) {
         images: List<LibraryImage>,
     ): LibraryImage? {
         val patternBitmap = StarterPatterns.bitmap(context, pattern) ?: return null
+        val patternHash = bitmapSha256(patternBitmap)
         return images.asSequence()
             .filter { it.sourcePatternId == pattern.id }
-            .firstOrNull { image ->
-            val currentBitmap = loadBitmap(image) ?: return@firstOrNull false
-            currentBitmap.sameAs(patternBitmap)
-        }
+            .firstOrNull { it.contentSha256 == patternHash }
     }
 
     fun imageFile(image: LibraryImage, processed: Boolean = true): File {
@@ -198,7 +207,24 @@ class AppRepository(private val context: Context) {
         FileOutputStream(File(imagesDir, fileName)).use {
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, it)
         }
-        return image.copy(processedFileName = fileName)
+        return image.copy(
+            processedFileName = fileName,
+            contentSha256 = bitmapSha256(bitmap),
+        )
+    }
+
+    private fun bitmapSha256(bitmap: Bitmap): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        digest.update(ByteBuffer.allocate(8).putInt(bitmap.width).putInt(bitmap.height).array())
+        val pixels = IntArray(bitmap.width)
+        val row = ByteBuffer.allocate(bitmap.width * Int.SIZE_BYTES)
+        for (y in 0 until bitmap.height) {
+            bitmap.getPixels(pixels, 0, bitmap.width, 0, y, bitmap.width, 1)
+            row.clear()
+            pixels.forEach { row.putInt(it) }
+            digest.update(row.array())
+        }
+        return digest.digest().joinToString("") { "%02x".format(it.toInt() and 0xff) }
     }
 
     fun deleteImageFiles(image: LibraryImage) {
@@ -488,6 +514,8 @@ private fun LibraryImage.toJson() = JSONObject().apply {
     put("name", name)
     put("originalFileName", originalFileName)
     put("sourcePatternId", sourcePatternId)
+    put("sourceContentSha256", sourceContentSha256)
+    put("contentSha256", contentSha256)
     put("processedFileName", processedFileName)
     put("favorite", favorite)
     put("collectionNames", JSONArray(collectionNames))
@@ -529,6 +557,10 @@ private fun JSONObject.toLibraryImage(): LibraryImage {
         name = getString("name"),
         originalFileName = getString("originalFileName"),
         sourcePatternId = optString("sourcePatternId")
+            .takeIf { it.isNotBlank() && it != "null" },
+        sourceContentSha256 = optString("sourceContentSha256")
+            .takeIf { it.isNotBlank() && it != "null" },
+        contentSha256 = optString("contentSha256")
             .takeIf { it.isNotBlank() && it != "null" },
         processedFileName = optString("processedFileName").takeIf { it.isNotBlank() && it != "null" },
         favorite = optBoolean("favorite"),
