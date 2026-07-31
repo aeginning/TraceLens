@@ -1,6 +1,5 @@
 @file:OptIn(
     androidx.compose.material3.ExperimentalMaterial3Api::class,
-    androidx.compose.foundation.layout.ExperimentalLayoutApi::class,
 )
 
 package pl.tracelens.app.ui.camera
@@ -50,7 +49,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -598,6 +596,13 @@ fun TraceWorkspace(
                         onValueChange = { project = project.copy(opacity = it) },
                         onValueChangeFinished = { saveProject(project) },
                     )
+                    WorkspaceButton(
+                        stringResource(if (project.gridEnabled) R.string.grid_enabled else R.string.grid_disabled),
+                        Icons.Default.GridOn,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        saveProject(project.copy(gridEnabled = !project.gridEnabled))
+                    }
                     if (project.gridEnabled) {
                         Text(stringResource(R.string.grid_cells, project.gridDivisions))
                         Slider(
@@ -685,54 +690,39 @@ fun TraceWorkspace(
                             valueRange = 5f..300f,
                         )
                     }
-                    FlowRow(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        WorkspaceButton(
-                            label = stringResource(if (locked) R.string.unlock else R.string.lock),
-                            icon = if (locked) Icons.Default.Lock else Icons.Default.LockOpen,
-                            onClick = {
-                                locked = !locked
-                                if (locked) saveProject(project)
-                            },
-                        )
-                        WorkspaceButton(stringResource(R.string.flip_x), Icons.Default.Flip) {
+                    WorkspaceButtonPair(
+                        firstLabel = stringResource(R.string.flip_x),
+                        firstIcon = Icons.Default.Flip,
+                        firstAction = {
                             saveProject(project.copy(mirrorX = !project.mirrorX))
-                        }
-                        WorkspaceButton(stringResource(R.string.flip_y), Icons.Default.FlipCameraAndroid) {
+                        },
+                        secondLabel = stringResource(R.string.flip_y),
+                        secondIcon = Icons.Default.FlipCameraAndroid,
+                        secondAction = {
                             saveProject(project.copy(mirrorY = !project.mirrorY))
-                        }
-                        WorkspaceButton(
-                            stringResource(if (project.gridEnabled) R.string.grid_enabled else R.string.grid_disabled),
-                            Icons.Default.GridOn,
-                        ) {
-                            saveProject(project.copy(gridEnabled = !project.gridEnabled))
-                        }
-                        WorkspaceButton(
-                            stringResource(if (cameraParametersLocked) R.string.unlock_camera else R.string.lock_camera),
-                            Icons.Default.CenterFocusStrong,
-                            onClick = ::toggleCameraLock,
-                        )
-                        WorkspaceButton(
-                            stringResource(if (overlayEnabled) R.string.view_combined else R.string.view_camera),
-                            Icons.Default.Compare,
-                        ) {
+                        },
+                    )
+                    WorkspaceButtonPair(
+                        firstLabel = stringResource(if (cameraParametersLocked) R.string.unlock_camera else R.string.lock_camera),
+                        firstIcon = Icons.Default.CenterFocusStrong,
+                        firstAction = ::toggleCameraLock,
+                        secondLabel = stringResource(if (overlayEnabled) R.string.view_combined else R.string.view_camera),
+                        secondIcon = Icons.Default.Compare,
+                        secondAction = {
                             overlayEnabled = !overlayEnabled
                             blinking = false
-                        }
-                        WorkspaceButton(
-                            stringResource(if (blinking) R.string.blinking_enabled else R.string.blinking_disabled),
-                            Icons.Default.Timer,
-                        ) {
+                        },
+                    )
+                    WorkspaceButtonPair(
+                        firstLabel = stringResource(if (blinking) R.string.blinking_enabled else R.string.blinking_disabled),
+                        firstIcon = Icons.Default.Timer,
+                        firstAction = {
                             blinking = !blinking
                             overlayEnabled = true
-                        }
-                        WorkspaceButton(
-                            stringResource(if (timelapseEnabled) R.string.timelapse_enabled else R.string.timelapse_disabled),
-                            Icons.Default.Timer,
-                        ) {
+                        },
+                        secondLabel = stringResource(if (timelapseEnabled) R.string.timelapse_enabled else R.string.timelapse_disabled),
+                        secondIcon = Icons.Default.Timer,
+                        secondAction = {
                             timelapseEnabled = !timelapseEnabled
                             Toast.makeText(
                                 context,
@@ -741,55 +731,62 @@ fun TraceWorkspace(
                                 } else timelapseStoppedMessage,
                                 Toast.LENGTH_SHORT,
                             ).show()
-                        }
-                        WorkspaceButton(
-                            if (project.tripodReferencePhoto == null) {
-                                stringResource(R.string.save_tripod)
-                            } else if (tripodAlignMode) {
-                                stringResource(R.string.hide_reference)
-                            } else {
-                                stringResource(R.string.align_tripod)
-                            },
-                            Icons.Default.ControlCamera,
-                        ) {
+                        },
+                    )
+                    WorkspaceButtonPair(
+                        firstLabel = if (project.tripodReferencePhoto == null) {
+                            stringResource(R.string.save_tripod)
+                        } else if (tripodAlignMode) {
+                            stringResource(R.string.hide_reference)
+                        } else {
+                            stringResource(R.string.align_tripod)
+                        },
+                        firstIcon = Icons.Default.ControlCamera,
+                        firstAction = {
                             if (project.tripodReferencePhoto == null) {
                                 saveTripodReference()
                             } else {
                                 tripodAlignMode = !tripodAlignMode
                             }
-                        }
-                        WorkspaceButton(
+                        },
+                        secondLabel = stringResource(
+                            R.string.blend_mode,
                             stringResource(
-                                R.string.blend_mode,
-                                stringResource(
-                                    when (project.overlayBlendMode) {
-                                        1 -> R.string.blend_multiply
-                                        2 -> R.string.blend_screen
-                                        else -> R.string.blend_normal
-                                    }
-                                )
-                            ),
-                            Icons.Default.ScreenRotation,
-                        ) {
+                                when (project.overlayBlendMode) {
+                                    1 -> R.string.blend_multiply
+                                    2 -> R.string.blend_screen
+                                    else -> R.string.blend_normal
+                                }
+                            )
+                        ),
+                        secondIcon = Icons.Default.ScreenRotation,
+                        secondAction = {
                             saveProject(project.copy(overlayBlendMode = (project.overlayBlendMode + 1) % 3))
-                        }
-                        WorkspaceButton(
-                            stringResource(if (torch) R.string.torch_enabled else R.string.torch_disabled),
-                            if (torch) Icons.Default.FlashOff else Icons.Default.FlashOn,
-                        ) {
+                        },
+                    )
+                    WorkspaceButton(
+                        stringResource(if (torch) R.string.torch_enabled else R.string.torch_disabled),
+                        if (torch) Icons.Default.FlashOff else Icons.Default.FlashOn,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
                             if (thermalStatus < PowerManager.THERMAL_STATUS_SEVERE) {
                                 val next = !torch
                                 camera?.cameraControl?.enableTorch(next)
                                 torch = next
                             }
-                        }
-                        WorkspaceButton(stringResource(R.string.portrait), Icons.Default.ScreenLockPortrait) {
-                            saveProject(project.copy(orientation = 1))
-                        }
-                        WorkspaceButton(stringResource(R.string.landscape), Icons.Default.ScreenLockLandscape) {
-                            saveProject(project.copy(orientation = 2))
-                        }
                     }
+                    WorkspaceButtonPair(
+                        firstLabel = stringResource(R.string.portrait),
+                        firstIcon = Icons.Default.ScreenLockPortrait,
+                        firstAction = {
+                            saveProject(project.copy(orientation = 1))
+                        },
+                        secondLabel = stringResource(R.string.landscape),
+                        secondIcon = Icons.Default.ScreenLockLandscape,
+                        secondAction = {
+                            saveProject(project.copy(orientation = 2))
+                        },
+                    )
                     if (cameras.isNotEmpty()) {
                         val selectedCamera = cameras.firstOrNull { it.id == project.cameraId }
                         FilledTonalButton(
@@ -940,12 +937,31 @@ private fun OverlayImage(
 private fun WorkspaceButton(
     label: String,
     icon: androidx.compose.ui.graphics.vector.ImageVector,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
 ) {
-    FilledTonalButton(onClick = onClick) {
+    FilledTonalButton(onClick = onClick, modifier = modifier) {
         Icon(icon, null, Modifier.size(20.dp))
         Spacer(Modifier.size(6.dp))
         Text(label)
+    }
+}
+
+@Composable
+private fun WorkspaceButtonPair(
+    firstLabel: String,
+    firstIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    firstAction: () -> Unit,
+    secondLabel: String,
+    secondIcon: androidx.compose.ui.graphics.vector.ImageVector,
+    secondAction: () -> Unit,
+) {
+    Row(
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        WorkspaceButton(firstLabel, firstIcon, Modifier.weight(1f), firstAction)
+        WorkspaceButton(secondLabel, secondIcon, Modifier.weight(1f), secondAction)
     }
 }
 
