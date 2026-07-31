@@ -1,0 +1,1 @@
+Dodano pełną instrukcję aplikacji z aktualnymi zrzutami i objaśnieniami wszystkich ważnych ikon. Siedem rozdziałów opisuje bibliotekę, edytor, wzory, projekty, rysowanie, dokumentowanie postępu oraz udostępnianie efektów. Wyszukiwarka ułatwia szybkie znalezienie konkretnej funkcji.

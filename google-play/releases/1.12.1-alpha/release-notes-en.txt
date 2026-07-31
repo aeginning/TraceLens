@@ -1,0 +1,1 @@
+Added a complete in-app guide with current screenshots and explanations for every important icon. Seven chapters cover the library, editor, patterns, projects, drawing, progress tracking, and sharing. Search makes it easy to find any specific feature.

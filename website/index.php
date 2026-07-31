@@ -123,6 +123,12 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
           <h3>Materiały do udostępnienia</h3>
           <p>Generuj pionowe timelapse’y, kolaże i porównania efektów, a potem publikuj je w mediach społecznościowych.</p>
         </article>
+        <article class="feature feature-wide">
+          <span class="feature-number">07</span>
+          <div class="feature-icon library-icon" aria-hidden="true"></div>
+          <h3>Instrukcja całej aplikacji</h3>
+          <p>Wbudowany przewodnik pokazuje każdy etap pracy, objaśnia wszystkie ikony i pozwala wyszukać mniej oczywiste funkcje, takie jak mieszanie, ręczna ostrość czy blokada kamery.</p>
+        </article>
       </div>
     </section>
 
