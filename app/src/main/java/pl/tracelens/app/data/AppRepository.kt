@@ -39,6 +39,7 @@ class AppRepository(private val context: Context) {
         defaultOpacity = preferences.getFloat("defaultOpacity", 0.25f).coerceIn(0f, 1f),
         defaultGridEnabled = preferences.getBoolean("defaultGridEnabled", false),
         defaultGridDivisions = preferences.getInt("defaultGridDivisions", 4).coerceIn(2, 12),
+        defaultGridColor = preferences.getLong("defaultGridColor", 0xFFFFFFFF),
         defaultBlinkEnabled = preferences.getBoolean("defaultBlinkEnabled", false),
         defaultTimelapseEnabled = preferences.getBoolean("defaultTimelapseEnabled", false),
         defaultTorchEnabled = preferences.getBoolean("defaultTorchEnabled", false),
@@ -55,6 +56,7 @@ class AppRepository(private val context: Context) {
             .putFloat("defaultOpacity", settings.defaultOpacity)
             .putBoolean("defaultGridEnabled", settings.defaultGridEnabled)
             .putInt("defaultGridDivisions", settings.defaultGridDivisions)
+            .putLong("defaultGridColor", settings.defaultGridColor)
             .putBoolean("defaultBlinkEnabled", settings.defaultBlinkEnabled)
             .putBoolean("defaultTimelapseEnabled", settings.defaultTimelapseEnabled)
             .putBoolean("defaultTorchEnabled", settings.defaultTorchEnabled)
@@ -618,9 +620,7 @@ private fun TraceProject.toJson() = JSONObject().apply {
     put("opacity", opacity.toDouble())
     put("gridEnabled", gridEnabled)
     put("gridDivisions", gridDivisions)
-    put("gridColor", gridColor)
     put("gridOpacity", gridOpacity.toDouble())
-    put("overlayTintColor", overlayTintColor)
     put("workSectionsEnabled", workSectionsEnabled)
     put("workSectionDivisions", workSectionDivisions)
     put("activeWorkSection", activeWorkSection)
@@ -653,9 +653,7 @@ private fun JSONObject.toTraceProject(): TraceProject {
         opacity = optDouble("opacity", 0.25).toFloat(),
         gridEnabled = optBoolean("gridEnabled"),
         gridDivisions = optInt("gridDivisions", 4).coerceIn(2, 12),
-        gridColor = optLong("gridColor", 0xFFFFFFFF),
         gridOpacity = optDouble("gridOpacity", 0.67).toFloat().coerceIn(0.1f, 1f),
-        overlayTintColor = if (has("overlayTintColor") && !isNull("overlayTintColor")) optLong("overlayTintColor") else null,
         workSectionsEnabled = optBoolean("workSectionsEnabled"),
         workSectionDivisions = optInt("workSectionDivisions", 2).coerceIn(2, 6),
         activeWorkSection = optInt("activeWorkSection", 0).coerceAtLeast(0),

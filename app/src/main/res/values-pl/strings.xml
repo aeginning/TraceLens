@@ -283,8 +283,6 @@
     </plurals>
     <string name="grid_color">Kolor siatki</string>
     <string name="grid_opacity">Przezroczystość siatki: %1$d%%</string>
-    <string name="overlay_color">Kolor nakładki</string>
-    <string name="original_color">Oryginalny</string>
     <string name="sections_enabled">Fragmenty pracy: włączone</string>
     <string name="sections_disabled">Fragmenty pracy: wyłączone</string>
     <string name="sections_grid">Podział fragmentów: %1$d × %2$d</string>

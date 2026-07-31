@@ -47,6 +47,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
@@ -532,6 +533,29 @@ private fun SettingsScreen(
                     valueRange = 2f..12f,
                     steps = 9,
                 )
+            }
+        }
+        item {
+            Text(stringResource(R.string.grid_color), fontWeight = FontWeight.SemiBold)
+            Spacer(Modifier.height(8.dp))
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                listOf(
+                    0xFFFFFFFF, 0xFFE0C8FF, 0xFFFF5252, 0xFFFFD740,
+                    0xFF69F0AE, 0xFF40C4FF, 0xFF000000,
+                ).forEach { value ->
+                    Box(
+                        Modifier.size(38.dp).background(Color(value), CircleShape)
+                            .border(
+                                if (settings.defaultGridColor == value) 3.dp else 1.dp,
+                                if (value == 0xFF000000) Color.LightGray else Color.DarkGray,
+                                CircleShape,
+                            )
+                            .clickable { save(settings.copy(defaultGridColor = value)) },
+                    )
+                }
             }
         }
         item {

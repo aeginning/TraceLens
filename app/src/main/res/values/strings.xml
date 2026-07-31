@@ -281,8 +281,6 @@
     </plurals>
     <string name="grid_color">Grid color</string>
     <string name="grid_opacity">Grid opacity: %1$d%%</string>
-    <string name="overlay_color">Overlay color</string>
-    <string name="original_color">Original</string>
     <string name="sections_enabled">Work sections: on</string>
     <string name="sections_disabled">Work sections: off</string>
     <string name="sections_grid">Section layout: %1$d × %2$d</string>

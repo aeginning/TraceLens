@@ -1,5 +1,6 @@
 @file:OptIn(
     androidx.compose.material3.ExperimentalMaterial3Api::class,
+    androidx.compose.foundation.layout.ExperimentalLayoutApi::class,
 )
 
 package pl.tracelens.app.ui.camera
@@ -49,6 +50,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -111,7 +113,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.BlendMode
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -138,10 +139,6 @@ import kotlin.math.sqrt
 private data class CameraOption(val id: String, val label: String)
 private data class DeviceTilt(val horizontal: Float = 0f, val vertical: Float = 0f)
 private data class BatteryStatus(val percent: Int = 0, val charging: Boolean = false)
-
-private val workspaceColors = listOf(
-    0xFFFFFFFF, 0xFFE0C8FF, 0xFFFF5252, 0xFFFFD740, 0xFF69F0AE, 0xFF40C4FF, 0xFF000000,
-)
 
 @Composable
 fun TraceWorkspace(
@@ -436,7 +433,7 @@ fun TraceWorkspace(
                 if (project.gridEnabled) {
                     DrawingGrid(
                         divisions = project.gridDivisions,
-                        color = Color(project.gridColor),
+                        color = Color(appSettings.defaultGridColor),
                         opacity = project.gridOpacity,
                         modifier = Modifier.fillMaxSize(),
                     )
@@ -612,12 +609,6 @@ fun TraceWorkspace(
                             valueRange = 2f..12f,
                             steps = 9,
                         )
-                        Text(stringResource(R.string.grid_color))
-                        ColorPalette(
-                            selected = project.gridColor,
-                            allowOriginal = false,
-                            onSelected = { saveProject(project.copy(gridColor = it ?: 0xFFFFFFFF)) },
-                        )
                         Text(stringResource(R.string.grid_opacity, (project.gridOpacity * 100).roundToInt()))
                         Slider(
                             value = project.gridOpacity,
@@ -626,12 +617,6 @@ fun TraceWorkspace(
                             valueRange = 0.1f..1f,
                         )
                     }
-                    Text(stringResource(R.string.overlay_color))
-                    ColorPalette(
-                        selected = project.overlayTintColor,
-                        allowOriginal = true,
-                        onSelected = { saveProject(project.copy(overlayTintColor = it)) },
-                    )
                     WorkspaceButton(
                         stringResource(if (project.workSectionsEnabled) R.string.sections_enabled else R.string.sections_disabled),
                         Icons.Default.ViewModule,
@@ -700,9 +685,10 @@ fun TraceWorkspace(
                             valueRange = 5f..300f,
                         )
                     }
-                    Row(
-                        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                    FlowRow(
+                        Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         WorkspaceButton(
                             label = stringResource(if (locked) R.string.unlock else R.string.lock),
@@ -919,7 +905,6 @@ private fun OverlayImage(
         bitmap.asImageBitmap(),
         stringResource(R.string.overlay),
         contentScale = ContentScale.Fit,
-        colorFilter = project.overlayTintColor?.let { ColorFilter.tint(Color(it), BlendMode.SrcIn) },
         modifier = Modifier.fillMaxSize()
             .graphicsLayer {
                 translationX = project.offsetX
@@ -982,41 +967,6 @@ private fun DrawingGrid(
         }
         drawLine(lineColor, start = Offset(size.width / 2f, 0f), end = Offset(size.width / 2f, size.height), strokeWidth = 3f)
         drawLine(lineColor, start = Offset(0f, size.height / 2f), end = Offset(size.width, size.height / 2f), strokeWidth = 3f)
-    }
-}
-
-@Composable
-private fun ColorPalette(
-    selected: Long?,
-    allowOriginal: Boolean,
-    onSelected: (Long?) -> Unit,
-) {
-    Row(
-        Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        if (allowOriginal) {
-            FilledTonalButton(onClick = { onSelected(null) }) {
-                Text(stringResource(R.string.original_color))
-            }
-        }
-        workspaceColors.forEach { value ->
-            Box(
-                Modifier.size(38.dp).clip(CircleShape)
-                    .background(Color(value))
-                    .pointerInput(value) { detectTapGestures { onSelected(value) } },
-                contentAlignment = Alignment.Center,
-            ) {
-                if (selected == value) {
-                    Canvas(Modifier.fillMaxSize()) {
-                        drawCircle(
-                            if (value == 0xFF000000) Color.White else Color.Black,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(4f),
-                        )
-                    }
-                }
-            }
-        }
     }
 }
 
