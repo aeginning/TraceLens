@@ -119,6 +119,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -140,7 +141,6 @@ import kotlin.math.roundToInt
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
-import java.util.Locale
 
 private data class CameraOption(val id: String, val label: String)
 private data class DeviceTilt(val horizontal: Float = 0f, val vertical: Float = 0f)
@@ -1013,6 +1013,7 @@ private fun DeviceStatusIndicator(
     thermalStatus: Int,
     modifier: Modifier = Modifier,
 ) {
+    val locale = LocalConfiguration.current.locales[0]
     val battery = rememberBatteryStatus()
     val thermalDescription = thermalLabel(thermalStatus)
     val temperature = battery.temperatureCelsius
@@ -1047,7 +1048,7 @@ private fun DeviceStatusIndicator(
         )
         if (temperature != null) {
             Text(
-                String.format(Locale.getDefault(), "%.1f°C", temperature),
+                String.format(locale, "%.1f°C", temperature),
                 color = Color.White,
             )
         }

@@ -1,0 +1,1 @@
+We improved performance and clarity while drawing. The library and galleries now load thumbnails in the background, while the editor responds faster to filter changes. We reduced sensor overhead, fixed notifications when adding patterns quickly, and added a compact battery, charging and temperature indicator.

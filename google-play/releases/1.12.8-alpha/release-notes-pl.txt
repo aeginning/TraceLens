@@ -1,0 +1,1 @@
+Usprawniliśmy płynność i czytelność pracy. Biblioteka oraz galerie ładują miniatury w tle, a edytor szybciej reaguje podczas zmiany filtrów. Ograniczyliśmy obciążenie czujników, poprawiliśmy powiadomienia przy szybkim dodawaniu wzorów oraz dodaliśmy kompaktowy wskaźnik baterii, ładowania i temperatury.
