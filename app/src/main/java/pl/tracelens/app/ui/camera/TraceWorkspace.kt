@@ -565,25 +565,27 @@ fun TraceWorkspace(
                 }
             }
 
-            if (showControls) Card(
+            if (showControls) Column(
                 Modifier.align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .navigationBarsPadding()
+                    .navigationBarsPadding(),
+                horizontalAlignment = Alignment.End,
             ) {
-                Column(
-                    Modifier.heightIn(max = 380.dp)
-                        .verticalScroll(rememberScrollState())
-                        .padding(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                FilledTonalButton(
+                    onClick = { showControls = false },
+                    modifier = Modifier.padding(end = 12.dp, bottom = 8.dp),
                 ) {
-                    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                        Spacer(Modifier.weight(1f))
-                        FilledTonalButton(onClick = { showControls = false }) {
-                            Icon(Icons.Default.VisibilityOff, null)
-                            Spacer(Modifier.size(6.dp))
-                            Text(stringResource(R.string.drawing_mode))
-                        }
-                    }
+                    Icon(Icons.Default.VisibilityOff, null)
+                    Spacer(Modifier.size(6.dp))
+                    Text(stringResource(R.string.drawing_mode))
+                }
+                Card(Modifier.fillMaxWidth()) {
+                    Column(
+                        Modifier.heightIn(max = 380.dp)
+                            .verticalScroll(rememberScrollState())
+                            .padding(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
                     WorkspaceButton(
                         stringResource(if (project.gridEnabled) R.string.grid_enabled else R.string.grid_disabled),
                         Icons.Default.GridOn,
@@ -613,6 +615,7 @@ fun TraceWorkspace(
                     WorkspaceButton(
                         stringResource(if (project.workSectionsEnabled) R.string.sections_enabled else R.string.sections_disabled),
                         Icons.Default.ViewModule,
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         saveProject(project.copy(workSectionsEnabled = !project.workSectionsEnabled))
                     }
@@ -804,6 +807,7 @@ fun TraceWorkspace(
                             }
                         }
                     }
+                    }
                 }
             }
         }
@@ -921,8 +925,12 @@ private fun WorkspaceButton(
 ) {
     FilledTonalButton(onClick = onClick, modifier = modifier) {
         Icon(icon, null, Modifier.size(20.dp))
-        Spacer(Modifier.size(6.dp))
-        Text(label)
+        Spacer(Modifier.size(10.dp))
+        Text(
+            text = label,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+        )
     }
 }
 
