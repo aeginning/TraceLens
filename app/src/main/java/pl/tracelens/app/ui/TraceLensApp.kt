@@ -151,6 +151,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -942,6 +943,7 @@ private fun StarterPatternsGalleryScreen(
     var imageForProject by remember { mutableStateOf<LibraryImage?>(null) }
     val patternSnackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    var patternMessageJob by remember { mutableStateOf<Job?>(null) }
 
     Scaffold(
         topBar = {
@@ -1106,7 +1108,9 @@ private fun StarterPatternsGalleryScreen(
                                 FilledTonalButton(
                                     onClick = {
                                         viewModel.addStarterPattern(pattern, name) { _, added ->
-                                            scope.launch {
+                                            patternMessageJob?.cancel()
+                                            patternSnackbar.currentSnackbarData?.dismiss()
+                                            patternMessageJob = scope.launch {
                                                 patternSnackbar.showSnackbar(
                                                     if (added) addedMessage else duplicateMessage
                                                 )
