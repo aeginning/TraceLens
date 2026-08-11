@@ -102,6 +102,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -123,6 +124,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.R
 import pl.tracelens.app.data.LibraryImage
@@ -174,7 +177,14 @@ fun TraceWorkspace(
         if (!cameraPermission) permissionLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    val overlay = remember(image.id, image.processedFileName) { viewModel.bitmap(image) }
+    val overlay = produceState<Bitmap?>(
+        initialValue = null,
+        image.id,
+        image.processedFileName,
+        image.contentSha256,
+    ) {
+        value = withContext(Dispatchers.IO) { viewModel.bitmap(image) }
+    }.value
     var locked by remember { mutableStateOf(true) }
     var torch by remember(initialProject.id) { mutableStateOf(appSettings.defaultTorchEnabled) }
     var camera by remember { mutableStateOf<Camera?>(null) }
@@ -189,19 +199,22 @@ fun TraceWorkspace(
     var blinking by remember(initialProject.id) { mutableStateOf(appSettings.defaultBlinkEnabled) }
     var blinkVisible by remember { mutableStateOf(true) }
     var cameraParametersLocked by remember { mutableStateOf(false) }
-    var movementBaseline by remember { mutableStateOf<DeviceTilt?>(null) }
-    var movementWarning by remember { mutableStateOf(false) }
     var timelapseEnabled by remember(initialProject.id) {
         mutableStateOf(appSettings.defaultTimelapseEnabled)
     }
     var captureInProgress by remember { mutableStateOf(false) }
     var tripodAlignMode by remember { mutableStateOf(false) }
-    val deviceTilt = rememberDeviceTilt()
-    val tripodReference = remember(project.tripodReferencePhoto) {
-        project.tripodReferencePhoto?.let {
-            viewModel.progressBitmap(project.id, it, 1800)
+    val tripodReference = produceState<Bitmap?>(
+        initialValue = null,
+        project.id,
+        project.tripodReferencePhoto,
+    ) {
+        value = project.tripodReferencePhoto?.let {
+            withContext(Dispatchers.IO) {
+                viewModel.progressBitmap(project.id, it, 1800)
+            }
         }
-    }
+    }.value
 
     LaunchedEffect(blinking, project.blinkIntervalMs) {
         blinkVisible = true
@@ -210,22 +223,6 @@ fun TraceWorkspace(
             blinkVisible = !blinkVisible
         }
     }
-    LaunchedEffect(deviceTilt, locked) {
-        if (deviceTilt == DeviceTilt()) return@LaunchedEffect
-        if (!locked) {
-            movementBaseline = null
-            movementWarning = false
-        } else {
-            val baseline = movementBaseline
-            if (baseline == null) {
-                movementBaseline = deviceTilt
-            } else {
-                movementWarning = abs(deviceTilt.horizontal - baseline.horizontal) > 3.5f ||
-                    abs(deviceTilt.vertical - baseline.vertical) > 3.5f
-            }
-        }
-    }
-
     val powerManager = remember { context.getSystemService(Context.POWER_SERVICE) as PowerManager }
     DisposableEffect(Unit) {
         val listener = PowerManager.OnThermalStatusChangedListener { thermalStatus = it }
@@ -471,30 +468,12 @@ fun TraceWorkspace(
                             .padding(8.dp).background(Color(0xCCB45309)).padding(8.dp),
                         )
                 }
-                Column(
-                    Modifier.align(Alignment.TopStart).padding(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    if (appSettings.showLevelIndicator) {
-                        Text(
-                            stringResource(R.string.phone_level_value, deviceTilt.horizontal.roundToInt(), deviceTilt.vertical.roundToInt()),
-                            color = Color.White,
-                            modifier = Modifier.background(
-                                if (abs(deviceTilt.horizontal) <= 2f && abs(deviceTilt.vertical) <= 2f) {
-                                    Color(0xCC2E7D32)
-                                } else Color(0xAA000000)
-                            ).padding(horizontal = 8.dp, vertical = 5.dp),
-                        )
-                    }
-                    if (appSettings.showMovementWarning && movementWarning) {
-                        Text(
-                            stringResource(R.string.phone_moved),
-                            color = Color.White,
-                            modifier = Modifier.background(Color(0xCCD84315))
-                                .padding(horizontal = 8.dp, vertical = 5.dp),
-                        )
-                    }
-                }
+                DeviceGuidanceOverlay(
+                    showLevelIndicator = appSettings.showLevelIndicator,
+                    showMovementWarning = appSettings.showMovementWarning,
+                    locked = locked,
+                    modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
+                )
                 if (appSettings.showDeviceMonitor) {
                     Text(
                         stringResource(
@@ -1035,20 +1014,83 @@ private fun thermalLabel(status: Int): String = stringResource(
 )
 
 @Composable
-private fun rememberDeviceTilt(): DeviceTilt {
+private fun DeviceGuidanceOverlay(
+    showLevelIndicator: Boolean,
+    showMovementWarning: Boolean,
+    locked: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    val enabled = showLevelIndicator || showMovementWarning
+    val deviceTilt = rememberDeviceTilt(enabled)
+    var movementBaseline by remember { mutableStateOf<DeviceTilt?>(null) }
+    var movementWarning by remember { mutableStateOf(false) }
+
+    LaunchedEffect(deviceTilt, locked, showMovementWarning) {
+        if (!showMovementWarning || !locked) {
+            movementBaseline = null
+            movementWarning = false
+        } else if (deviceTilt != DeviceTilt()) {
+            val baseline = movementBaseline
+            if (baseline == null) {
+                movementBaseline = deviceTilt
+            } else {
+                movementWarning = abs(deviceTilt.horizontal - baseline.horizontal) > 3.5f ||
+                    abs(deviceTilt.vertical - baseline.vertical) > 3.5f
+            }
+        }
+    }
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+    ) {
+        if (showLevelIndicator) {
+            Text(
+                stringResource(
+                    R.string.phone_level_value,
+                    deviceTilt.horizontal.roundToInt(),
+                    deviceTilt.vertical.roundToInt(),
+                ),
+                color = Color.White,
+                modifier = Modifier.background(
+                    if (abs(deviceTilt.horizontal) <= 2f && abs(deviceTilt.vertical) <= 2f) {
+                        Color(0xCC2E7D32)
+                    } else Color(0xAA000000)
+                ).padding(horizontal = 8.dp, vertical = 5.dp),
+            )
+        }
+        if (showMovementWarning && movementWarning) {
+            Text(
+                stringResource(R.string.phone_moved),
+                color = Color.White,
+                modifier = Modifier.background(Color(0xCCD84315))
+                    .padding(horizontal = 8.dp, vertical = 5.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun rememberDeviceTilt(enabled: Boolean): DeviceTilt {
     val context = LocalContext.current
     var tilt by remember { mutableStateOf(DeviceTilt()) }
-    DisposableEffect(context) {
+    DisposableEffect(context, enabled) {
+        if (!enabled) return@DisposableEffect onDispose { }
         val manager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
         val sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        var lastUpdateNanos = 0L
         val listener = object : SensorEventListener {
             override fun onSensorChanged(event: SensorEvent) {
+                if (event.timestamp - lastUpdateNanos < 100_000_000L) return
+                lastUpdateNanos = event.timestamp
                 val x = event.values[0]
                 val y = event.values[1]
                 val z = event.values[2]
                 val horizontal = Math.toDegrees(atan2(x.toDouble(), sqrt((y * y + z * z).toDouble()))).toFloat()
                 val vertical = Math.toDegrees(atan2(y.toDouble(), sqrt((x * x + z * z).toDouble()))).toFloat()
-                tilt = DeviceTilt(horizontal, vertical)
+                if (abs(horizontal - tilt.horizontal) >= 0.2f || abs(vertical - tilt.vertical) >= 0.2f) {
+                    tilt = DeviceTilt(horizontal, vertical)
+                }
             }
             override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
         }

@@ -49,6 +49,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -386,7 +387,15 @@ private fun PhotoSelectionGrid(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         items(photoNames, key = { it }) { fileName ->
-            val bitmap = remember(project.id, fileName) { viewModel.progressBitmap(project.id, fileName, 320) }
+            val bitmap = produceState<android.graphics.Bitmap?>(
+                initialValue = null,
+                project.id,
+                fileName,
+            ) {
+                value = withContext(Dispatchers.IO) {
+                    viewModel.progressBitmap(project.id, fileName, 320)
+                }
+            }.value
             val position = selected.indexOf(fileName)
             Box(
                 Modifier.height(150.dp).border(

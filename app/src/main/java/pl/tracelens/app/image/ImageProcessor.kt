@@ -10,7 +10,11 @@ import kotlin.math.min
 import kotlin.math.sqrt
 
 object ImageProcessor {
-    fun process(source: Bitmap, filters: ImageFilters): Bitmap {
+    fun process(
+        source: Bitmap,
+        filters: ImageFilters,
+        shouldCancel: () -> Boolean = { false },
+    ): Bitmap {
         val bitmap = downscale(crop(rotate(source, filters.rotationDegrees), filters), 2048)
         val width = bitmap.width
         val height = bitmap.height
@@ -24,10 +28,17 @@ object ImageProcessor {
         val rb = removeColor?.let(Color::blue) ?: 0
         val tolerance = filters.colorTolerance * 441.7f
         val automaticBackground = if (filters.autoRemoveBackground) {
-            detectConnectedBackground(input, width, height, tolerance.coerceAtLeast(24f))
+            detectConnectedBackground(
+                input,
+                width,
+                height,
+                tolerance.coerceAtLeast(24f),
+                shouldCancel,
+            )
         } else null
 
         for (index in input.indices) {
+            if (index % width == 0 && shouldCancel()) throw java.util.concurrent.CancellationException()
             val color = input[index]
             var r = Color.red(color)
             var g = Color.green(color)
@@ -65,13 +76,16 @@ object ImageProcessor {
             output[index] = Color.argb(a, r, g, b)
         }
 
-        val finalPixels = if (filters.contour) sobel(output, width, height) else output
+        val finalPixels = if (filters.contour) sobel(output, width, height, shouldCancel) else output
         if (filters.artifactCleanup > 0) {
-            removeSmallIslands(finalPixels, width, height, filters.artifactCleanup)
+            removeSmallIslands(finalPixels, width, height, filters.artifactCleanup, shouldCancel)
         }
         applyEraser(finalPixels, width, height, filters)
         return Bitmap.createBitmap(finalPixels, width, height, Bitmap.Config.ARGB_8888)
     }
+
+    fun previewSource(source: Bitmap, maxDimension: Int = 1024): Bitmap =
+        downscale(source, maxDimension)
 
     private fun quantize(value: Int, levels: Int): Int {
         val step = 255f / (levels.coerceIn(2, 16) - 1)
@@ -124,12 +138,19 @@ object ImageProcessor {
         return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
     }
 
-    private fun removeSmallIslands(pixels: IntArray, width: Int, height: Int, strength: Int) {
+    private fun removeSmallIslands(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        strength: Int,
+        shouldCancel: () -> Boolean,
+    ) {
         val visited = BooleanArray(pixels.size)
         val queue = IntArray(pixels.size)
         val component = IntArray(pixels.size)
         val limit = (1 + pixels.size * strength / 2_000_000).coerceAtMost(2_000)
         for (start in pixels.indices) {
+            if (start % width == 0 && shouldCancel()) throw java.util.concurrent.CancellationException()
             if (visited[start] || Color.alpha(pixels[start]) < 24) continue
             var head = 0
             var tail = 0
@@ -165,6 +186,7 @@ object ImageProcessor {
         width: Int,
         height: Int,
         tolerance: Float,
+        shouldCancel: () -> Boolean,
     ): BooleanArray {
         val result = BooleanArray(pixels.size)
         if (pixels.isEmpty()) return result
@@ -202,6 +224,7 @@ object ImageProcessor {
             offer(y * width + width - 1)
         }
         while (head < tail) {
+            if (head % width == 0 && shouldCancel()) throw java.util.concurrent.CancellationException()
             val index = queue[head++]
             val x = index % width
             val y = index / width
@@ -272,10 +295,16 @@ object ImageProcessor {
         )
     }
 
-    private fun sobel(pixels: IntArray, width: Int, height: Int): IntArray {
+    private fun sobel(
+        pixels: IntArray,
+        width: Int,
+        height: Int,
+        shouldCancel: () -> Boolean,
+    ): IntArray {
         val result = IntArray(pixels.size)
         fun luminance(x: Int, y: Int): Int = Color.red(pixels[y * width + x])
         for (y in 1 until height - 1) {
+            if (shouldCancel()) throw java.util.concurrent.CancellationException()
             for (x in 1 until width - 1) {
                 val gx = -luminance(x - 1, y - 1) + luminance(x + 1, y - 1) -
                     2 * luminance(x - 1, y) + 2 * luminance(x + 1, y) -

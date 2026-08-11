@@ -123,6 +123,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -149,7 +150,12 @@ import androidx.compose.ui.window.DialogProperties
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import pl.tracelens.app.AppViewModel
 import pl.tracelens.app.R
 import pl.tracelens.app.data.ImageFilters
@@ -819,9 +825,10 @@ private fun LibraryScreen(
                     }
                 }
                 items(visibleImages, key = { it.id }) { image ->
+                    val thumbnail = rememberImageThumbnail(viewModel, image)
                     ImageCard(
                         image = image,
-                        bitmap = viewModel.bitmap(image),
+                        bitmap = thumbnail,
                         onFavorite = { viewModel.toggleFavorite(image) },
                         onRename = { imageToRename = image },
                         onEdit = { onEdit(image) },
@@ -1216,6 +1223,51 @@ private fun ImageCard(
 }
 
 @Composable
+private fun rememberImageThumbnail(
+    viewModel: AppViewModel,
+    image: LibraryImage,
+): Bitmap? = produceState<Bitmap?>(
+    initialValue = null,
+    image.id,
+    image.processedFileName,
+    image.contentSha256,
+) {
+    value = withContext(Dispatchers.IO) { viewModel.thumbnail(image) }
+}.value
+
+@Composable
+private fun rememberImageBitmap(
+    viewModel: AppViewModel,
+    image: LibraryImage,
+    processed: Boolean = true,
+): Bitmap? = produceState<Bitmap?>(
+    initialValue = null,
+    image.id,
+    image.processedFileName,
+    image.contentSha256,
+    processed,
+) {
+    value = withContext(Dispatchers.IO) { viewModel.bitmap(image, processed) }
+}.value
+
+@Composable
+private fun rememberProgressThumbnail(
+    viewModel: AppViewModel,
+    projectId: String,
+    fileName: String,
+    maxSize: Int,
+): Bitmap? = produceState<Bitmap?>(
+    initialValue = null,
+    projectId,
+    fileName,
+    maxSize,
+) {
+    value = withContext(Dispatchers.IO) {
+        viewModel.progressBitmap(projectId, fileName, maxSize)
+    }
+}.value
+
+@Composable
 private fun ImageCollectionsDialog(
     image: LibraryImage,
     availableCollections: List<String>,
@@ -1357,7 +1409,14 @@ private fun EditorScreen(
     image: LibraryImage,
     onBack: () -> Unit,
 ) {
-    val original = remember(image.id) { viewModel.bitmap(image, processed = false) }
+    val original = rememberImageBitmap(viewModel, image, processed = false)
+    val previewSource = produceState<Bitmap?>(initialValue = null, original) {
+        value = original?.let { source ->
+            withContext(Dispatchers.Default) {
+                pl.tracelens.app.image.ImageProcessor.previewSource(source)
+            }
+        }
+    }.value
     var filters by remember(image.id) { mutableStateOf(image.filters) }
     var showCropDialog by remember { mutableStateOf(false) }
     var eraserMode by remember { mutableStateOf(false) }
@@ -1381,9 +1440,9 @@ private fun EditorScreen(
         },
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            if (original != null) {
+            if (previewSource != null) {
                 ColorPickImage(
-                    bitmap = original,
+                    bitmap = previewSource,
                     filters = filters,
                     showOriginal = showOriginal,
                     eraserMode = eraserMode,
@@ -1711,19 +1770,26 @@ private fun ColorPickImage(
     onColor: (Int) -> Unit,
     onErase: (List<EraserPoint>) -> Unit,
 ) {
-    val processed = remember(bitmap, filters) {
-        pl.tracelens.app.image.ImageProcessor.process(bitmap, filters)
+    var renderedPreview by remember(bitmap) { mutableStateOf<EditorPreview?>(null) }
+    LaunchedEffect(bitmap, filters) {
+        delay(120)
+        val calculationContext = currentCoroutineContext()
+        renderedPreview = withContext(Dispatchers.Default) {
+            val processed = pl.tracelens.app.image.ImageProcessor.process(bitmap, filters) {
+                !calculationContext.isActive
+            }
+            val original = pl.tracelens.app.image.ImageProcessor.crop(bitmap, filters)
+            EditorPreview(processed = processed, original = original)
+        }
     }
-    val originalCrop = remember(bitmap, filters.cropLeft, filters.cropTop, filters.cropRight, filters.cropBottom) {
-        pl.tracelens.app.image.ImageProcessor.crop(bitmap, filters)
-    }
-    val preview = if (showOriginal) originalCrop else processed
+    val preview = (if (showOriginal) renderedPreview?.original else renderedPreview?.processed)
+        ?: bitmap
     Image(
         preview.asImageBitmap(),
         stringResource(R.string.preview),
         Modifier.fillMaxWidth().height(260.dp).padding(horizontal = 16.dp)
             .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(16.dp))
-            .pointerInput(bitmap, filters, eraserMode, eraserSize) {
+            .pointerInput(preview, filters, eraserMode, eraserSize) {
                 fun normalized(position: androidx.compose.ui.geometry.Offset): Pair<Float, Float>? {
                     val bitmapRatio = preview.width.toFloat() / preview.height
                     val viewRatio = size.width.toFloat() / size.height
@@ -1793,6 +1859,11 @@ private fun ColorPickImage(
         contentScale = ContentScale.Fit,
     )
 }
+
+private data class EditorPreview(
+    val processed: Bitmap,
+    val original: Bitmap,
+)
 
 @Composable
 private fun CropImageDialog(
@@ -2005,11 +2076,16 @@ private fun ProjectsScreen(
                     Card(onClick = { onOpen(project) }, modifier = Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(12.dp)) {
                             val previewPhoto = project.coverPhoto ?: project.progressPhotos.lastOrNull()
-                            val bitmap = if (previewPhoto != null) {
-                                remember(project.id, previewPhoto) {
-                                    viewModel.progressBitmap(project.id, previewPhoto, 320)
-                                }
-                            } else image?.let(viewModel::bitmap)
+                            val bitmap = when {
+                                previewPhoto != null -> rememberProgressThumbnail(
+                                    viewModel,
+                                    project.id,
+                                    previewPhoto,
+                                    320,
+                                )
+                                image != null -> rememberImageThumbnail(viewModel, image)
+                                else -> null
+                            }
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 if (bitmap != null) {
                                     Image(
@@ -2278,6 +2354,7 @@ private fun ProjectImageSelectorDialog(
                     ) {
                         items(visibleImages, key = { it.id }) { image ->
                             val isSelected = selected?.id == image.id
+                            val thumbnail = rememberImageThumbnail(viewModel, image)
                             Card(
                                 onClick = { selected = image },
                                 modifier = Modifier.border(
@@ -2295,7 +2372,7 @@ private fun ProjectImageSelectorDialog(
                                         .background(MaterialTheme.colorScheme.surfaceVariant),
                                     contentAlignment = Alignment.Center,
                                 ) {
-                                    viewModel.thumbnail(image)?.let { bitmap ->
+                                    thumbnail?.let { bitmap ->
                                         Image(
                                             bitmap.asImageBitmap(),
                                             image.name,
@@ -2427,9 +2504,7 @@ private fun ProjectGalleryScreen(
             ) {
                 items(project.progressPhotos, key = { it }) { fileName ->
                     val index = project.progressPhotos.indexOf(fileName)
-                    val bitmap = remember(project.id, fileName) {
-                        viewModel.progressBitmap(project.id, fileName, 520)
-                    }
+                    val bitmap = rememberProgressThumbnail(viewModel, project.id, fileName, 520)
                     Card(onClick = { selectedIndex = index }) {
                         Column {
                             Box(
@@ -2480,9 +2555,7 @@ private fun ProjectGalleryScreen(
                                 (zoomByPhoto[photos[pagerState.currentPage]] ?: 1f) <= 1f,
                         ) { page ->
                             val fileName = photos[page]
-                            val bitmap = remember(project.id, fileName) {
-                                viewModel.progressBitmap(project.id, fileName)
-                            }
+                            val bitmap = rememberProgressThumbnail(viewModel, project.id, fileName, 1800)
                             val zoom = zoomByPhoto[fileName] ?: 1f
                             if (bitmap != null) {
                                 Image(
