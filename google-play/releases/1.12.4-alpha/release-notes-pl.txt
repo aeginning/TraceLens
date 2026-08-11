@@ -1,0 +1,1 @@
+Usprawniliśmy ekran rysowania i zgodność z najnowszym Androidem. Projekt otwiera się teraz od razu w trybie rysowania, a ustawienia pozostają dostępne pod ikoną sterowania. Uporządkowaliśmy panel ustawień, wyrównaliśmy ikony i poprawiliśmy obsługę wyświetlania bez ramek na Androidzie 15 i nowszym.

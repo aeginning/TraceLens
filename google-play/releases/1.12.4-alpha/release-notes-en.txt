@@ -1,0 +1,1 @@
+We improved the drawing screen and compatibility with the latest Android versions. Projects now open directly in drawing mode, while settings remain available from the controls icon. We also reorganised the settings panel, aligned its icons and improved edge-to-edge display support on Android 15 and newer.
