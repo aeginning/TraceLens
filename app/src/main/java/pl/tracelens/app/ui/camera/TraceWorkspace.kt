@@ -61,6 +61,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.material.icons.filled.Cameraswitch
 import androidx.compose.material.icons.filled.CenterFocusStrong
 import androidx.compose.material.icons.filled.ExpandLess
@@ -121,6 +123,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
@@ -135,10 +140,15 @@ import kotlin.math.roundToInt
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
+import java.util.Locale
 
 private data class CameraOption(val id: String, val label: String)
 private data class DeviceTilt(val horizontal: Float = 0f, val vertical: Float = 0f)
-private data class BatteryStatus(val percent: Int = 0, val charging: Boolean = false)
+private data class BatteryStatus(
+    val percent: Int = 0,
+    val charging: Boolean = false,
+    val temperatureCelsius: Float? = null,
+)
 
 @Composable
 fun TraceWorkspace(
@@ -191,7 +201,6 @@ fun TraceWorkspace(
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var cameras by remember { mutableStateOf<List<CameraOption>>(emptyList()) }
     var thermalStatus by remember { mutableIntStateOf(PowerManager.THERMAL_STATUS_NONE) }
-    val batteryStatus = rememberBatteryStatus()
     var focusPoint by remember { mutableStateOf<Offset?>(null) }
     var showControls by remember { mutableStateOf(false) }
     var showCameraPicker by remember { mutableStateOf(false) }
@@ -460,14 +469,6 @@ fun TraceWorkspace(
                     )
                 }
 
-                if (appSettings.showDeviceMonitor && thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE) {
-                    Text(
-                        stringResource(R.string.phone_heating),
-                        color = Color.White,
-                        modifier = Modifier.align(Alignment.TopCenter)
-                            .padding(8.dp).background(Color(0xCCB45309)).padding(8.dp),
-                        )
-                }
                 DeviceGuidanceOverlay(
                     showLevelIndicator = appSettings.showLevelIndicator,
                     showMovementWarning = appSettings.showMovementWarning,
@@ -475,18 +476,9 @@ fun TraceWorkspace(
                     modifier = Modifier.align(Alignment.TopStart).padding(8.dp),
                 )
                 if (appSettings.showDeviceMonitor) {
-                    Text(
-                        stringResource(
-                            R.string.device_monitor,
-                            batteryStatus.percent,
-                            stringResource(if (batteryStatus.charging) R.string.battery_charging else R.string.battery_discharging),
-                            thermalLabel(thermalStatus),
-                        ),
-                        color = Color.White,
-                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp).background(
-                            if (thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE || batteryStatus.percent <= 15) Color(0xCCB45309)
-                            else Color(0xAA000000)
-                        ).padding(horizontal = 8.dp, vertical = 5.dp),
+                    DeviceStatusIndicator(
+                        thermalStatus = thermalStatus,
+                        modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
                     )
                 }
                 if (!showControls) {
@@ -992,9 +984,12 @@ private fun rememberBatteryStatus(): BatteryStatus {
                 val level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, 0)
                 val scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, 100).coerceAtLeast(1)
                 val state = intent.getIntExtra(BatteryManager.EXTRA_STATUS, BatteryManager.BATTERY_STATUS_UNKNOWN)
+                val rawTemperature = intent.getIntExtra(BatteryManager.EXTRA_TEMPERATURE, Int.MIN_VALUE)
                 status = BatteryStatus(
                     percent = level * 100 / scale,
                     charging = state == BatteryManager.BATTERY_STATUS_CHARGING || state == BatteryManager.BATTERY_STATUS_FULL,
+                    temperatureCelsius = rawTemperature.takeIf { it != Int.MIN_VALUE && it > 0 }
+                        ?.div(10f),
                 )
             }
         }
@@ -1012,6 +1007,52 @@ private fun thermalLabel(status: Int): String = stringResource(
         else -> R.string.thermal_normal
     }
 )
+
+@Composable
+private fun DeviceStatusIndicator(
+    thermalStatus: Int,
+    modifier: Modifier = Modifier,
+) {
+    val battery = rememberBatteryStatus()
+    val thermalDescription = thermalLabel(thermalStatus)
+    val temperature = battery.temperatureCelsius
+    val statusColor = when {
+        thermalStatus >= PowerManager.THERMAL_STATUS_SEVERE ||
+            (temperature != null && temperature >= 45f) -> Color(0xFFE53935)
+        thermalStatus >= PowerManager.THERMAL_STATUS_MODERATE ||
+            (temperature != null && temperature >= 40f) || battery.percent <= 15 -> Color(0xFFFFA000)
+        else -> Color(0xFF43A047)
+    }
+    Row(
+        modifier = modifier.background(Color(0xAA000000), RoundedCornerShape(14.dp))
+            .padding(horizontal = 8.dp, vertical = 5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(5.dp),
+    ) {
+        Icon(
+            imageVector = if (battery.charging) {
+                Icons.Default.BatteryChargingFull
+            } else Icons.Default.BatteryFull,
+            contentDescription = stringResource(
+                if (battery.charging) R.string.battery_charging else R.string.battery_discharging
+            ),
+            tint = if (battery.percent <= 15) Color(0xFFFFA000) else Color.White,
+            modifier = Modifier.size(19.dp),
+        )
+        Text("${battery.percent}%", color = Color.White)
+        Box(
+            Modifier.size(10.dp)
+                .background(statusColor, CircleShape)
+                .semantics { contentDescription = thermalDescription },
+        )
+        if (temperature != null) {
+            Text(
+                String.format(Locale.getDefault(), "%.1f°C", temperature),
+                color = Color.White,
+            )
+        }
+    }
+}
 
 @Composable
 private fun DeviceGuidanceOverlay(
