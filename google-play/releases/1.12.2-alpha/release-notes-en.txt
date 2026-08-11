@@ -1,0 +1,2 @@
+Updated the interface for edge-to-edge display on Android 15 and newer. Controls now correctly respect system bars and display cutouts. Removed deprecated system bar colour parameters and improved app behaviour when the on-screen keyboard is visible.
+

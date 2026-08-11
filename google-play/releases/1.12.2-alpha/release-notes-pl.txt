@@ -1,0 +1,2 @@
+Dostosowano interfejs do wyświetlania bez ramek w Androidzie 15 i nowszym. Elementy sterujące prawidłowo uwzględniają paski systemowe oraz wycięcia ekranu. Usunięto wycofane parametry kolorów pasków systemowych i poprawiono zachowanie aplikacji podczas wyświetlania klawiatury.
+
