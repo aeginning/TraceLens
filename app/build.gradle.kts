@@ -11,6 +11,10 @@ val signingProperties = Properties().apply {
     if (signingFile.exists()) signingFile.inputStream().use { load(it) }
 }
 
+providers.environmentVariable("TRACELENS_BUILD_DIR").orNull
+    ?.takeIf { it.isNotBlank() }
+    ?.let { layout.buildDirectory.set(file(it)) }
+
 android {
     namespace = "pl.tracelens.app"
     compileSdk = 36
@@ -19,8 +23,8 @@ android {
         applicationId = "pl.tracelens.app"
         minSdk = 29
         targetSdk = 36
-        versionCode = 35
-        versionName = "1.12.1"
+        versionCode = 36
+        versionName = "1.12.2"
     }
 
     signingConfigs {

@@ -35,8 +35,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -1026,7 +1026,7 @@ private fun StarterPatternsGalleryScreen(
                 ),
             ) {
                 Surface(color = Color.Black, modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+                    Box(Modifier.fillMaxSize().safeDrawingPadding()) {
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier.fillMaxSize(),
@@ -2215,7 +2215,7 @@ private fun ProjectImageSelectorDialog(
         ),
     ) {
         Surface(Modifier.fillMaxSize()) {
-            Column(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+            Column(Modifier.fillMaxSize().safeDrawingPadding()) {
                 TopAppBar(
                     title = { Text(stringResource(R.string.new_project)) },
                     navigationIcon = {
@@ -2472,7 +2472,7 @@ private fun ProjectGalleryScreen(
                 ),
             ) {
                 Surface(color = Color.Black, modifier = Modifier.fillMaxSize()) {
-                    Box(Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()) {
+                    Box(Modifier.fillMaxSize().safeDrawingPadding()) {
                         HorizontalPager(
                             state = pagerState,
                             modifier = Modifier.fillMaxSize(),

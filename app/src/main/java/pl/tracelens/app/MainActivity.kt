@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,13 +48,12 @@ class MainActivity : AppCompatActivity() {
                 showSplash = false
             }
             LaunchedEffect(showSplash) {
-                val bars = WindowCompat.getInsetsController(window, window.decorView)
-                bars.isAppearanceLightStatusBars = !showSplash
-                bars.isAppearanceLightNavigationBars = !showSplash
-                window.navigationBarColor = if (showSplash) {
-                    android.graphics.Color.rgb(33, 21, 48)
+                if (showSplash) {
+                    val bars = WindowCompat.getInsetsController(window, window.decorView)
+                    bars.isAppearanceLightStatusBars = false
+                    bars.isAppearanceLightNavigationBars = false
                 } else {
-                    android.graphics.Color.WHITE
+                    enableEdgeToEdge()
                 }
             }
             Crossfade(targetState = showSplash, label = "app-launch") { splashVisible ->
@@ -68,11 +68,13 @@ class MainActivity : AppCompatActivity() {
                             modifier = Modifier.fillMaxSize(),
                             contentScale = ContentScale.Crop,
                         )
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 44.dp),
-                            color = Color(0xFFDFD0FF),
-                            trackColor = Color(0x44704DB7),
-                        )
+                        Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 24.dp),
+                                color = Color(0xFFDFD0FF),
+                                trackColor = Color(0x44704DB7),
+                            )
+                        }
                     }
                 } else {
                     TraceLensApp(
