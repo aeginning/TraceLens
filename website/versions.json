@@ -1,10 +1,10 @@
 [
   {
     "version": "1.12",
-    "title": "Pełna instrukcja zawsze pod ręką",
-    "description": "Nowa zakładka Instrukcja szczegółowo wyjaśnia bibliotekę, edytor, wzory, projekty, tryb rysowania, zdjęcia postępu i publikowanie efektów. Zawiera aktualne zrzuty, prawdziwe ikony, polskie i angielskie objaśnienia oraz wyszukiwarkę wszystkich funkcji.",
-    "apk": "TraceLens-1.12.1.apk",
-    "date": "2026-08-01"
+    "title": "Instrukcja i płynniejsze działanie",
+    "description": "Pełna instrukcja PL/EN wyjaśnia wszystkie etapy pracy. Seria 1.12 usprawnia też ładowanie bibliotek i galerii, pracę edytora oraz czujników, porządkuje powiadomienia wzorów i dodaje kompaktowy wskaźnik baterii, ładowania oraz temperatury.",
+    "apk": "TraceLens-1.12.8.apk",
+    "date": "2026-08-12"
   },
   {
     "version": "1.11",

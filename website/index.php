@@ -36,7 +36,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <link rel="alternate" hreflang="en" href="https://tracelens.kasztelan.me/?lang=en">
   <link rel="alternate" hreflang="x-default" href="https://tracelens.kasztelan.me/">
   <title>TraceLens <?= e($current['version']) ?> — cyfrowa kalka w Twoim telefonie</title>
-  <link rel="stylesheet" href="styles.css?v=1.12.3">
+  <link rel="stylesheet" href="styles.css?v=1.12.8">
 </head>
 <body>
   <header class="nav">

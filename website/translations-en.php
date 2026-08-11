@@ -1,5 +1,7 @@
 <?php
 return [
+  'Instrukcja i płynniejsze działanie' => 'Guide and smoother performance',
+  'Pełna instrukcja PL/EN wyjaśnia wszystkie etapy pracy. Seria 1.12 usprawnia też ładowanie bibliotek i galerii, pracę edytora oraz czujników, porządkuje powiadomienia wzorów i dodaje kompaktowy wskaźnik baterii, ładowania oraz temperatury.' => 'The complete Polish and English guide explains every stage of the workflow. Version 1.12 also improves library and gallery loading, editor and sensor performance, pattern notifications, and adds a compact battery, charging and temperature indicator.',
   'TraceLens zamienia telefon z Androidem w wygodne narzędzie do odrysowywania obrazów z podglądem aparatu.' => 'TraceLens turns your Android phone into a convenient tracing tool with a live camera preview.',
   'TraceLens — odrysowuj z podglądem aparatu' => 'TraceLens — trace with a live camera preview',
   'Nałóż dowolny obraz na podgląd aparatu, dopasuj go i śledź postęp rysowania.' => 'Overlay any image on the camera preview, adjust it and track your drawing progress.',
