@@ -183,7 +183,7 @@ fun TraceWorkspace(
     var thermalStatus by remember { mutableIntStateOf(PowerManager.THERMAL_STATUS_NONE) }
     val batteryStatus = rememberBatteryStatus()
     var focusPoint by remember { mutableStateOf<Offset?>(null) }
-    var showControls by remember { mutableStateOf(true) }
+    var showControls by remember { mutableStateOf(false) }
     var showCameraPicker by remember { mutableStateOf(false) }
     var compareHeld by remember { mutableStateOf(false) }
     var blinking by remember(initialProject.id) { mutableStateOf(appSettings.defaultBlinkEnabled) }
