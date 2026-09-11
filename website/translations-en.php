@@ -1,5 +1,14 @@
 <?php
 return [
+  'Pobierz z Google Play' => 'Get it on Google Play',
+  'Zainstaluj aplikację z Google Play lub pobierz plik APK bezpośrednio.' => 'Install the app from Google Play or download the APK directly.',
+  'Edytor obrazu' => 'Image editor',
+  'Edytor obrazu TraceLens z podglądem świnki morskiej' => 'TraceLens image editor with a guinea pig preview',
+  'Kadruj, obracaj i usuwaj tło przed rozpoczęciem rysowania.' => 'Crop, rotate and remove the background before you start drawing.',
+  'Instrukcja' => 'Guide',
+  'Instrukcja TraceLens z czterema krokami pracy' => 'TraceLens guide with four workflow steps',
+  'Poznaj funkcje i ikony dzięki instrukcji w aplikacji.' => 'Learn about features and icons with the in-app guide.',
+  'Tryb rysowania TraceLens z nakładką świnki morskiej' => 'TraceLens drawing mode with a guinea pig overlay',
   'Instrukcja i płynniejsze działanie' => 'Guide and smoother performance',
   'Pełna instrukcja PL/EN wyjaśnia wszystkie etapy pracy. Seria 1.12 usprawnia też ładowanie bibliotek i galerii, pracę edytora oraz czujników, porządkuje powiadomienia wzorów i dodaje kompaktowy wskaźnik baterii, ładowania oraz temperatury.' => 'The complete Polish and English guide explains every stage of the workflow. Version 1.12 also improves library and gallery loading, editor and sensor performance, pattern notifications, and adds a compact battery, charging and temperature indicator.',
   'TraceLens zamienia telefon z Androidem w wygodne narzędzie do odrysowywania obrazów z podglądem aparatu.' => 'TraceLens turns your Android phone into a convenient tracing tool with a live camera preview.',

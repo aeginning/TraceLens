@@ -76,6 +76,8 @@ h1 em { color: var(--green); font-style: normal; }
 .button:hover { transform: translateY(-2px); }
 .button.primary { color: white; background: var(--green); box-shadow: 0 12px 30px rgba(112,77,183,.25); }
 .button.secondary { background: rgba(255,255,255,.65); border-color: var(--line); }
+.download-actions { display:flex; flex-direction:column; gap:12px; }
+.download-actions .secondary { color:var(--ink); }
 .download-icon { font-size: 22px; }
 .facts { display:flex; flex-wrap:wrap; gap: 22px; margin: 0; padding: 0; list-style: none; color: #42534e; font-size: 13px; font-weight: 700; }
 .facts li::before { content:"✓"; margin-right:7px; color:var(--green); }
@@ -158,7 +160,7 @@ h1 em { color: var(--green); font-style: normal; }
 .showcase { padding-bottom: 90px; }
 .screenshot-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
 .screenshot-grid figure { margin:0; padding:12px; background:var(--paper); border:1px solid var(--line); border-radius:24px; }
-.screenshot-button { display:block; width:100%; height:510px; padding:0; overflow:hidden; cursor:zoom-in; background:#e8e2eb; border:0; border-radius:16px; }
+.screenshot-button { display:block; width:100%; aspect-ratio:1280 / 2800; padding:0; overflow:hidden; cursor:zoom-in; background:#e8e2eb; border:0; border-radius:16px; }
 .screenshot-button img { width:100%; height:100%; object-fit:cover; object-position:top; transition:transform .35s ease; }
 .screenshot-button:hover img { transform:scale(1.025); }
 .screenshot-grid figcaption { display:flex; flex-direction:column; gap:3px; padding:15px 7px 8px; }
@@ -200,7 +202,7 @@ footer .brand { color:var(--ink); }
   .feature-pattern { min-height:260px; }
   .screenshot-grid { grid-template-columns:1fr 1fr; gap:10px; }
   .screenshot-grid figure { padding:7px; border-radius:17px; }
-  .screenshot-button { height:330px; border-radius:12px; }
+  .screenshot-button { border-radius:12px; }
   .screenshot-grid figcaption { padding:10px 4px 6px; }
   .screenshot-grid figcaption span { display:none; }
   .section { padding-top:90px; }

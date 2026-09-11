@@ -18,6 +18,7 @@ if ($language === 'en') {
 }
 $versions = json_decode(file_get_contents(__DIR__ . '/versions.json'), true);
 $current = $versions[0];
+$playStoreUrl = 'https://play.google.com/store/apps/details?id=pl.tracelens.app';
 function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); }
 ?>
 <!doctype html>
@@ -36,7 +37,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <link rel="alternate" hreflang="en" href="https://tracelens.kasztelan.me/?lang=en">
   <link rel="alternate" hreflang="x-default" href="https://tracelens.kasztelan.me/">
   <title>TraceLens <?= e($current['version']) ?> — cyfrowa kalka w Twoim telefonie</title>
-  <link rel="stylesheet" href="styles.css?v=1.12.8">
+  <link rel="stylesheet" href="styles.css?v=20260911">
 </head>
 <body>
   <header class="nav">
@@ -54,7 +55,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
       <a href="?lang=pl#start" lang="pl"<?= $language === 'pl' ? ' class="active" aria-current="page"' : '' ?>>PL</a>
       <a href="?lang=en#start" lang="en"<?= $language === 'en' ? ' class="active" aria-current="page"' : '' ?>>EN</a>
     </div>
-    <a class="nav-download" href="<?= e($current['apk']) ?>" download>Pobierz APK</a>
+    <a class="nav-download" href="<?= e($playStoreUrl) ?>">Google Play</a>
   </header>
 
   <main>
@@ -64,9 +65,10 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
         <h1>Cyfrowa kalka,<br><em>którą masz zawsze przy sobie.</em></h1>
         <p class="lead">Nałóż wybrany obraz na podgląd aparatu, ustaw jego przezroczystość i odrysowuj bezpośrednio na papierze. TraceLens pomaga zachować proporcje i dokumentować każdy etap pracy.</p>
         <div class="hero-actions">
-          <a class="button primary" href="<?= e($current['apk']) ?>" download>
+          <a class="button primary" href="<?= e($playStoreUrl) ?>">Pobierz z Google Play</a>
+          <a class="button secondary" href="<?= e($current['apk']) ?>" download>
             <span class="download-icon" aria-hidden="true">↓</span>
-            Pobierz TraceLens <?= e($current['version']) ?>
+            Pobierz APK
           </a>
           <a class="button secondary" href="#jak-dziala">Zobacz, jak działa</a>
         </div>
@@ -184,58 +186,58 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
       </div>
       <div class="screenshot-grid">
         <figure>
-          <button class="screenshot-button" data-image="screenshots/biblioteka-obrazow.jpeg" data-title="Biblioteka obrazów">
-            <img src="screenshots/biblioteka-obrazow.jpeg" alt="Biblioteka obrazów TraceLens z wzorami zwierząt" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/01-biblioteka-obrazow.png" data-title="Biblioteka obrazów">
+            <img src="screenshots/01-biblioteka-obrazow.png" alt="Biblioteka obrazów TraceLens z wzorami zwierząt" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>Biblioteka obrazów</b><span>Wyszukuj, grupuj i przygotowuj własne wzory.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/projekty.jpeg" data-title="Lista projektów">
-            <img src="screenshots/projekty.jpeg" alt="Lista aktywnych projektów TraceLens" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/05-projekty.png" data-title="Lista projektów">
+            <img src="screenshots/05-projekty.png" alt="Lista aktywnych projektów TraceLens" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>Projekty</b><span>Wznawiaj pracę, archiwizuj i przenoś projekty.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/ustawienia.jpeg" data-title="Ustawienia aplikacji">
-            <img src="screenshots/ustawienia.jpeg" alt="Ustawienia domyślne nowych projektów TraceLens" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/07-ustawienia.png" data-title="Ustawienia aplikacji">
+            <img src="screenshots/07-ustawienia.png" alt="Ustawienia domyślne nowych projektów TraceLens" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>Ustawienia domyślne</b><span>Dopasuj siatkę, kamerę i zachowanie nowych projektów.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/pakiet-wzorow.jpeg" data-title="Pakiet wzorów offline">
-            <img src="screenshots/pakiet-wzorow.jpeg" alt="Galeria prostych wzorów dostępnych offline w TraceLens" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/03-wzory-offline.png" data-title="Pakiet wzorów offline">
+            <img src="screenshots/03-wzory-offline.png" alt="Galeria prostych wzorów dostępnych offline w TraceLens" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>72 wzory offline</b><span>Wybieraj gotowe motywy bez szukania ich w internecie.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/podglad-wzoru.jpeg" data-title="Podgląd wzoru">
-            <img src="screenshots/podglad-wzoru.jpeg" alt="Pełnoekranowy podgląd wzoru ptaka z informacją o autorze" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/04-podglad-wzoru.png" data-title="Podgląd wzoru">
+            <img src="screenshots/04-podglad-wzoru.png" alt="Pełnoekranowy podgląd wzoru ptaka z informacją o autorze" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>Podgląd i licencja</b><span>Sprawdź wzór, autora i od razu utwórz projekt.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/transfer-qr.jpeg" data-title="Przenoszenie projektu">
-            <img src="screenshots/transfer-qr.jpeg" alt="Przenoszenie projektu TraceLens na drugi telefon kodem QR" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/02-edytor-obrazu.png" data-title="Edytor obrazu">
+            <img src="screenshots/02-edytor-obrazu.png" alt="Edytor obrazu TraceLens z podglądem świnki morskiej" width="1280" height="2800" loading="lazy">
           </button>
-          <figcaption><b>Transfer kodem QR</b><span>Przenoś projekty bez konta i zewnętrznej chmury.</span></figcaption>
+          <figcaption><b>Edytor obrazu</b><span>Kadruj, obracaj i usuwaj tło przed rozpoczęciem rysowania.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/tryb-rysowania.jpeg" data-title="Tryb rysowania">
-            <img src="screenshots/tryb-rysowania.jpeg" alt="Tryb rysowania TraceLens z siatką i nakładką chomika" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/08-tryb-rysowania.png" data-title="Tryb rysowania">
+            <img src="screenshots/08-tryb-rysowania.png" alt="Tryb rysowania TraceLens z nakładką świnki morskiej" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>Tryb rysowania</b><span>Ustaw wzór na obrazie z kamery i reguluj przezroczystość.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/sterowanie-rysowaniem.jpeg" data-title="Sterowanie rysowaniem">
-            <img src="screenshots/sterowanie-rysowaniem.jpeg" alt="Panel sterowania aktywnym projektem TraceLens" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/09-sterowanie-rysowaniem.png" data-title="Sterowanie rysowaniem">
+            <img src="screenshots/09-sterowanie-rysowaniem.png" alt="Panel sterowania aktywnym projektem TraceLens" width="1280" height="2800" loading="lazy">
           </button>
           <figcaption><b>Sterowanie projektem</b><span>Odbijaj wzór, blokuj kamerę i kontroluj timelapse.</span></figcaption>
         </figure>
         <figure>
-          <button class="screenshot-button" data-image="screenshots/galeria-postepu.jpeg" data-title="Galeria postępu">
-            <img src="screenshots/galeria-postepu.jpeg" alt="Galeria trzech zdjęć postępu projektu Chomiś" loading="lazy">
+          <button class="screenshot-button" data-image="screenshots/06-instrukcja.png" data-title="Instrukcja">
+            <img src="screenshots/06-instrukcja.png" alt="Instrukcja TraceLens z czterema krokami pracy" width="1280" height="2800" loading="lazy">
           </button>
-          <figcaption><b>Galeria postępu</b><span>Dokumentuj etapy i twórz materiały do udostępnienia.</span></figcaption>
+          <figcaption><b>Instrukcja</b><span>Poznaj funkcje i ikony dzięki instrukcji w aplikacji.</span></figcaption>
         </figure>
       </div>
     </section>
@@ -268,9 +270,12 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
       <div>
         <p class="eyebrow">Gotowy do odrysowywania?</p>
         <h2>Zainstaluj TraceLens<br>na swoim Androidzie.</h2>
-        <p>Po pobraniu system może poprosić o zgodę na instalację aplikacji z tego źródła.</p>
+        <p>Zainstaluj aplikację z Google Play lub pobierz plik APK bezpośrednio.</p>
       </div>
-      <a class="button primary large" href="<?= e($current['apk']) ?>" download><span aria-hidden="true">↓</span> Pobierz wersję <?= e($current['version']) ?></a>
+      <div class="download-actions">
+        <a class="button primary large" href="<?= e($playStoreUrl) ?>">Pobierz z Google Play</a>
+        <a class="button secondary" href="<?= e($current['apk']) ?>" download>Pobierz APK</a>
+      </div>
     </section>
   </main>
 
