@@ -1,5 +1,6 @@
 <?php
 return [
+  'Polityka prywatności' => 'Privacy policy',
   'Pobierz z Google Play' => 'Get it on Google Play',
   'Zainstaluj aplikację z Google Play lub pobierz plik APK bezpośrednio.' => 'Install the app from Google Play or download the APK directly.',
   'Edytor obrazu' => 'Image editor',

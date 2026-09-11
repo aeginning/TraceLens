@@ -178,6 +178,22 @@ h1 em { color: var(--green); font-style: normal; }
 .button.large { min-height:66px; padding:0 28px; color:var(--green-dark); background:var(--lime); white-space:nowrap; }
 footer { width:min(1120px,calc(100% - 32px)); margin:0 auto; padding:30px 0 50px; display:flex; align-items:center; justify-content:space-between; gap:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
 footer .brand { color:var(--ink); }
+footer { flex-wrap:wrap; }
+.footer-privacy { color:var(--green); font-size:.875rem; text-decoration:underline; text-underline-offset:4px; }
+.privacy-page { width:min(960px,calc(100% - 32px)); margin:36px auto 56px; }
+.privacy-back { display:inline-flex; padding:12px 0; color:var(--green); font-size:1rem; text-decoration:underline; text-underline-offset:4px; }
+.privacy-document { margin:16px 0; background:var(--paper); border:1px solid var(--line); border-radius:26px; overflow:hidden; }
+.privacy-header { padding:clamp(24px,5vw,56px); background:linear-gradient(135deg,#fffdfb,#eee7f7); border-bottom:1px solid var(--line); }
+.privacy-header h1 { margin:0 0 18px; font-size:clamp(2rem,4vw,3.5rem); line-height:1.15; letter-spacing:-.035em; overflow-wrap:break-word; }
+.privacy-header .eyebrow { font-size:.875rem; margin-bottom:14px; }
+.privacy-date { margin:0; color:var(--muted); font-size:1rem; }
+.privacy-content { padding:clamp(24px,5vw,56px); }
+.privacy-content section + section { margin-top:32px; padding-top:32px; border-top:1px solid var(--line); }
+.privacy-content h2 { margin:0 0 14px; font-size:clamp(1.25rem,2.5vw,1.5rem); line-height:1.35; letter-spacing:-.02em; }
+.privacy-content p { max-width:72ch; margin:0 0 16px; font-size:1.0625rem; line-height:1.8; }
+.privacy-content p:last-child { margin-bottom:0; }
+.privacy-content a { color:var(--green); text-decoration:underline; text-underline-offset:3px; overflow-wrap:anywhere; }
+.privacy-page a:focus-visible,.footer-privacy:focus-visible { outline:3px solid var(--green); outline-offset:5px; border-radius:3px; }
 
 @media (max-width: 900px) {
   .nav nav { display:none; }

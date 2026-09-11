@@ -37,7 +37,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <link rel="alternate" hreflang="en" href="https://tracelens.kasztelan.me/?lang=en">
   <link rel="alternate" hreflang="x-default" href="https://tracelens.kasztelan.me/">
   <title>TraceLens <?= e($current['version']) ?> — cyfrowa kalka w Twoim telefonie</title>
-  <link rel="stylesheet" href="styles.css?v=20260911">
+  <link rel="stylesheet" href="styles.css?v=20260911-privacy">
 </head>
 <body>
   <header class="nav">
@@ -282,6 +282,7 @@ function e(string $value): string { return htmlspecialchars($value, ENT_QUOTES, 
   <footer>
     <a class="brand" href="#start"><span class="brand-mark" aria-hidden="true"><span></span></span><span>TraceLens</span></a>
     <p>Proste narzędzie do odrysowywania obrazów z podglądem aparatu.</p>
+    <a class="footer-privacy" href="privacy.php">Polityka prywatności</a>
     <p>© <span id="year">2026</span> TraceLens</p>
   </footer>
   <dialog class="lightbox" id="lightbox">
