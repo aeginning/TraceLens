@@ -1,6 +1,8 @@
 # TraceLens
 
-TraceLens to prywatna aplikacja na Androida działająca jak cyfrowa kalka. Łączy podgląd z kamery z półprzezroczystą nakładką obrazu, dzięki czemu można odrysowywać grafikę na kartce i obserwować postęp na ekranie telefonu.
+TraceLens to aplikacja na Androida działająca jak cyfrowa kalka. Łączy podgląd z kamery z półprzezroczystą nakładką obrazu, dzięki czemu można odrysowywać grafikę na kartce i obserwować postęp na ekranie telefonu.
+
+[Google Play](https://play.google.com/store/apps/details?id=pl.tracelens.app) · [Strona aplikacji](https://tracelens.kasztelan.me/)
 
 ## Wymagania
 
@@ -40,3 +42,9 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 Pełne ustalenia produktu znajdują się w pliku `kwestionariusz-aplikacji.md`.
 
 Historia wydań znajduje się w katalogu [`changelog`](changelog/README.md).
+
+## Lokalne konfiguracje i sekrety
+
+Repozytorium nie zawiera haseł FTP ani klucza podpisującego aplikację. Dane wdrożenia są odczytywane lokalnie z ignorowanego `.env.deploy`, a podpis release z `.env.signing`. Plik `.env.signing.example` zawiera wyłącznie przykładowe wartości. Własny build debug nie wymaga produkcyjnego klucza podpisu.
+
+Przed publikacją zmian można uruchomić `python scripts/check-publication.py` oraz skan historii narzędziem Gitleaks. Pierwszy sprawdza wszystkie obiekty historii pod kątem wartości sekretów z lokalnych plików `.env*`, bez ich wypisywania; drugi wykrywa typowe formaty kluczy i tokenów.

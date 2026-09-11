@@ -11,6 +11,15 @@ captures/
 google-play/assets/*-source.png
 .env.deploy
 .env.signing
+.env
+.env.*
+!.env.*.example
+*.keystore
+*.p12
+*.pfx
+*.key
+*.pem
+.sites-runtime/
 *.jks
 tools/pattern-curator/.build-tools/
 tools/pattern-curator/build/
