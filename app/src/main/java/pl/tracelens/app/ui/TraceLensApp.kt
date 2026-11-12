@@ -499,6 +499,17 @@ private fun SettingsScreen(
                         label = { Text(stringResource(R.string.language_polish)) },
                     )
                 }
+                item {
+                    FilterChip(
+                        selected = selectedLanguage.startsWith("zh"),
+                        onClick = {
+                            AppCompatDelegate.setApplicationLocales(
+                                LocaleListCompat.forLanguageTags("zh-CN")
+                            )
+                        },
+                        label = { Text(stringResource(R.string.language_chinese_simplified)) },
+                    )
+                }
             }
             Spacer(Modifier.height(8.dp))
             Text(stringResource(R.string.theme), style = MaterialTheme.typography.bodySmall)
