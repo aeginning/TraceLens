@@ -12,6 +12,7 @@
     <string name="language_system">System</string>
     <string name="language_english">English</string>
     <string name="language_polish">Polski</string>
+    <string name="language_chinese_simplified">Chinese (Simplified)</string>
     <string name="theme">Theme</string>
     <string name="theme_system">System</string>
     <string name="theme_light">Light</string>
